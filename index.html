@@ -388,7 +388,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",flight:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",diet:[],concern:[],hours:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",diet:[],concern:[],hours:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null;
 function openNew(){draft=blank();openId=null;renderDrawer();showDrawer();}
 function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;renderDrawer();showDrawer();}
@@ -429,7 +429,10 @@ function renderDrawer(){
       <div class="field"><label>방문 도시 <span class="es">복수</span></label><div class="chips" id="d_cities">${chipsHTML(CITY_OPTS,d.cities)}</div></div>
       <div class="field"><label>숙소</label><div class="chips" id="d_stay">${["이미 예약함","추천 필요","미정"].map(o=>`<span class="ch ${d.stay===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="field"><label>숙소 이름 · 위치 <span class="es">Alojamiento</span></label><input type="text" id="d_stayDetail" value="${(d.stayDetail||'').replace(/"/g,'&quot;')}" placeholder="예: 명동 롯데호텔 / 홍대 에어비앤비"></div>
-      <div class="field"><label>✈️ 항공편 <span class="es">Vuelo · 도착/출발 편명·시각</span></label><input type="text" id="d_flight" value="${(d.flight||'').replace(/"/g,'&quot;')}" placeholder="예: 도착 KE652 6/20 14:30 인천 / 출발 KE651 6/27"></div>
+      <div class="row2">
+        <div class="field"><label>🛬 입국 항공편 <span class="es">Llegada</span></label><input type="text" id="d_flightIn" value="${(d.flightIn||d.flight||'').replace(/"/g,'&quot;')}" placeholder="예: KE652 6/20 14:30 인천"></div>
+        <div class="field"><label>🛫 출국 항공편 <span class="es">Salida</span></label><input type="text" id="d_flightOut" value="${(d.flightOut||'').replace(/"/g,'&quot;')}" placeholder="예: KE651 6/27 10:00"></div>
+      </div>
     </div>
 
     <div class="grp"><h4>③ 관심 · Intereses</h4>
@@ -492,7 +495,7 @@ function saveClient(){
   if(!ig&&!name){toast('인스타 아이디나 이름은 입력해 주세요');return;}
   const obj={id:openId||draft.id||Date.now(),ig,name,origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
-    group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),flight:gv('d_flight'),interests:readChips('d_interests'),
+    group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",
     diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
