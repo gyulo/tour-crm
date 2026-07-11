@@ -347,9 +347,14 @@ function card(c){
   </div>`;
 }
 
+/* 네이버맵 열기 */
+function openNaver(id){const v=document.getElementById(id).value.trim();if(!v){toast('주소를 먼저 입력하세요');return;}window.open('https://map.naver.com/p/search/'+encodeURIComponent(v),'_blank');}
+
 /* ---------- calendar ---------- */
 let calRef=null, calSel=null;
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+/* 근무 시작~종료 사이의 모든 날짜(YYYY-MM-DD) */
+function daysBetween(s,e){const out=[];if(!s)return out;const a=new Date(s+'T00:00:00');let b=e?new Date(e+'T00:00:00'):new Date(s+'T00:00:00');if(isNaN(a))return out;if(isNaN(b)||b<a)b=a;for(let dt=a;dt<=b;dt.setDate(dt.getDate()+1)){out.push(`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`);}return out;}
 function calendarHTML(list){
   const t=new Date();
   if(!calRef)calRef={y:t.getFullYear(),m:t.getMonth()};
@@ -357,7 +362,11 @@ function calendarHTML(list){
   const startDow=new Date(y,m,1).getDay();
   const daysIn=new Date(y,m+1,0).getDate();
   const byDate={};
-  list.forEach(c=>{if(c.tourDate){(byDate[c.tourDate]=byDate[c.tourDate]||[]).push(c);}});
+  list.forEach(c=>{
+    const start=c.hireStart||c.tourDate;
+    if(!start)return;
+    daysBetween(start,c.hireEnd).forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push(c);});
+  });
   const dows=['일','월','화','수','목','금','토'];
   const today=todayStr();
   let cells='';
@@ -379,7 +388,7 @@ function calendarHTML(list){
         <div class="meta">${c.origin||''}${c.pax?' · '+c.pax+'명':''}${c.hours?' · '+c.hours:''}${(c.cities&&c.cities.length)?' · '+c.cities.join(', '):''}</div>
       </div>`).join(''):'<div style="font-size:12px;color:var(--muted)">이 날 예정된 투어 없음</div>'}</div>`;
   }
-  const noDate=list.filter(c=>!c.tourDate).length;
+  const noDate=list.filter(c=>!c.hireStart&&!c.tourDate).length;
   return `<div class="cal">
     <div class="cal-head"><h3>${y}년 ${m+1}월</h3>
       <div class="nav"><button onclick="calNav(-1)">‹</button><button onclick="calToday()">오늘</button><button onclick="calNav(1)">›</button></div></div>
@@ -398,7 +407,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",diet:[],concern:[],hours:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null;
 function openNew(){draft=blank();openId=null;renderDrawer();showDrawer();}
 function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;renderDrawer();showDrawer();}
@@ -439,6 +448,11 @@ function renderDrawer(){
       <div class="field"><label>방문 도시 <span class="es">복수</span></label><div class="chips" id="d_cities">${chipsHTML(CITY_OPTS,d.cities)}</div></div>
       <div class="field"><label>숙소</label><div class="chips" id="d_stay">${["이미 예약함","추천 필요","미정"].map(o=>`<span class="ch ${d.stay===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="field"><label>숙소 이름 · 위치 <span class="es">Alojamiento</span></label><input type="text" id="d_stayDetail" value="${(d.stayDetail||'').replace(/"/g,'&quot;')}" placeholder="예: 명동 롯데호텔 / 홍대 에어비앤비"></div>
+      <div class="field"><label>숙소 주소 <span class="es">Dirección · 지도 버튼으로 바로 열기</span></label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="d_stayAddr" value="${(d.stayAddr||'').replace(/"/g,'&quot;')}" placeholder="주소 붙여넣기" style="flex:1">
+          <button type="button" class="btn ghost" onclick="openNaver('d_stayAddr')" style="white-space:nowrap;flex:0 0 auto">🗺️ 지도</button>
+        </div></div>
       <div class="row2">
         <div class="field"><label>🛬 입국 항공편 <span class="es">Llegada</span></label><input type="text" id="d_flightIn" value="${(d.flightIn||d.flight||'').replace(/"/g,'&quot;')}" placeholder="예: KE652 6/20 14:30 인천"></div>
         <div class="field"><label>🛫 출국 항공편 <span class="es">Salida</span></label><input type="text" id="d_flightOut" value="${(d.flightOut||'').replace(/"/g,'&quot;')}" placeholder="예: KE651 6/27 10:00"></div>
@@ -453,6 +467,7 @@ function renderDrawer(){
       <div class="field"><label>🎤 K-pop</label><input type="text" id="d_kpop" value="${(d.kpop||'').replace(/"/g,'&quot;')}" placeholder="그룹·최애 / 콘서트·굿즈"></div>
       <div class="field"><label>🍽 음식</label><input type="text" id="d_food" value="${(d.food||'').replace(/"/g,'&quot;')}"></div>
       <div class="field"><label>관광 ↔ 현지인</label><div class="scale" id="d_local">${LOCAL_OPTS.map(o=>`<button data-v="${o}" class="${d.local===o?'on':''}">${o}</button>`).join('')}</div></div>
+      <div class="field"><label>👘 한복 체험 <span class="es">Hanbok</span></label><div class="chips" id="d_hanbok">${["입어요","안 입어요","미정"].map(o=>`<span class="ch ${d.hanbok===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
     </div>
 
     <div class="grp"><h4>④ 제약 · Restricciones</h4>
@@ -463,6 +478,12 @@ function renderDrawer(){
     <div class="grp"><h4>⑤ 영업 · Operación</h4>
       <div class="field"><label>퍼널 단계</label><div class="stagesel" id="d_stage">${STAGES.map(s=>`<span class="ch ${d.stage===s.id?'on':''}" data-v="${s.id}" style="--stagecol:${s.color}">${s.label}</span>`).join('')}</div></div>
       <div class="field"><label>투어 시간</label><div class="chips" id="d_hours">${["4시간","6시간","8시간","다중일"].map(o=>`<span class="ch ${d.hours===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
+      <div class="row2">
+        <div class="field"><label>🧑‍🏫 근무 시작일 <span class="es">Desde · 달력 표시</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
+        <div class="field"><label>근무 종료일 <span class="es">Hasta · 하루면 비워도 됨</span></label><input type="date" id="d_hireEnd" value="${d.hireEnd||''}"></div>
+      </div>
+      <div class="field"><label>🗓 일정 메모 <span class="es">날짜별 시간·동선</span></label><textarea id="d_scheduleNote" placeholder="예:&#10;6/20 09:00 호텔 픽업 → 경복궁&#10;6/21 남산 → 명동">${d.scheduleNote||''}</textarea></div>
+      <div class="field"><label>💳 선호 결제 <span class="es">Método de pago</span></label><div class="chips" id="d_payMethod">${["현금","카드","PayPal","Wise","계좌이체","기타"].map(o=>`<span class="ch ${d.payMethod===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="depbox">
         <div><div class="lbl">💵 예약금 $${DEPOSIT_AMT}</div><div class="sub">1차 ZOOM에서 받음</div></div>
         <div class="toggle ${depositOf(d)?'on':''}" id="d_deposit"></div>
@@ -485,7 +506,7 @@ function wireDrawer(){
     document.getElementById(id).querySelectorAll('.ch').forEach(ch=>ch.onclick=()=>ch.classList.toggle('on'));
   });
   // single chips
-  ['d_group','d_stay','d_hours'].forEach(id=>{
+  ['d_group','d_stay','d_hours','d_hanbok','d_payMethod'].forEach(id=>{
     const g=document.getElementById(id);g.querySelectorAll('.ch').forEach(ch=>ch.onclick=()=>{const on=ch.classList.contains('on');g.querySelectorAll('.ch').forEach(x=>x.classList.remove('on'));if(!on)ch.classList.add('on');});
   });
   // local scale
@@ -505,9 +526,9 @@ function saveClient(){
   if(!ig&&!name){toast('인스타 아이디나 이름은 입력해 주세요');return;}
   const obj={id:openId||draft.id||Date.now(),ig,name,origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
-    group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
-    drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",
-    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),
+    group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
+    drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
+    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),payMethod:readSingle('d_payMethod'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
     tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual"};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
