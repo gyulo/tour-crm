@@ -178,13 +178,13 @@
     <input id="search" type="text" placeholder="인스타 아이디 · 이름 · 국가 검색  (@handle)">
   </div>
   <div class="viewtog"><button id="vk" class="on" onclick="setView('kanban')">칸반</button><button id="vl" onclick="setView('list')">목록</button><button id="vc" onclick="setView('calendar')">달력</button></div>
-  <button class="btn ghost" onclick="loadRemote()" title="시트에서 새로고침">🔄</button>
+  <button class="btn ghost" onclick="loadRemote()" title="서버에서 새로고침">🔄</button>
   <span id="syncStatus" style="font-size:11px;color:var(--muted);white-space:nowrap;"></span>
   <button class="btn primary" onclick="openNew()">+ 손님</button>
 </div></div>
 
 <div id="syncBar" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;max-width:1500px;margin:0 auto;padding:12px 18px;background:#FFF4E0;border-bottom:1px solid #F0D9A8;font-size:13px;">
-  <span>🔑 구글 시트와 동기화하려면 Apps Script에서 정한 <b>비밀번호(TOKEN)</b>를 입력하세요 (이 기기에 한 번만):</span>
+  <span>🔑 여러 기기에서 동기화하려면 <b>비밀번호</b>를 입력하세요 (이 기기에 한 번만):</span>
   <input id="syncToken" type="text" placeholder="비밀번호" style="padding:8px 11px;border:1px solid #CED2DB;border-radius:8px;font-size:16px;">
   <button class="btn primary" onclick="saveTokenFromBar()">연결</button>
 </div>
@@ -229,8 +229,8 @@ const SAMPLE=[
   local:"반반",diet:[],concern:["예산"],hours:"",budget:"낮음",stage:"dm",depositPaid:false,tourFee:"",notes:"예산 확인 중",created:"2026-03-01"},
 ];
 
-/* ---------- storage + Google Sheet sync ---------- */
-const API_URL="https://script.google.com/macros/s/AKfycbwBAh6OkaPPkFAwAp8qmiPC1AF3dwkCP38-AayRfLlwWQlXqJ1YWokkp8fOUlD3xkqq/exec";
+/* ---------- storage + AWS sync (Lambda + DynamoDB) ---------- */
+const API_URL="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const KEY="seoulTourCRM_v2";
 const TKEY="seoulTourCRM_token";
 let clients=[];
@@ -238,8 +238,9 @@ function getToken(){try{return localStorage.getItem(TKEY)||"";}catch(e){return""
 function setToken(t){try{localStorage.setItem(TKEY,t);}catch(e){}}
 function setSync(m){const el=document.getElementById('syncStatus');if(el)el.textContent=m;}
 
+let hadLocal=false;
 function loadLocal(){
-  try{const r=localStorage.getItem(KEY);if(r){clients=JSON.parse(r);return;}}catch(e){}
+  try{const r=localStorage.getItem(KEY);if(r){clients=JSON.parse(r);hadLocal=true;return;}}catch(e){}
   clients=SAMPLE.slice();
 }
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(clients));}catch(e){}}
@@ -250,21 +251,30 @@ function normalize(o){
   if(o.id!==undefined&&o.id!==''&&!isNaN(+o.id))o.id=+o.id;
   return o;
 }
-/* load from sheet via JSONP (avoids CORS) */
+/* load from AWS (Lambda + DynamoDB) */
 function loadRemote(){
   const tok=getToken();if(!tok){showSyncBar(true);setSync('비밀번호 입력 필요');return;}
   setSync('불러오는 중…');
-  const cb='__crmcb'+Date.now();const s=document.createElement('script');
-  window[cb]=function(data){try{if(Array.isArray(data)){clients=data.map(normalize);saveLocal();render();setSync('동기화됨 ✓');}else setSync('동기화 오류');}catch(e){setSync('동기화 오류');}delete window[cb];s.remove();};
-  s.onerror=function(){setSync('연결 실패');delete window[cb];s.remove();};
-  s.src=API_URL+'?callback='+cb+'&token='+encodeURIComponent(tok)+'&_='+Date.now();
-  document.body.appendChild(s);
+  fetch(API_URL+'?key='+encodeURIComponent(tok)+'&_='+Date.now())
+    .then(r=>{if(r.status===401)throw new Error('401');if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(data=>{
+      if(!Array.isArray(data)){setSync('동기화 오류');return;}
+      if(data.length===0 && clients.length>0 && hadLocal){
+        // 서버가 비어있고 이 기기에 실제 데이터가 있음 → 최초 1회 서버로 이관
+        setSync('서버로 이관 중…');
+        Promise.all(clients.map(c=>fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,client:c})})))
+          .then(()=>setSync('이관 완료 ✓')).catch(()=>setSync('이관 일부 실패'));
+        return;
+      }
+      clients=data.map(normalize);saveLocal();render();setSync('동기화됨 ✓');
+    })
+    .catch(e=>{if(String(e).includes('401')){setSync('비밀번호 오류');showSyncBar(true);}else setSync('연결 실패');});
 }
-/* save/delete to sheet (fire-and-forget) */
+/* save/delete to AWS */
 function pushClient(c){const tok=getToken();if(!tok)return;
-  fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,client:c})}).then(()=>setSync('시트 저장됨 ✓')).catch(()=>setSync('저장 보류(오프라인)'));}
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,client:c})}).then(r=>setSync(r.ok?'저장됨 ✓':'저장 오류')).catch(()=>setSync('저장 보류(오프라인)'));}
 function pushDelete(id){const tok=getToken();if(!tok)return;
-  fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,action:'delete',id:id})}).catch(()=>{});}
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,action:'delete',id:id})}).catch(()=>{});}
 
 function showSyncBar(show){const b=document.getElementById('syncBar');if(b)b.style.display=show?'flex':'none';}
 function saveTokenFromBar(){const t=document.getElementById('syncToken').value.trim();if(!t){return;}setToken(t);showSyncBar(false);loadRemote();}
