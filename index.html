@@ -334,7 +334,7 @@ function card(c){
   return `<div class="card" style="--stripe:${stripe(c)}" onclick="openClient(${c.id})">
     <div class="nm">${c.name||'(이름)'}</div>
     ${c.ig?`<div class="ig">${c.ig}</div>`:''}
-    <div class="meta"><span>${c.origin||'-'}${c.city?' · '+c.city:''}</span><span>${c.pax||'?'}명</span>${c.season?'<span>'+c.season+'</span>':''}</div>
+    <div class="meta"><span>${c.origin||'-'}${c.city?' · '+c.city:''}</span><span>${c.pax||'?'}명</span>${c.season?'<span>'+c.season+'</span>':''}${extractUrls(c.wishLinks).length?'<span>📍'+extractUrls(c.wishLinks).length+' 링크</span>':''}</div>
     ${(c.interests&&c.interests.length)?`<div class="tags">${c.interests.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
     ${(c.dramas&&c.dramas.length)?`<div class="tags">${c.dramas.slice(0,3).map(t=>`<span class="tag" style="background:#FBE9F1;color:#A8345B">🎬 ${t}</span>`).join('')}</div>`:''}
     <div class="row" onclick="event.stopPropagation()">
@@ -408,9 +408,22 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
+/* 가고 싶은 곳 링크들을 클릭 가능한 목록으로 렌더 (한 줄에 하나, '라벨 URL' 형식 지원) */
+function renderWishLinks(text){
+  const lines=String(text==null?'':text).split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!lines.length)return '';
+  return '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">'+lines.map(line=>{
+    const m=line.match(/https?:\/\/[^\s]+/);
+    if(!m)return `<div style="font-size:12px;color:var(--muted)">• ${escH(line)}</div>`;
+    const url=m[0];let label=line.replace(url,'').replace(/[-:·|]/g,' ').trim();
+    if(!label){try{label=new URL(url).hostname.replace(/^www\./,'');}catch(e){label=url.slice(0,44);}}
+    return `<a href="${escH(url)}" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent);text-decoration:none;border:1px solid var(--line2);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:7px;background:#fff"><span>🔗</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span><span style="color:var(--muted);font-size:11px">열기 ↗</span></a>`;
+  }).join('')+'</div>';
+}
 function openNew(){draft=blank();openId=null;waSummary="";renderDrawer();showDrawer();}
 function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;waSummary="";renderDrawer();showDrawer();}
 function showDrawer(){document.getElementById('overlay').classList.add('on');document.getElementById('drawer').classList.add('on');}
@@ -478,6 +491,10 @@ function renderDrawer(){
       <div class="field"><label>🍽 음식</label><input type="text" id="d_food" value="${(d.food||'').replace(/"/g,'&quot;')}"></div>
       <div class="field"><label>관광 ↔ 현지인</label><div class="scale" id="d_local">${LOCAL_OPTS.map(o=>`<button data-v="${o}" class="${d.local===o?'on':''}">${o}</button>`).join('')}</div></div>
       <div class="field"><label>👘 한복 체험 <span class="es">Hanbok</span></label><div class="chips" id="d_hanbok">${["입어요","안 입어요","미정"].map(o=>`<span class="ch ${d.hanbok===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
+      <div class="field"><label>📍 가고 싶은 곳 · 링크 모음 <span class="es">손님이 보낸 장소 링크 (한 줄에 하나)</span></label>
+        <textarea id="d_wishLinks" placeholder="손님이 보낸 링크를 붙여넣으세요 (한 줄에 하나). 예:&#10;성수동 카페 https://instagram.com/...&#10;https://maps.google.com/...&#10;홍대 맛집 https://youtube.com/...">${escH(d.wishLinks||'')}</textarea>
+        <div id="d_wishPreview">${renderWishLinks(d.wishLinks)}</div>
+      </div>
     </div>
 
     <div class="grp"><h4>④ 제약 · Restricciones</h4>
@@ -527,6 +544,9 @@ function wireDrawer(){
     const idx=STAGES.findIndex(s=>s.id===ch.dataset.v);if(idx>=DEPOSIT_FROM)document.getElementById('d_deposit').classList.add('on');});
   // deposit toggle
   document.getElementById('d_deposit').onclick=function(){this.classList.toggle('on');};
+  // 가고 싶은 곳 링크: 입력하는 즉시 클릭 가능한 미리보기 갱신
+  const wl=document.getElementById('d_wishLinks');
+  if(wl){const pv=document.getElementById('d_wishPreview');wl.oninput=()=>{pv.innerHTML=renderWishLinks(wl.value);};}
 }
 /* ---------- 와츠앱 대화 → AI 자동 채우기 ---------- */
 async function parseWhatsApp(){
@@ -564,6 +584,7 @@ function applyParsed(p){
   S('payMethod',p.payMethod);S('budget',p.budget);S('tourFee',p.tourFee);
   A('cities',p.cities);A('interests',p.interests);A('dramas',p.dramas);A('diet',p.diet);A('concern',p.concern);
   if(p.drama&&p.drama.trim()&&!d.drama)d.drama=p.drama.trim();
+  if(p.wishLinks&&p.wishLinks.trim()){const cur=d.wishLinks||'';const add=p.wishLinks.trim().split('\n').map(s=>s.trim()).filter(u=>u&&cur.indexOf(u)===-1).join('\n');if(add)d.wishLinks=cur?(cur+'\n'+add):add;}
   if(p.notes&&p.notes.trim())d.notes=d.notes?(d.notes+'\n'+p.notes.trim()):p.notes.trim();
   if(!d.channel)d.channel='WhatsApp';
   if(d.tourDate&&!d.hireStart)d.hireStart=d.tourDate;
@@ -583,7 +604,7 @@ function syncDraftFromForm(){
   const lb=document.querySelector('#d_local button.on');d.local=lb?lb.dataset.v:'';
   d.hanbok=readSingle('d_hanbok');d.diet=readChips('d_diet');d.concern=readChips('d_concern');
   d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');
-  d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.payMethod=readSingle('d_payMethod');
+  d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.wishLinks=g('d_wishLinks');d.payMethod=readSingle('d_payMethod');
   d.stage=document.querySelector('#d_stage .ch.on').dataset.v;
   d.depositPaid=document.getElementById('d_deposit').classList.contains('on');
   d.tourFee=g('d_tourFee');d.notes=document.getElementById('d_notes').value.trim();
@@ -598,7 +619,7 @@ function saveClient(){
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
-    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),payMethod:readSingle('d_payMethod'),
+    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
     tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual"};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
