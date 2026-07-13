@@ -231,6 +231,7 @@ const SAMPLE=[
 
 /* ---------- storage + AWS sync (Lambda + DynamoDB) ---------- */
 const API_URL="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
+const PARSE_URL="https://jto2smfoztmn5f5yr7j2daeowy0kldqd.lambda-url.ap-northeast-2.on.aws/"; // 와츠앱 대화 AI 파싱
 const KEY="seoulTourCRM_v2";
 const TKEY="seoulTourCRM_token";
 let clients=[];
@@ -408,9 +409,10 @@ function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findInde
 
 /* ---------- drawer ---------- */
 function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
-let draft=null;
-function openNew(){draft=blank();openId=null;renderDrawer();showDrawer();}
-function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;renderDrawer();showDrawer();}
+let draft=null,waSummary="";
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openNew(){draft=blank();openId=null;waSummary="";renderDrawer();showDrawer();}
+function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;waSummary="";renderDrawer();showDrawer();}
 function showDrawer(){document.getElementById('overlay').classList.add('on');document.getElementById('drawer').classList.add('on');}
 function closeDrawer(){document.getElementById('overlay').classList.remove('on');document.getElementById('drawer').classList.remove('on');draft=null;}
 
@@ -423,6 +425,14 @@ function renderDrawer(){
     <button class="x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="dbody">
+    ${!openId?`<div class="grp" style="border:1px dashed var(--accent);background:#F7F4FE;">
+      <h4 style="color:var(--accent)">✨ 와츠앱 대화로 자동 채우기 · Autocompletar</h4>
+      <div class="field" style="margin-bottom:10px">
+        <textarea id="d_wa" placeholder="손님과 나눈 와츠앱 대화 전체를 여기에 붙여넣으세요 (스페인어·영어 OK). AI가 읽고 아래 칸을 채워줍니다." style="min-height:96px"></textarea>
+      </div>
+      <button type="button" class="btn primary" id="waBtn" style="width:100%;padding:12px" onclick="parseWhatsApp()">🤖 AI로 분석해서 채우기</button>
+      <div id="waMsg" style="font-size:12px;margin-top:9px;line-height:1.5;">${waSummary?'<span style="color:var(--money)">✅ '+escH(waSummary)+'</span>':'<span style="color:var(--muted)">붙여넣고 버튼을 누르면 아래 칸이 자동으로 채워집니다. 확인·수정 후 저장하세요.</span>'}</div>
+    </div>`:''}
     <div class="grp"><h4>① 기본 · Básico</h4>
       <div class="row2">
         <div class="field"><label>인스타 아이디 <span class="es">키</span></label><input type="text" id="d_ig" value="${d.ig||''}" placeholder="@handle"></div>
@@ -517,6 +527,66 @@ function wireDrawer(){
     const idx=STAGES.findIndex(s=>s.id===ch.dataset.v);if(idx>=DEPOSIT_FROM)document.getElementById('d_deposit').classList.add('on');});
   // deposit toggle
   document.getElementById('d_deposit').onclick=function(){this.classList.toggle('on');};
+}
+/* ---------- 와츠앱 대화 → AI 자동 채우기 ---------- */
+async function parseWhatsApp(){
+  const ta=document.getElementById('d_wa');if(!ta)return;
+  const text=ta.value.trim();
+  if(!text){toast('먼저 대화를 붙여넣으세요');return;}
+  const tok=getToken();
+  if(!tok){toast('먼저 상단 비밀번호로 연결하세요');showSyncBar(true);return;}
+  const btn=document.getElementById('waBtn'),msg=document.getElementById('waMsg');
+  const old=btn.textContent;btn.disabled=true;btn.textContent='🤖 분석 중… (약 5~10초)';
+  msg.innerHTML='<span style="color:var(--muted)">AI가 대화를 읽고 있어요…</span>';
+  syncDraftFromForm(); // 사용자가 손으로 넣은 값 보존
+  try{
+    const r=await fetch(PARSE_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,text})});
+    if(r.status===401){msg.innerHTML='<span style="color:var(--warn)">비밀번호가 맞지 않아요</span>';btn.disabled=false;btn.textContent=old;return;}
+    const data=await r.json();
+    if(data.error){msg.innerHTML='<span style="color:var(--warn)">오류: '+escH(data.error)+'</span>';btn.disabled=false;btn.textContent=old;return;}
+    applyParsed(data);
+    waSummary=data._summary||'대화 내용을 반영했어요.';
+    renderDrawer();
+    const ta2=document.getElementById('d_wa');if(ta2)ta2.value=text; // 재분석 대비 원문 복원
+    toast('AI가 채웠어요 · 확인 후 저장');
+  }catch(e){
+    msg.innerHTML='<span style="color:var(--warn)">연결 실패 — 잠시 후 다시 시도하세요</span>';btn.disabled=false;btn.textContent=old;
+  }
+}
+function applyParsed(p){
+  const d=draft;
+  const S=(k,v)=>{if(v!=null&&String(v).trim()!=='')d[k]=String(v).trim();};
+  const A=(k,v)=>{if(Array.isArray(v)&&v.length)d[k]=Array.from(new Set([...(d[k]||[]),...v]));};
+  if(p.ig&&p.ig.trim()){let h=p.ig.trim().replace(/^@+/,'');d.ig='@'+h;}
+  S('name',p.name);S('origin',p.origin);S('city',p.city);S('pax',p.pax);S('days',p.days);
+  S('season',p.season);S('tourDate',p.tourDate);S('group',p.group);S('stay',p.stay);S('stayDetail',p.stayDetail);
+  S('kpop',p.kpop);S('food',p.food);S('local',p.local);S('hanbok',p.hanbok);S('hours',p.hours);
+  S('payMethod',p.payMethod);S('budget',p.budget);S('tourFee',p.tourFee);
+  A('cities',p.cities);A('interests',p.interests);A('dramas',p.dramas);A('diet',p.diet);A('concern',p.concern);
+  if(p.drama&&p.drama.trim()&&!d.drama)d.drama=p.drama.trim();
+  if(p.notes&&p.notes.trim())d.notes=d.notes?(d.notes+'\n'+p.notes.trim()):p.notes.trim();
+  if(!d.channel)d.channel='WhatsApp';
+  if(d.tourDate&&!d.hireStart)d.hireStart=d.tourDate;
+  d.source='whatsapp-ai';
+}
+/* 현재 폼에 입력된 값을 draft로 회수 (재렌더 시 손입력 보존) */
+function syncDraftFromForm(){
+  if(!document.getElementById('d_stage'))return;
+  const d=draft,g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  d.ig=g('d_ig');d.name=g('d_name');d.origin=g('d_origin');d.city=g('d_city');
+  d.channel=document.getElementById('d_channel').value;d.budget=document.getElementById('d_budget').value;
+  d.season=g('d_season');d.days=g('d_days');d.tourDate=g('d_tourDate');d.pax=g('d_pax');
+  d.group=readSingle('d_group');d.cities=readChips('d_cities');d.stay=readSingle('d_stay');
+  d.stayDetail=g('d_stayDetail');d.stayAddr=g('d_stayAddr');d.flightIn=g('d_flightIn');d.flightOut=g('d_flightOut');
+  d.interests=readChips('d_interests');d.drama=g('d_drama');d.dramas=readChips('d_dramas');
+  d.kpop=g('d_kpop');d.food=g('d_food');
+  const lb=document.querySelector('#d_local button.on');d.local=lb?lb.dataset.v:'';
+  d.hanbok=readSingle('d_hanbok');d.diet=readChips('d_diet');d.concern=readChips('d_concern');
+  d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');
+  d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.payMethod=readSingle('d_payMethod');
+  d.stage=document.querySelector('#d_stage .ch.on').dataset.v;
+  d.depositPaid=document.getElementById('d_deposit').classList.contains('on');
+  d.tourFee=g('d_tourFee');d.notes=document.getElementById('d_notes').value.trim();
 }
 function readChips(id){return [...document.getElementById(id).querySelectorAll('.ch.on')].map(c=>c.dataset.v);}
 function readSingle(id){const c=document.getElementById(id).querySelector('.ch.on');return c?c.dataset.v:"";}
