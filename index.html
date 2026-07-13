@@ -232,6 +232,25 @@ const SAMPLE=[
 /* ---------- storage + AWS sync (Lambda + DynamoDB) ---------- */
 const API_URL="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const PARSE_URL="https://jto2smfoztmn5f5yr7j2daeowy0kldqd.lambda-url.ap-northeast-2.on.aws/"; // 와츠앱 대화 AI 파싱
+/* 구글폼 유입 손님에게 보내는 Zoom(Calendly) 안내 메시지 */
+const ZOOM_MSG=`Hola 😊 {name}
+Gracias por tu interés en mi servicio.
+
+Para preparar tu propuesta exacta, primero hacemos una llamada corta por Zoom. En la llamada solo veremos estas dos cosas:
+1. ¿En qué fechas viajas a Corea?
+2. ¿Qué opción te interesa más? (4 horas / 6 horas / 8 horas)
+
+Por favor, reserva tu llamada aquí en el horario que te quede más cómodo:
+👉 https://calendly.com/gyudong186/30min
+
+El sistema muestra automáticamente el horario en tu hora local, así que no tienes que calcular la diferencia horaria.
+
+Nos vemos pronto por Zoom y lo dejamos todo organizado.
+Gyudong`;
+/* 전화번호를 wa.me용으로 정리 (숫자만, 국제접속 00·+ 제거, 슬래시면 첫 번호) */
+function waPhone(p){let s=String(p==null?'':p).split('/')[0].replace(/\(.*?\)/g,'');let d=s.replace(/[^0-9+]/g,'').replace(/^\+/,'').replace(/^00/,'');return d.replace(/[^0-9]/g,'');}
+function waZoom(phone,name){const num=waPhone(phone);if(!num){toast('와츠앱 번호를 먼저 입력하세요');return;}const first=String(name||'').trim().split(/\s+/)[0]||'';const msg=ZOOM_MSG.replace('{name}',first);window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');}
+function waZoomById(id){const c=clients.find(x=>x.id===id);if(c)waZoom(c.phone,c.name);}
 const KEY="seoulTourCRM_v2";
 const TKEY="seoulTourCRM_token";
 let clients=[];
@@ -340,6 +359,7 @@ function card(c){
     <div class="row" onclick="event.stopPropagation()">
       ${c.review?`<span class="badge-dep" style="background:#C0492F">⚠ 검토</span>`:''}
       ${depositOf(c)?`<span class="badge-dep">💵 $${DEPOSIT_AMT}</span>`:''}
+      ${c.phone?`<button title="와츠앱으로 Zoom 링크 보내기" onclick="waZoomById(${c.id})" style="border:1px solid var(--line2);background:#fff;border-radius:7px;height:24px;padding:0 7px;cursor:pointer;font-size:12px">📱</button>`:''}
       <span class="mv">
         <button onclick="move(${c.id},-1)" ${si===0?'disabled':''}>←</button>
         <button onclick="move(${c.id},1)" ${si===STAGES.length-1?'disabled':''}>→</button>
@@ -408,7 +428,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ig:"",name:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ig:"",name:"",phone:"",email:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -458,6 +478,11 @@ function renderDrawer(){
         <div class="field"><label>도시</label><input type="text" id="d_city" value="${d.city||''}"></div>
       </div>
       <div class="row2">
+        <div class="field"><label>📱 와츠앱 번호 <span class="es">Teléfono · 국가번호 포함</span></label><input type="text" id="d_phone" value="${escH(d.phone||'')}" placeholder="+52 55 1234 5678"></div>
+        <div class="field"><label>✉️ 이메일</label><input type="text" id="d_email" value="${escH(d.email||'')}" placeholder="correo@..."></div>
+      </div>
+      <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waZoom(gv('d_phone'),gv('d_name'))">📱 와츠앱으로 Zoom 링크 보내기</button>
+      <div class="row2" style="margin-top:13px">
         <div class="field"><label>유입 채널</label><select id="d_channel">${["","Instagram","TikTok","WhatsApp","추천","Google Form","기타"].map(o=>`<option ${d.channel===o?'selected':''}>${o}</option>`).join('')}</select></div>
         <div class="field"><label>예산 감각</label><select id="d_budget">${["","낮음","중간","높음"].map(o=>`<option ${d.budget===o?'selected':''}>${o}</option>`).join('')}</select></div>
       </div>
@@ -648,7 +673,7 @@ function applyParsed(p){
 function syncDraftFromForm(){
   if(!document.getElementById('d_stage'))return;
   const d=draft,g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  d.ig=g('d_ig');d.name=g('d_name');d.origin=g('d_origin');d.city=g('d_city');
+  d.ig=g('d_ig');d.name=g('d_name');d.phone=g('d_phone');d.email=g('d_email');d.origin=g('d_origin');d.city=g('d_city');
   d.channel=document.getElementById('d_channel').value;d.budget=document.getElementById('d_budget').value;
   d.season=g('d_season');d.days=g('d_days');d.tourDate=g('d_tourDate');d.pax=g('d_pax');
   d.group=readSingle('d_group');d.cities=readChips('d_cities');d.stay=readSingle('d_stay');
@@ -669,7 +694,7 @@ function gv(id){return document.getElementById(id).value.trim();}
 function saveClient(){
   const ig=gv('d_ig'),name=gv('d_name');
   if(!ig&&!name){toast('인스타 아이디나 이름은 입력해 주세요');return;}
-  const obj={id:openId||draft.id||Date.now(),ig,name,origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
+  const obj={id:openId||draft.id||Date.now(),ig,name,phone:gv('d_phone'),email:gv('d_email'),origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
