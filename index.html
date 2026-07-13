@@ -440,9 +440,11 @@ function renderDrawer(){
   <div class="dbody">
     ${!openId?`<div class="grp" style="border:1px dashed var(--accent);background:#F7F4FE;">
       <h4 style="color:var(--accent)">✨ 와츠앱 대화로 자동 채우기 · Autocompletar</h4>
-      <div class="field" style="margin-bottom:10px">
-        <textarea id="d_wa" placeholder="손님과 나눈 와츠앱 대화 전체를 여기에 붙여넣으세요 (스페인어·영어 OK). AI가 읽고 아래 칸을 채워줍니다." style="min-height:96px"></textarea>
+      <div class="field" style="margin-bottom:8px">
+        <textarea id="d_wa" placeholder="손님과 나눈 와츠앱 대화를 붙여넣거나, 아래에서 파일을 올리세요 (스페인어·영어 OK)." style="min-height:88px"></textarea>
       </div>
+      <input type="file" id="d_waFile" accept=".zip,.txt" style="display:none" onchange="loadWaFile(this)">
+      <button type="button" class="btn ghost" style="width:100%;padding:11px;margin-bottom:8px" onclick="document.getElementById('d_waFile').click()">📎 드라이브에서 받은 파일 올리기 (.zip / .txt)</button>
       <button type="button" class="btn primary" id="waBtn" style="width:100%;padding:12px" onclick="parseWhatsApp()">🤖 AI로 분석해서 채우기</button>
       <div id="waMsg" style="font-size:12px;margin-top:9px;line-height:1.5;">${waSummary?'<span style="color:var(--money)">✅ '+escH(waSummary)+'</span>':'<span style="color:var(--muted)">붙여넣고 버튼을 누르면 아래 칸이 자동으로 채워집니다. 확인·수정 후 저장하세요.</span>'}</div>
     </div>`:''}
@@ -548,6 +550,58 @@ function wireDrawer(){
   const wl=document.getElementById('d_wishLinks');
   if(wl){const pv=document.getElementById('d_wishPreview');wl.oninput=()=>{pv.innerHTML=renderWishLinks(wl.value);};}
 }
+/* ---------- 파일 올리기(.zip/.txt) → 대화 텍스트 추출 ---------- */
+async function inflateRaw(bytes){
+  const ds=new DecompressionStream('deflate-raw');
+  const ab=await new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
+  return new Uint8Array(ab);
+}
+/* 브라우저 내장 기능만으로 zip에서 대화 txt 추출 (라이브러리 불필요) */
+async function extractChatFromZip(arrayBuffer){
+  const bytes=new Uint8Array(arrayBuffer),dv=new DataView(arrayBuffer),dec=new TextDecoder('utf-8');
+  let eocd=-1;
+  for(let i=bytes.length-22;i>=0;i--){if(dv.getUint32(i,true)===0x06054b50){eocd=i;break;}}
+  if(eocd<0)throw new Error('올바른 zip 파일이 아니에요');
+  const total=dv.getUint16(eocd+10,true);let off=dv.getUint32(eocd+16,true);
+  const entries=[];
+  for(let n=0;n<total;n++){
+    if(dv.getUint32(off,true)!==0x02014b50)break;
+    const method=dv.getUint16(off+10,true),compSize=dv.getUint32(off+20,true);
+    const fnLen=dv.getUint16(off+28,true),exLen=dv.getUint16(off+30,true),cmLen=dv.getUint16(off+32,true);
+    const lho=dv.getUint32(off+42,true);
+    const name=dec.decode(bytes.subarray(off+46,off+46+fnLen));
+    entries.push({name,method,compSize,lho});
+    off+=46+fnLen+exLen+cmLen;
+  }
+  const target=entries.find(e=>/_chat\.txt$/i.test(e.name))||entries.find(e=>/\.txt$/i.test(e.name));
+  if(!target)throw new Error('zip 안에서 대화 텍스트(.txt)를 못 찾았어요');
+  const lho=target.lho;
+  if(dv.getUint32(lho,true)!==0x04034b50)throw new Error('zip 구조 오류');
+  const fnLen=dv.getUint16(lho+26,true),exLen=dv.getUint16(lho+28,true);
+  const start=lho+30+fnLen+exLen;
+  const comp=bytes.subarray(start,start+target.compSize);
+  const out=target.method===0?comp:await inflateRaw(comp);
+  return new TextDecoder('utf-8').decode(out);
+}
+async function loadWaFile(input){
+  const f=input.files&&input.files[0];if(!f){return;}
+  const msg=document.getElementById('waMsg'),ta=document.getElementById('d_wa');
+  try{
+    let text='';
+    if(/\.zip$/i.test(f.name)){
+      if(typeof DecompressionStream==='undefined')throw new Error('이 브라우저는 zip 자동해제를 지원 안 해요. 크롬을 쓰거나 대화를 직접 붙여넣으세요.');
+      if(msg)msg.innerHTML='<span style="color:var(--muted)">압축 푸는 중…</span>';
+      text=await extractChatFromZip(await f.arrayBuffer());
+    }else{text=await f.text();}
+    ta.value=text.trim();
+    if(msg)msg.innerHTML='<span style="color:var(--money)">✅ 파일 읽음 ('+ta.value.length.toLocaleString()+'자). 아래 🤖 버튼을 누르세요.</span>';
+    toast('파일 읽음 ✓');
+  }catch(e){
+    if(msg)msg.innerHTML='<span style="color:var(--warn)">파일 읽기 실패: '+escH(e.message||e)+'</span>';
+  }
+  input.value='';
+}
+
 /* ---------- 와츠앱 대화 → AI 자동 채우기 ---------- */
 async function parseWhatsApp(){
   const ta=document.getElementById('d_wa');if(!ta)return;
