@@ -232,6 +232,7 @@ const SAMPLE=[
 /* ---------- storage + AWS sync (Lambda + DynamoDB) ---------- */
 const API_URL="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const PARSE_URL="https://jto2smfoztmn5f5yr7j2daeowy0kldqd.lambda-url.ap-northeast-2.on.aws/"; // 와츠앱 대화 AI 파싱
+const DRIVE_PULL_URL="https://c2pgzzeiobahgvkktwocx72q2i0rvvtk.lambda-url.ap-northeast-2.on.aws/"; // 드라이브 티켓파일 긁어와 분석
 /* 구글폼 유입 손님에게 보내는 Zoom(Calendly) 안내 메시지 */
 const ZOOM_MSG=`Hola 😊 {name}
 Gracias por tu interés en mi servicio.
@@ -251,6 +252,24 @@ Gyudong`;
 function waPhone(p){let s=String(p==null?'':p).split('/')[0].replace(/\(.*?\)/g,'');let d=s.replace(/[^0-9+]/g,'').replace(/^\+/,'').replace(/^00/,'');return d.replace(/[^0-9]/g,'');}
 function waZoom(phone,name){const num=waPhone(phone);if(!num){toast('와츠앱 번호를 먼저 입력하세요');return;}const first=String(name||'').trim().split(/\s+/)[0]||'';const msg=ZOOM_MSG.replace('{name}',first);window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');}
 function waZoomById(id){const c=clients.find(x=>x.id===id);if(c)waZoom(c.phone,c.name);}
+/* 드라이브 여행crm 폴더에서 이 티켓번호 파일 찾아 → AI분석 → 카드 갱신 */
+async function pullFromDrive(ticket){
+  ticket=(ticket||'').trim();
+  if(!ticket){toast('먼저 티켓번호를 입력하세요');return;}
+  const tok=getToken();if(!tok){toast('먼저 비밀번호로 연결하세요');showSyncBar(true);return;}
+  const btn=document.getElementById('pullBtn'),old=btn&&btn.textContent;
+  if(btn){btn.disabled=true;btn.textContent='🔄 드라이브에서 찾아 분석 중… (10~20초)';}
+  try{
+    const r=await fetch(DRIVE_PULL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,ticket})});
+    const data=await r.json();
+    if(!r.ok||data.error){toast('❌ '+(data.error||('오류 '+r.status)));if(btn){btn.disabled=false;btn.textContent=old;}return;}
+    const res=await fetch(API_URL+'?key='+encodeURIComponent(tok)+'&_='+Date.now());
+    const list=await res.json();
+    if(Array.isArray(list)){clients=list.map(normalize);saveLocal();}
+    toast('✅ '+(data.summary||'드라이브에서 불러와 채웠어요'));
+    const id=openId;render();if(id!=null)openClient(id);
+  }catch(e){toast('연결 실패 — 잠시 후 다시');if(btn){btn.disabled=false;btn.textContent=old;}}
+}
 const KEY="seoulTourCRM_v2";
 const TKEY="seoulTourCRM_token";
 let clients=[];
@@ -472,6 +491,7 @@ function renderDrawer(){
     </div>`:''}
     <div class="grp"><h4>① 기본 · Básico</h4>
       <div class="field"><label>🎫 티켓번호 <span class="es">이 손님 고유번호 · 파일 전달 시 이 번호로</span></label><input type="text" id="d_ticket" value="${escH(d.ticket||'')}" placeholder="T0001" style="font-family:'IBM Plex Mono',monospace;font-weight:600"></div>
+      ${openId?`<button type="button" class="btn ghost" id="pullBtn" style="width:100%;padding:10px;margin-bottom:13px;border:1px solid var(--accent);color:var(--accent)" onclick="pullFromDrive(gv('d_ticket'))">🔄 드라이브에서 이 티켓 파일 불러와 AI 채우기</button>`:''}
       <div class="row2">
         <div class="field"><label>인스타 아이디 <span class="es">키</span></label><input type="text" id="d_ig" value="${d.ig||''}" placeholder="@handle"></div>
         <div class="field"><label>이름 <span class="es">Nombre</span></label><input type="text" id="d_name" value="${d.name||''}"></div>
