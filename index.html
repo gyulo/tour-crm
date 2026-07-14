@@ -233,6 +233,7 @@ const SAMPLE=[
 const API_URL="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const PARSE_URL="https://jto2smfoztmn5f5yr7j2daeowy0kldqd.lambda-url.ap-northeast-2.on.aws/"; // 와츠앱 대화 AI 파싱
 const DRIVE_PULL_URL="https://c2pgzzeiobahgvkktwocx72q2i0rvvtk.lambda-url.ap-northeast-2.on.aws/"; // 드라이브 티켓파일 긁어와 분석
+const LINKINFO_URL="https://io3ieoi4tokmurgqmhalfueoaa0xbscj.lambda-url.ap-northeast-2.on.aws/"; // 링크 캡션 읽기
 /* 구글폼 유입 손님에게 보내는 Zoom(Calendly) 안내 메시지 */
 const ZOOM_MSG=`Hola 😊 {name}
 Gracias por tu interés en mi servicio.
@@ -252,6 +253,28 @@ Gyudong`;
 function waPhone(p){let s=String(p==null?'':p).split('/')[0].replace(/\(.*?\)/g,'');let d=s.replace(/[^0-9+]/g,'').replace(/^\+/,'').replace(/^00/,'');return d.replace(/[^0-9]/g,'');}
 function waZoom(phone,name){const num=waPhone(phone);if(!num){toast('와츠앱 번호를 먼저 입력하세요');return;}const first=String(name||'').trim().split(/\s+/)[0]||'';const msg=ZOOM_MSG.replace('{name}',first);window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');}
 function waZoomById(id){const c=clients.find(x=>x.id===id);if(c)waZoom(c.phone,c.name);}
+/* 가고 싶은 곳 링크들의 캡션(내용)을 로봇으로 읽어와 옆에 표시 */
+async function fetchLinkCaptions(){
+  const ta=document.getElementById('d_wishLinks');if(!ta)return;
+  syncDraftFromForm();
+  const urls=extractUrls(ta.value);
+  if(!urls.length){toast('먼저 링크를 넣으세요');return;}
+  const tok=getToken();if(!tok){toast('먼저 비밀번호로 연결하세요');showSyncBar(true);return;}
+  const btn=document.getElementById('linkInfoBtn'),old=btn&&btn.textContent,pv=document.getElementById('d_wishPreview');
+  if(btn)btn.disabled=true;
+  draft.linkCaptions=draft.linkCaptions||{};
+  let i=0;
+  for(const u of urls){
+    i++; if(btn)btn.textContent=`🔎 읽는 중… ${i}/${urls.length}`;
+    try{
+      const r=await fetch(LINKINFO_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,url:u})});
+      const d=await r.json();draft.linkCaptions[u]=d.caption||'(못 읽음)';
+    }catch(e){draft.linkCaptions[u]='(못 읽음)';}
+    if(pv)pv.innerHTML=renderWishLinks(ta.value,draft.linkCaptions);
+  }
+  if(btn){btn.disabled=false;btn.textContent=old;}
+  toast('링크 내용 읽기 완료 · 저장하면 유지돼요');
+}
 /* 드라이브 여행crm 폴더에서 이 티켓번호 파일 찾아 → AI분석 → 카드 갱신 */
 async function pullFromDrive(ticket){
   ticket=(ticket||'').trim();
@@ -449,20 +472,25 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
 /* 가고 싶은 곳 링크들을 클릭 가능한 목록으로 렌더 (한 줄에 하나, '라벨 URL' 형식 지원) */
-function renderWishLinks(text){
+function renderWishLinks(text,caps){
+  caps=caps||{};
   const lines=String(text==null?'':text).split('\n').map(s=>s.trim()).filter(Boolean);
   if(!lines.length)return '';
-  return '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">'+lines.map(line=>{
+  return '<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">'+lines.map(line=>{
     const m=line.match(/https?:\/\/[^\s]+/);
-    if(!m)return `<div style="font-size:12px;color:var(--muted)">• ${escH(line)}</div>`;
+    if(!m)return `<div style="font-size:12px;color:var(--muted);padding:4px 0">• ${escH(line)}</div>`;
     const url=m[0];let label=line.replace(url,'').replace(/[-:·|]/g,' ').trim();
     if(!label){try{label=new URL(url).hostname.replace(/^www\./,'');}catch(e){label=url.slice(0,44);}}
-    return `<a href="${escH(url)}" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent);text-decoration:none;border:1px solid var(--line2);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:7px;background:#fff"><span>🔗</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span><span style="color:var(--muted);font-size:11px">열기 ↗</span></a>`;
+    const cap=caps[url];
+    return `<div style="border:1px solid var(--line2);border-radius:9px;padding:9px 11px;background:#fff">
+      <a href="${escH(url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:7px;color:var(--accent);text-decoration:none;font-size:12.5px;font-weight:600"><span>🔗</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span><span style="color:var(--muted);font-size:11px">열기 ↗</span></a>
+      ${cap?`<div style="font-size:12px;color:#4A4F58;margin-top:6px;line-height:1.45;border-top:1px dashed var(--line);padding-top:6px">${escH(cap)}</div>`:''}
+    </div>`;
   }).join('')+'</div>';
 }
 function openNew(){draft=blank();draft.ticket=nextTicket();openId=null;waSummary="";renderDrawer();showDrawer();}
@@ -543,7 +571,8 @@ function renderDrawer(){
       <div class="field"><label>👘 한복 체험 <span class="es">Hanbok</span></label><div class="chips" id="d_hanbok">${["입어요","안 입어요","미정"].map(o=>`<span class="ch ${d.hanbok===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="field"><label>📍 가고 싶은 곳 · 링크 모음 <span class="es">손님이 보낸 장소 링크 (한 줄에 하나)</span></label>
         <textarea id="d_wishLinks" placeholder="손님이 보낸 링크를 붙여넣으세요 (한 줄에 하나). 예:&#10;성수동 카페 https://instagram.com/...&#10;https://maps.google.com/...&#10;홍대 맛집 https://youtube.com/...">${escH(d.wishLinks||'')}</textarea>
-        <div id="d_wishPreview">${renderWishLinks(d.wishLinks)}</div>
+        <button type="button" class="btn ghost" id="linkInfoBtn" style="width:100%;padding:9px;margin:8px 0 2px" onclick="fetchLinkCaptions()">🔎 링크 내용(캡션) 읽어오기</button>
+        <div id="d_wishPreview">${renderWishLinks(d.wishLinks,d.linkCaptions)}</div>
       </div>
     </div>
 
@@ -596,7 +625,7 @@ function wireDrawer(){
   document.getElementById('d_deposit').onclick=function(){this.classList.toggle('on');};
   // 가고 싶은 곳 링크: 입력하는 즉시 클릭 가능한 미리보기 갱신
   const wl=document.getElementById('d_wishLinks');
-  if(wl){const pv=document.getElementById('d_wishPreview');wl.oninput=()=>{pv.innerHTML=renderWishLinks(wl.value);};}
+  if(wl){const pv=document.getElementById('d_wishPreview');wl.oninput=()=>{pv.innerHTML=renderWishLinks(wl.value,draft.linkCaptions);};}
 }
 /* ---------- 파일 올리기(.zip/.txt) → 대화 텍스트 추출 ---------- */
 async function inflateRaw(bytes){
@@ -723,7 +752,7 @@ function saveClient(){
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
     diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
-    tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual"};
+    tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
   else{clients.push(obj);}
   saveLocal();render();closeDrawer();pushClient(obj);toast('저장됨 · Guardado');
