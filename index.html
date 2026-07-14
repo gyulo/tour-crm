@@ -482,22 +482,21 @@ function renderWishLinks(text,caps){
   const lines=String(text==null?'':text).split('\n').map(s=>s.trim()).filter(Boolean);
   if(!lines.length)return '';
   let n=0;
-  return '<div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">'+lines.map(line=>{
+  return '<div style="display:flex;flex-direction:column;gap:9px;margin-top:8px">'+lines.map(line=>{
     const m=line.match(/https?:\/\/[^\s]+/);
-    if(!m)return `<div style="font-size:12px;color:var(--muted);padding:4px 0">• ${escH(line)}</div>`;
+    if(!m)return `<div style="font-size:12.5px;color:var(--ink);padding:2px 0 2px 26px">• ${escH(line)}</div>`;
     n++;
     const url=m[0];let label=line.replace(url,'').replace(/[-:·|]/g,' ').trim();
-    let domain=url;try{domain=new URL(url).hostname.replace(/^www\./,'');}catch(e){}
-    if(!label)label=domain;
+    if(!label){try{label=new URL(url).hostname.replace(/^www\./,'');}catch(e){label=url;}}
     const cap=caps[url];
     let shortCap='';
-    if(cap){shortCap=String(cap).replace(/\s+/g,' ').trim();if(shortCap.length>20)shortCap=shortCap.slice(0,20)+'…';}
-    return `<div style="border:1px solid var(--line2);border-radius:12px;padding:0;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden">
-      <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--bg2,#F6F7F9);border-bottom:1px solid var(--line2);font-size:12px;font-weight:700;color:var(--ink)"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px">${n}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span></div>
-      <div style="padding:11px 13px">
-        <div style="font-size:13px;color:#333;line-height:1.55;word-break:break-word">${cap?escH(shortCap):'<span style="color:var(--muted)">아직 내용 안 읽음 · 아래 🔎 버튼을 누르면 자동으로 채워져요</span>'}</div>
-        <a href="${escH(url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;color:var(--accent);text-decoration:underline;font-size:12px;font-weight:600;word-break:break-all"><span>🔗</span><span>${escH(url)}</span><span style="text-decoration:none">↗</span></a>
+    if(cap){shortCap=String(cap).replace(/\s+/g,' ').trim();if(shortCap.length>26)shortCap=shortCap.slice(0,26)+'…';}
+    return `<div style="border:1px solid var(--line2);border-radius:10px;padding:9px 12px;background:#fff">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="flex:0 0 auto;color:var(--muted);font-weight:700;font-size:13px;min-width:16px">${n}.</span>
+        <a href="${escH(url)}" target="_blank" rel="noopener" style="flex:1;color:var(--accent);text-decoration:underline;font-weight:700;font-size:14px;word-break:break-word">${escH(label)} ↗</a>
       </div>
+      ${shortCap?`<div style="font-size:12px;color:#555;line-height:1.45;margin:3px 0 0 24px">${escH(shortCap)}</div>`:`<div style="font-size:11px;color:var(--muted);margin:3px 0 0 24px">아직 내용 안 읽음 · 🔎 버튼으로 채워져요</div>`}
     </div>`;
   }).join('')+'</div>';
 }
