@@ -304,7 +304,9 @@ let view="kanban",search="",openId=null;
 function depositOf(c){const si=STAGES.findIndex(s=>s.id===c.stage);return c.depositPaid||si>=DEPOSIT_FROM;}
 function segOf(c){const i=c.interests||[];if(i.includes("K-드라마"))return"K-드라마";if(i.includes("K-pop"))return"K-pop";if(i.includes("뷰티·의료"))return"뷰티/의료";if(i.includes("음식"))return"음식";if(c.group==="가족")return"가족";if(c.local&&c.local.includes("현지인")||c.local==="완전 로컬")return"현지인";if(c.group==="솔로")return"솔로";return"기타";}
 function stripe(c){return SEG_COLOR[segOf(c)]||"#ccc";}
-function matches(c){if(!search)return true;const t=search.toLowerCase();return [c.ig,c.name,c.origin,c.city].filter(Boolean).some(x=>x.toLowerCase().includes(t));}
+function matches(c){if(!search)return true;const t=search.toLowerCase();return [c.ig,c.name,c.origin,c.city,c.ticket,c.phone].filter(Boolean).some(x=>String(x).toLowerCase().includes(t));}
+/* 다음 티켓번호 자동 발번 (T0001, T0002…) */
+function nextTicket(){let max=0;clients.forEach(c=>{const m=/^T(\d+)$/.exec(c.ticket||'');if(m)max=Math.max(max,+m[1]);});return 'T'+String(max+1).padStart(4,'0');}
 
 /* ---------- stats ---------- */
 function renderStats(){
@@ -351,7 +353,7 @@ function render(){
 function card(c){
   const si=STAGES.findIndex(s=>s.id===c.stage);
   return `<div class="card" style="--stripe:${stripe(c)}" onclick="openClient(${c.id})">
-    <div class="nm">${c.name||'(이름)'}</div>
+    <div class="nm">${c.name||'(이름)'}${c.ticket?`<span style="margin-left:auto;font-size:10px;color:var(--accent);font-family:'IBM Plex Mono',monospace;background:var(--chip);padding:1px 6px;border-radius:6px">${escH(c.ticket)}</span>`:''}</div>
     ${c.ig?`<div class="ig">${c.ig}</div>`:''}
     <div class="meta"><span>${c.origin||'-'}${c.city?' · '+c.city:''}</span><span>${c.pax||'?'}명</span>${c.season?'<span>'+c.season+'</span>':''}${extractUrls(c.wishLinks).length?'<span>📍'+extractUrls(c.wishLinks).length+' 링크</span>':''}</div>
     ${(c.interests&&c.interests.length)?`<div class="tags">${c.interests.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
@@ -428,7 +430,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ig:"",name:"",phone:"",email:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -444,7 +446,7 @@ function renderWishLinks(text){
     return `<a href="${escH(url)}" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent);text-decoration:none;border:1px solid var(--line2);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:7px;background:#fff"><span>🔗</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span><span style="color:var(--muted);font-size:11px">열기 ↗</span></a>`;
   }).join('')+'</div>';
 }
-function openNew(){draft=blank();openId=null;waSummary="";renderDrawer();showDrawer();}
+function openNew(){draft=blank();draft.ticket=nextTicket();openId=null;waSummary="";renderDrawer();showDrawer();}
 function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;waSummary="";renderDrawer();showDrawer();}
 function showDrawer(){document.getElementById('overlay').classList.add('on');document.getElementById('drawer').classList.add('on');}
 function closeDrawer(){document.getElementById('overlay').classList.remove('on');document.getElementById('drawer').classList.remove('on');draft=null;}
@@ -454,7 +456,7 @@ function renderDrawer(){
   const d=draft;const st=STAGES.find(s=>s.id===d.stage);
   document.getElementById('drawerContent').innerHTML=`
   <div class="dhead">
-    <strong style="font-family:'Space Grotesk'">${openId?'손님 카드':'새 손님'}</strong>
+    <strong style="font-family:'Space Grotesk'">${openId?'손님 카드':'새 손님'}${d.ticket?' · <span style="font-family:\'IBM Plex Mono\';color:var(--accent)">'+escH(d.ticket)+'</span>':''}</strong>
     <button class="x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="dbody">
@@ -469,6 +471,7 @@ function renderDrawer(){
       <div id="waMsg" style="font-size:12px;margin-top:9px;line-height:1.5;">${waSummary?'<span style="color:var(--money)">✅ '+escH(waSummary)+'</span>':'<span style="color:var(--muted)">붙여넣고 버튼을 누르면 아래 칸이 자동으로 채워집니다. 확인·수정 후 저장하세요.</span>'}</div>
     </div>`:''}
     <div class="grp"><h4>① 기본 · Básico</h4>
+      <div class="field"><label>🎫 티켓번호 <span class="es">이 손님 고유번호 · 파일 전달 시 이 번호로</span></label><input type="text" id="d_ticket" value="${escH(d.ticket||'')}" placeholder="T0001" style="font-family:'IBM Plex Mono',monospace;font-weight:600"></div>
       <div class="row2">
         <div class="field"><label>인스타 아이디 <span class="es">키</span></label><input type="text" id="d_ig" value="${d.ig||''}" placeholder="@handle"></div>
         <div class="field"><label>이름 <span class="es">Nombre</span></label><input type="text" id="d_name" value="${d.name||''}"></div>
@@ -673,7 +676,7 @@ function applyParsed(p){
 function syncDraftFromForm(){
   if(!document.getElementById('d_stage'))return;
   const d=draft,g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  d.ig=g('d_ig');d.name=g('d_name');d.phone=g('d_phone');d.email=g('d_email');d.origin=g('d_origin');d.city=g('d_city');
+  d.ticket=g('d_ticket');d.ig=g('d_ig');d.name=g('d_name');d.phone=g('d_phone');d.email=g('d_email');d.origin=g('d_origin');d.city=g('d_city');
   d.channel=document.getElementById('d_channel').value;d.budget=document.getElementById('d_budget').value;
   d.season=g('d_season');d.days=g('d_days');d.tourDate=g('d_tourDate');d.pax=g('d_pax');
   d.group=readSingle('d_group');d.cities=readChips('d_cities');d.stay=readSingle('d_stay');
@@ -694,7 +697,7 @@ function gv(id){return document.getElementById(id).value.trim();}
 function saveClient(){
   const ig=gv('d_ig'),name=gv('d_name');
   if(!ig&&!name){toast('인스타 아이디나 이름은 입력해 주세요');return;}
-  const obj={id:openId||draft.id||Date.now(),ig,name,phone:gv('d_phone'),email:gv('d_email'),origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
+  const obj={id:openId||draft.id||Date.now(),ticket:gv('d_ticket'),ig,name,phone:gv('d_phone'),email:gv('d_email'),origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
