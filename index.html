@@ -481,15 +481,21 @@ function renderWishLinks(text,caps){
   caps=caps||{};
   const lines=String(text==null?'':text).split('\n').map(s=>s.trim()).filter(Boolean);
   if(!lines.length)return '';
-  return '<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">'+lines.map(line=>{
+  let n=0;
+  return '<div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">'+lines.map(line=>{
     const m=line.match(/https?:\/\/[^\s]+/);
     if(!m)return `<div style="font-size:12px;color:var(--muted);padding:4px 0">• ${escH(line)}</div>`;
+    n++;
     const url=m[0];let label=line.replace(url,'').replace(/[-:·|]/g,' ').trim();
-    if(!label){try{label=new URL(url).hostname.replace(/^www\./,'');}catch(e){label=url.slice(0,44);}}
+    let domain=url;try{domain=new URL(url).hostname.replace(/^www\./,'');}catch(e){}
+    if(!label)label=domain;
     const cap=caps[url];
-    return `<div style="border:1px solid var(--line2);border-radius:9px;padding:9px 11px;background:#fff">
-      <a href="${escH(url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:7px;color:var(--accent);text-decoration:none;font-size:12.5px;font-weight:600"><span>🔗</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span><span style="color:var(--muted);font-size:11px">열기 ↗</span></a>
-      ${cap?`<div style="font-size:12px;color:#4A4F58;margin-top:6px;line-height:1.45;border-top:1px dashed var(--line);padding-top:6px">${escH(cap)}</div>`:''}
+    return `<div style="border:1px solid var(--line2);border-radius:12px;padding:0;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--bg2,#F6F7F9);border-bottom:1px solid var(--line2);font-size:12px;font-weight:700;color:var(--ink)"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px">${n}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span></div>
+      <div style="padding:11px 13px">
+        <div style="font-size:13px;color:#333;line-height:1.55;white-space:pre-wrap;word-break:break-word">${cap?escH(cap):'<span style="color:var(--muted)">아직 내용 안 읽음 · 아래 🔎 버튼을 누르면 자동으로 채워져요</span>'}</div>
+        <a href="${escH(url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;color:var(--accent);text-decoration:underline;font-size:12px;font-weight:600;word-break:break-all"><span>🔗</span><span>${escH(url)}</span><span style="text-decoration:none">↗</span></a>
+      </div>
     </div>`;
   }).join('')+'</div>';
 }
