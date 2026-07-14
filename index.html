@@ -695,13 +695,17 @@ async function parseWhatsApp(){
     if(r.status===401){msg.innerHTML='<span style="color:var(--warn)">비밀번호가 맞지 않아요</span>';btn.disabled=false;btn.textContent=old;return;}
     const data=await r.json();
     if(data.error){msg.innerHTML='<span style="color:var(--warn)">오류: '+escH(data.error)+'</span>';btn.disabled=false;btn.textContent=old;return;}
-    applyParsed(data);
-    waSummary=data._summary||'대화 내용을 반영했어요.';
-    renderDrawer();
-    const ta2=document.getElementById('d_wa');if(ta2)ta2.value=text; // 재분석 대비 원문 복원
-    toast('AI가 채웠어요 · 확인 후 저장');
+    try{
+      applyParsed(data);
+      waSummary=data._summary||'대화 내용을 반영했어요.';
+      renderDrawer();
+      const ta2=document.getElementById('d_wa');if(ta2)ta2.value=text; // 재분석 대비 원문 복원
+      toast('AI가 채웠어요 · 확인 후 저장');
+    }catch(ce){
+      msg.innerHTML='<span style="color:var(--warn)">채우기 처리 오류: '+escH((ce&&ce.message)||ce)+'</span>';btn.disabled=false;btn.textContent=old;
+    }
   }catch(e){
-    msg.innerHTML='<span style="color:var(--warn)">연결 실패 — 잠시 후 다시 시도하세요</span>';btn.disabled=false;btn.textContent=old;
+    msg.innerHTML='<span style="color:var(--warn)">연결 실패: '+escH((e&&e.message)||e)+' — 새로고침(Ctrl+Shift+R) 후 다시</span>';btn.disabled=false;btn.textContent=old;
   }
 }
 function applyParsed(p){
