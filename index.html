@@ -482,7 +482,13 @@ function renderWishLinks(text,caps){
   const lines=String(text==null?'':text).split('\n').map(s=>s.trim()).filter(Boolean);
   if(!lines.length)return '';
   let n=0;
-  return '<div style="display:flex;flex-direction:column;gap:9px;margin-top:8px">'+lines.map(line=>{
+  // 링크가 6개 이상이면 약 5개 높이만 보이고 나머지는 스크롤(드래그)
+  const box = lines.length>5
+    ? 'display:flex;flex-direction:column;gap:9px;margin-top:4px;max-height:330px;overflow-y:auto;overflow-x:hidden;padding:6px 6px 6px 4px;border:1px solid var(--line2);border-radius:12px;background:var(--bg2,#F8F9FB);-webkit-overflow-scrolling:touch'
+    : 'display:flex;flex-direction:column;gap:9px;margin-top:8px';
+  const linkCnt=lines.filter(l=>/https?:\/\//.test(l)).length;
+  const hint = lines.length>5 ? `<div style="font-size:11px;color:var(--muted);margin-top:8px">총 ${linkCnt}개 · 아래 상자를 스크롤(드래그) ↕</div>` : '';
+  return hint+'<div style="'+box+'">'+lines.map(line=>{
     const m=line.match(/https?:\/\/[^\s]+/);
     if(!m)return `<div style="font-size:12.5px;color:var(--ink);padding:2px 0 2px 26px">• ${escH(line)}</div>`;
     n++;
