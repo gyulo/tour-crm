@@ -268,7 +268,7 @@ async function fetchLinkCaptions(){
     i++; if(btn)btn.textContent=`🔎 읽는 중… ${i}/${urls.length}`;
     try{
       const r=await fetch(LINKINFO_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:tok,url:u})});
-      const d=await r.json();draft.linkCaptions[u]=d.caption||'(못 읽음)';
+      const d=await r.json();draft.linkCaptions[u]=d.summary||d.caption||'(못 읽음)';
     }catch(e){draft.linkCaptions[u]='(못 읽음)';}
     if(pv)pv.innerHTML=renderWishLinks(ta.value,draft.linkCaptions);
   }
@@ -491,7 +491,7 @@ function renderWishLinks(text,caps){
     if(!label)label=domain;
     const cap=caps[url];
     let shortCap='';
-    if(cap){shortCap=String(cap).replace(/\s+/g,' ').trim();if(shortCap.length>14)shortCap=shortCap.slice(0,14)+'…';}
+    if(cap){shortCap=String(cap).replace(/\s+/g,' ').trim();if(shortCap.length>20)shortCap=shortCap.slice(0,20)+'…';}
     return `<div style="border:1px solid var(--line2);border-radius:12px;padding:0;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden">
       <div style="display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--bg2,#F6F7F9);border-bottom:1px solid var(--line2);font-size:12px;font-weight:700;color:var(--ink)"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px">${n}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(label)}</span></div>
       <div style="padding:11px 13px">
