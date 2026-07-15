@@ -428,11 +428,12 @@ function calendarHTML(list){
   const daysIn=new Date(y,m+1,0).getDate();
   const byDate={};
   list.forEach(c=>{
-    const gd=Array.isArray(c.tourDays)?c.tourDays.filter(Boolean):[];
-    if(gd.length){gd.forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,guide:true});});return;}
+    const tdSet=new Set(Array.isArray(c.tourDays)?c.tourDays.filter(Boolean):[]);
     const start=c.hireStart||c.tourDate;
-    if(!start)return;
-    daysBetween(start,c.hireEnd).forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,guide:false});});
+    const days=new Set();
+    if(start)daysBetween(start,c.hireEnd).forEach(ds=>days.add(ds)); // 체류 전체
+    tdSet.forEach(ds=>days.add(ds)); // 채용일이 체류 밖이어도 표시
+    days.forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,hired:tdSet.has(ds)});}); // hired=그날 나를 채용
   });
   const dows=['일','월','화','수','목','금','토'];
   const today=todayStr();
@@ -441,19 +442,20 @@ function calendarHTML(list){
   for(let d=1;d<=daysIn;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const cs=byDate[ds]||[];
-    const hasGuide=cs.some(e=>e.guide);
-    let chips=cs.slice(0,3).map(e=>`<span class="cal-chip" style="background:${e.guide?'#F5C518':stripe(e.c)};${e.guide?'color:#3d3000;font-weight:700':''}" onclick="event.stopPropagation();openClient(${e.c.id})">${e.guide?'🟡':''}${e.c.name||e.c.ig||'손님'}</span>`).join('');
+    const hasHired=cs.some(e=>e.hired);
+    let chips=cs.slice(0,3).map(e=>`<span class="cal-chip" style="background:${stripe(e.c)};position:relative" onclick="event.stopPropagation();openClient(${e.c.id})">${e.hired?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 1px rgba(0,0,0,.25);margin-right:4px;vertical-align:middle"></span>':''}${e.c.name||e.c.ig||'손님'}</span>`).join('');
     if(cs.length>3)chips+=`<span class="cal-more">+${cs.length-3}</span>`;
-    const dot=cs.length?`<span class="cal-dot" style="background:${cs[0].guide?'#F5C518':stripe(cs[0].c)};${cs[0].guide?'color:#3d3000':''}">${cs.length}</span>`:'';
-    cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}"${hasGuide?' style="box-shadow:inset 0 0 0 2px #F5C518;border-radius:8px"':''} onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}</span>${chips}</div>`;
+    const dot=cs.length?`<span class="cal-dot" style="background:${stripe(cs[0].c)}">${cs.length}</span>`:'';
+    const hdot=hasHired?'<span class="cal-hdot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 1px rgba(0,0,0,.3);margin-left:3px;vertical-align:middle"></span>':'';
+    cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}" onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}${hdot}</span>${chips}</div>`;
   }
   let agenda='';
   if(calSel){
     const cs=byDate[calSel]||[];
     agenda=`<div class="cal-agenda"><h4>${calSel} · ${cs.length}명</h4>${cs.length?cs.map(e=>`
-      <div class="agenda-card" style="--stripe:${e.guide?'#F5C518':stripe(e.c)}" onclick="openClient(${e.c.id})">
-        <b>${e.guide?'🟡 ':''}${e.c.name||'(이름)'}</b> <span style="color:var(--accent);font-size:12px">${e.c.ig||''}</span>
-        <div class="meta">${e.guide?'나와 함께 · ':''}${e.c.origin||''}${e.c.pax?' · '+e.c.pax+'명':''}${e.c.hours?' · '+e.c.hours:''}${(e.c.cities&&e.c.cities.length)?' · '+e.c.cities.join(', '):''}</div>
+      <div class="agenda-card" style="--stripe:${stripe(e.c)}" onclick="openClient(${e.c.id})">
+        <b>${e.hired?'🟡 ':''}${e.c.name||'(이름)'}</b> <span style="color:var(--accent);font-size:12px">${e.c.ig||''}</span>
+        <div class="meta">${e.hired?'<b style="color:#B58900">나를 채용</b> · ':'체류 중 · '}${e.c.origin||''}${e.c.pax?' · '+e.c.pax+'명':''}${e.c.hours?' · '+e.c.hours:''}${(e.c.cities&&e.c.cities.length)?' · '+e.c.cities.join(', '):''}</div>
       </div>`).join(''):'<div style="font-size:12px;color:var(--muted)">이 날 예정된 투어 없음</div>'}</div>`;
   }
   const noDate=list.filter(c=>!c.hireStart&&!c.tourDate&&!(Array.isArray(c.tourDays)&&c.tourDays.filter(Boolean).length)).length;
@@ -462,7 +464,7 @@ function calendarHTML(list){
       <div class="nav"><button onclick="calNav(-1)">‹</button><button onclick="calToday()">오늘</button><button onclick="calNav(1)">›</button></div></div>
     <div class="cal-grid">${dows.map(w=>`<div class="cal-dow">${w}</div>`).join('')}${cells}</div>
     ${agenda}
-    <div style="font-size:11px;color:var(--muted);margin-top:8px">🟡 노란색 = 나와 함께 여행하는 날(동행일)</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">배경색 = 손님 체류기간 · 🟡 노란 점 = 내가 채용되는 날</div>
     ${noDate?`<div class="save-note">📅 투어 날짜 미입력 ${noDate}명 — 손님 카드에서 날짜 넣으면 달력에 떠요</div>`:''}
   </div>`;
 }
@@ -623,10 +625,10 @@ function renderDrawer(){
       <div class="field"><label>퍼널 단계</label><div class="stagesel" id="d_stage">${STAGES.map(s=>`<span class="ch ${d.stage===s.id?'on':''}" data-v="${s.id}" style="--stagecol:${s.color}">${s.label}</span>`).join('')}</div></div>
       <div class="field"><label>투어 시간</label><div class="chips" id="d_hours">${["4시간","6시간","8시간","다중일"].map(o=>`<span class="ch ${d.hours===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="row2">
-        <div class="field"><label>🧑‍🏫 근무 시작일 <span class="es">Desde · 손님 체류(참고)</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
-        <div class="field"><label>근무 종료일 <span class="es">Hasta · 참고용</span></label><input type="date" id="d_hireEnd" value="${d.hireEnd||''}"></div>
+        <div class="field"><label>🏨 체류 시작일 <span class="es">Llega · 손님이 한국 오는 날</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
+        <div class="field"><label>체류 종료일 <span class="es">Se va · 떠나는 날</span></label><input type="date" id="d_hireEnd" value="${d.hireEnd||''}"></div>
       </div>
-      <div class="field"><label>🟡 나와 함께 여행하는 날 <span class="es">Días conmigo · 안 이어져도 됨 · 달력에 노란색</span></label>
+      <div class="field"><label>🟡 나를 채용하는 날 <span class="es">Días conmigo · 체류 중 실제 투어일 · 달력에 노란 점</span></label>
         <div id="d_tourDays">${renderTourDays(d.tourDays)}</div>
         <button type="button" class="btn ghost" style="padding:6px 11px;font-size:12.5px;margin-top:4px" onclick="addTourDay()">+ 동행일 추가</button>
       </div>
