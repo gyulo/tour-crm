@@ -428,9 +428,11 @@ function calendarHTML(list){
   const daysIn=new Date(y,m+1,0).getDate();
   const byDate={};
   list.forEach(c=>{
+    const gd=Array.isArray(c.tourDays)?c.tourDays.filter(Boolean):[];
+    if(gd.length){gd.forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,guide:true});});return;}
     const start=c.hireStart||c.tourDate;
     if(!start)return;
-    daysBetween(start,c.hireEnd).forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push(c);});
+    daysBetween(start,c.hireEnd).forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,guide:false});});
   });
   const dows=['일','월','화','수','목','금','토'];
   const today=todayStr();
@@ -439,26 +441,28 @@ function calendarHTML(list){
   for(let d=1;d<=daysIn;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const cs=byDate[ds]||[];
-    let chips=cs.slice(0,3).map(c=>`<span class="cal-chip" style="background:${stripe(c)}" onclick="event.stopPropagation();openClient(${c.id})">${c.name||c.ig||'손님'}</span>`).join('');
+    const hasGuide=cs.some(e=>e.guide);
+    let chips=cs.slice(0,3).map(e=>`<span class="cal-chip" style="background:${e.guide?'#F5C518':stripe(e.c)};${e.guide?'color:#3d3000;font-weight:700':''}" onclick="event.stopPropagation();openClient(${e.c.id})">${e.guide?'🟡':''}${e.c.name||e.c.ig||'손님'}</span>`).join('');
     if(cs.length>3)chips+=`<span class="cal-more">+${cs.length-3}</span>`;
-    const dot=cs.length?`<span class="cal-dot" style="background:${stripe(cs[0])}">${cs.length}</span>`:'';
-    cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}" onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}</span>${chips}</div>`;
+    const dot=cs.length?`<span class="cal-dot" style="background:${cs[0].guide?'#F5C518':stripe(cs[0].c)};${cs[0].guide?'color:#3d3000':''}">${cs.length}</span>`:'';
+    cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}"${hasGuide?' style="box-shadow:inset 0 0 0 2px #F5C518;border-radius:8px"':''} onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}</span>${chips}</div>`;
   }
   let agenda='';
   if(calSel){
     const cs=byDate[calSel]||[];
-    agenda=`<div class="cal-agenda"><h4>${calSel} · ${cs.length}명</h4>${cs.length?cs.map(c=>`
-      <div class="agenda-card" style="--stripe:${stripe(c)}" onclick="openClient(${c.id})">
-        <b>${c.name||'(이름)'}</b> <span style="color:var(--accent);font-size:12px">${c.ig||''}</span>
-        <div class="meta">${c.origin||''}${c.pax?' · '+c.pax+'명':''}${c.hours?' · '+c.hours:''}${(c.cities&&c.cities.length)?' · '+c.cities.join(', '):''}</div>
+    agenda=`<div class="cal-agenda"><h4>${calSel} · ${cs.length}명</h4>${cs.length?cs.map(e=>`
+      <div class="agenda-card" style="--stripe:${e.guide?'#F5C518':stripe(e.c)}" onclick="openClient(${e.c.id})">
+        <b>${e.guide?'🟡 ':''}${e.c.name||'(이름)'}</b> <span style="color:var(--accent);font-size:12px">${e.c.ig||''}</span>
+        <div class="meta">${e.guide?'나와 함께 · ':''}${e.c.origin||''}${e.c.pax?' · '+e.c.pax+'명':''}${e.c.hours?' · '+e.c.hours:''}${(e.c.cities&&e.c.cities.length)?' · '+e.c.cities.join(', '):''}</div>
       </div>`).join(''):'<div style="font-size:12px;color:var(--muted)">이 날 예정된 투어 없음</div>'}</div>`;
   }
-  const noDate=list.filter(c=>!c.hireStart&&!c.tourDate).length;
+  const noDate=list.filter(c=>!c.hireStart&&!c.tourDate&&!(Array.isArray(c.tourDays)&&c.tourDays.filter(Boolean).length)).length;
   return `<div class="cal">
     <div class="cal-head"><h3>${y}년 ${m+1}월</h3>
       <div class="nav"><button onclick="calNav(-1)">‹</button><button onclick="calToday()">오늘</button><button onclick="calNav(1)">›</button></div></div>
     <div class="cal-grid">${dows.map(w=>`<div class="cal-dow">${w}</div>`).join('')}${cells}</div>
     ${agenda}
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">🟡 노란색 = 나와 함께 여행하는 날(동행일)</div>
     ${noDate?`<div class="save-note">📅 투어 날짜 미입력 ${noDate}명 — 손님 카드에서 날짜 넣으면 달력에 떠요</div>`:''}
   </div>`;
 }
@@ -472,7 +476,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -514,6 +518,19 @@ function renderWishLinks(text,caps){
     </div>`;
   }).join('')+'</div>';
 }
+// 🟡 가이드 동행일 (여러 날, 안 이어져도 됨)
+function renderTourDays(arr){
+  arr=Array.isArray(arr)?arr.slice():[];
+  if(!arr.length)arr=[''];
+  return arr.map((dv,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">
+    <input type="date" class="td-input" value="${dv||''}" style="flex:1">
+    <button type="button" class="btn ghost" style="padding:5px 10px;font-size:13px;color:var(--warn)" onclick="removeTourDay(${i})" title="이 날 삭제">✕</button>
+  </div>`).join('');
+}
+function tdRaw(){const b=document.getElementById('d_tourDays');return b?[...b.querySelectorAll('.td-input')].map(e=>e.value):[];}
+function readTourDays(){return tdRaw().filter(Boolean);}
+function addTourDay(){syncDraftFromForm();draft.tourDays=tdRaw();draft.tourDays.push('');renderDrawer();}
+function removeTourDay(i){syncDraftFromForm();const a=tdRaw();a.splice(i,1);draft.tourDays=a;renderDrawer();}
 function openNew(){draft=blank();draft.ticket=nextTicket();openId=null;waSummary="";renderDrawer();showDrawer();}
 function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;waSummary="";renderDrawer();showDrawer();}
 function showDrawer(){document.getElementById('overlay').classList.add('on');document.getElementById('drawer').classList.add('on');}
@@ -606,8 +623,12 @@ function renderDrawer(){
       <div class="field"><label>퍼널 단계</label><div class="stagesel" id="d_stage">${STAGES.map(s=>`<span class="ch ${d.stage===s.id?'on':''}" data-v="${s.id}" style="--stagecol:${s.color}">${s.label}</span>`).join('')}</div></div>
       <div class="field"><label>투어 시간</label><div class="chips" id="d_hours">${["4시간","6시간","8시간","다중일"].map(o=>`<span class="ch ${d.hours===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="row2">
-        <div class="field"><label>🧑‍🏫 근무 시작일 <span class="es">Desde · 달력 표시</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
-        <div class="field"><label>근무 종료일 <span class="es">Hasta · 하루면 비워도 됨</span></label><input type="date" id="d_hireEnd" value="${d.hireEnd||''}"></div>
+        <div class="field"><label>🧑‍🏫 근무 시작일 <span class="es">Desde · 손님 체류(참고)</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
+        <div class="field"><label>근무 종료일 <span class="es">Hasta · 참고용</span></label><input type="date" id="d_hireEnd" value="${d.hireEnd||''}"></div>
+      </div>
+      <div class="field"><label>🟡 나와 함께 여행하는 날 <span class="es">Días conmigo · 안 이어져도 됨 · 달력에 노란색</span></label>
+        <div id="d_tourDays">${renderTourDays(d.tourDays)}</div>
+        <button type="button" class="btn ghost" style="padding:6px 11px;font-size:12.5px;margin-top:4px" onclick="addTourDay()">+ 동행일 추가</button>
       </div>
       <div class="field"><label>🗓 일정 메모 <span class="es">날짜별 시간·동선</span></label><textarea id="d_scheduleNote" placeholder="예:&#10;6/20 09:00 호텔 픽업 → 경복궁&#10;6/21 남산 → 명동">${d.scheduleNote||''}</textarea></div>
       <div class="field"><label>💳 선호 결제 <span class="es">Método de pago</span></label><div class="chips" id="d_payMethod">${["현금","카드","PayPal","Wise","계좌이체","기타"].map(o=>`<span class="ch ${d.payMethod===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
@@ -759,7 +780,7 @@ function syncDraftFromForm(){
   d.kpop=g('d_kpop');d.food=g('d_food');
   const lb=document.querySelector('#d_local button.on');d.local=lb?lb.dataset.v:'';
   d.hanbok=readSingle('d_hanbok');d.diet=readChips('d_diet');d.concern=readChips('d_concern');
-  d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');
+  d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');d.tourDays=tdRaw();
   d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.wishLinks=g('d_wishLinks');d.payMethod=readSingle('d_payMethod');
   d.stage=document.querySelector('#d_stage .ch.on').dataset.v;
   d.depositPaid=document.getElementById('d_deposit').classList.contains('on');
@@ -775,7 +796,7 @@ function saveClient(){
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
-    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
+    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),tourDays:readTourDays(),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
     tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
