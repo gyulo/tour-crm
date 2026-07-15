@@ -429,11 +429,12 @@ function calendarHTML(list){
   const byDate={};
   list.forEach(c=>{
     const tdSet=new Set(Array.isArray(c.tourDays)?c.tourDays.filter(Boolean):[]);
+    const mdSet=new Set(Array.isArray(c.maybeDays)?c.maybeDays.filter(Boolean):[]);
     const start=c.hireStart||c.tourDate;
     const days=new Set();
     if(start)daysBetween(start,c.hireEnd).forEach(ds=>days.add(ds)); // 체류 전체
-    tdSet.forEach(ds=>days.add(ds)); // 채용일이 체류 밖이어도 표시
-    days.forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,hired:tdSet.has(ds)});}); // hired=그날 나를 채용
+    tdSet.forEach(ds=>days.add(ds)); mdSet.forEach(ds=>days.add(ds)); // 채용/가능일이 체류 밖이어도 표시
+    days.forEach(ds=>{(byDate[ds]=byDate[ds]||[]).push({c,hired:tdSet.has(ds),maybe:mdSet.has(ds)&&!tdSet.has(ds)});});
   });
   const dows=['일','월','화','수','목','금','토'];
   const today=todayStr();
@@ -443,10 +444,13 @@ function calendarHTML(list){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const cs=byDate[ds]||[];
     const hasHired=cs.some(e=>e.hired);
-    let chips=cs.slice(0,3).map(e=>`<span class="cal-chip" style="background:${stripe(e.c)};position:relative" onclick="event.stopPropagation();openClient(${e.c.id})">${e.hired?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 1px rgba(0,0,0,.25);margin-right:4px;vertical-align:middle"></span>':''}${e.c.name||e.c.ig||'손님'}</span>`).join('');
+    const hasMaybe=cs.some(e=>e.maybe);
+    const solid='display:inline-block;width:7px;height:7px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 1px rgba(0,0,0,.25);margin-right:4px;vertical-align:middle';
+    const hollow='display:inline-block;width:7px;height:7px;border-radius:50%;background:transparent;border:1.5px solid #F5C518;box-sizing:border-box;margin-right:4px;vertical-align:middle';
+    let chips=cs.slice(0,3).map(e=>`<span class="cal-chip" style="background:${stripe(e.c)};position:relative" onclick="event.stopPropagation();openClient(${e.c.id})">${e.hired?`<span style="${solid}"></span>`:e.maybe?`<span style="${hollow}"></span>`:''}${e.c.name||e.c.ig||'손님'}</span>`).join('');
     if(cs.length>3)chips+=`<span class="cal-more">+${cs.length-3}</span>`;
     const dot=cs.length?`<span class="cal-dot" style="background:${stripe(cs[0].c)}">${cs.length}</span>`:'';
-    const hdot=hasHired?'<span class="cal-hdot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 1px rgba(0,0,0,.3);margin-left:3px;vertical-align:middle"></span>':'';
+    const hdot=hasHired?`<span style="${solid};margin-left:3px;margin-right:0;width:8px;height:8px"></span>`:(hasMaybe?`<span style="${hollow};margin-left:3px;margin-right:0;width:8px;height:8px"></span>`:'');
     cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}" onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}${hdot}</span>${chips}</div>`;
   }
   let agenda='';
@@ -454,17 +458,17 @@ function calendarHTML(list){
     const cs=byDate[calSel]||[];
     agenda=`<div class="cal-agenda"><h4>${calSel} · ${cs.length}명</h4>${cs.length?cs.map(e=>`
       <div class="agenda-card" style="--stripe:${stripe(e.c)}" onclick="openClient(${e.c.id})">
-        <b>${e.hired?'🟡 ':''}${e.c.name||'(이름)'}</b> <span style="color:var(--accent);font-size:12px">${e.c.ig||''}</span>
-        <div class="meta">${e.hired?'<b style="color:#B58900">나를 채용</b> · ':'체류 중 · '}${e.c.origin||''}${e.c.pax?' · '+e.c.pax+'명':''}${e.c.hours?' · '+e.c.hours:''}${(e.c.cities&&e.c.cities.length)?' · '+e.c.cities.join(', '):''}</div>
+        <b>${e.hired?'🟡 ':e.maybe?'⭕ ':''}${e.c.name||'(이름)'}</b> <span style="color:var(--accent);font-size:12px">${e.c.ig||''}</span>
+        <div class="meta">${e.hired?'<b style="color:#B58900">나를 채용</b> · ':e.maybe?'<b style="color:#B58900">채용 가능(미확정)</b> · ':'체류 중 · '}${e.c.origin||''}${e.c.pax?' · '+e.c.pax+'명':''}${e.c.hours?' · '+e.c.hours:''}${(e.c.cities&&e.c.cities.length)?' · '+e.c.cities.join(', '):''}</div>
       </div>`).join(''):'<div style="font-size:12px;color:var(--muted)">이 날 예정된 투어 없음</div>'}</div>`;
   }
-  const noDate=list.filter(c=>!c.hireStart&&!c.tourDate&&!(Array.isArray(c.tourDays)&&c.tourDays.filter(Boolean).length)).length;
+  const noDate=list.filter(c=>!c.hireStart&&!c.tourDate&&!(Array.isArray(c.tourDays)&&c.tourDays.filter(Boolean).length)&&!(Array.isArray(c.maybeDays)&&c.maybeDays.filter(Boolean).length)).length;
   return `<div class="cal">
     <div class="cal-head"><h3>${y}년 ${m+1}월</h3>
       <div class="nav"><button onclick="calNav(-1)">‹</button><button onclick="calToday()">오늘</button><button onclick="calNav(1)">›</button></div></div>
     <div class="cal-grid">${dows.map(w=>`<div class="cal-dow">${w}</div>`).join('')}${cells}</div>
     ${agenda}
-    <div style="font-size:11px;color:var(--muted);margin-top:8px">배경색 = 손님 체류기간 · 🟡 노란 점 = 내가 채용되는 날</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">배경색 = 손님 체류기간 · 🟡 꽉 찬 점 = 채용 확정 · ⭕ 빈 점 = 채용 가능(미확정)</div>
     ${noDate?`<div class="save-note">📅 투어 날짜 미입력 ${noDate}명 — 손님 카드에서 날짜 넣으면 달력에 떠요</div>`:''}
   </div>`;
 }
@@ -478,7 +482,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -520,19 +524,26 @@ function renderWishLinks(text,caps){
     </div>`;
   }).join('')+'</div>';
 }
-// 🟡 가이드 동행일 (여러 날, 안 이어져도 됨)
-function renderTourDays(arr){
+// 🟡 채용일(확정) / ⭕ 채용 가능일(미확정) — 여러 날, 안 이어져도 됨
+function renderDayRows(arr,removeFn){
   arr=Array.isArray(arr)?arr.slice():[];
   if(!arr.length)arr=[''];
   return arr.map((dv,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">
     <input type="date" class="td-input" value="${dv||''}" style="flex:1">
-    <button type="button" class="btn ghost" style="padding:5px 10px;font-size:13px;color:var(--warn)" onclick="removeTourDay(${i})" title="이 날 삭제">✕</button>
+    <button type="button" class="btn ghost" style="padding:5px 10px;font-size:13px;color:var(--warn)" onclick="${removeFn}(${i})" title="이 날 삭제">✕</button>
   </div>`).join('');
 }
-function tdRaw(){const b=document.getElementById('d_tourDays');return b?[...b.querySelectorAll('.td-input')].map(e=>e.value):[];}
+function renderTourDays(arr){return renderDayRows(arr,'removeTourDay');}
+function renderMaybeDays(arr){return renderDayRows(arr,'removeMaybeDay');}
+function rawDays(boxId){const b=document.getElementById(boxId);return b?[...b.querySelectorAll('.td-input')].map(e=>e.value):[];}
+function tdRaw(){return rawDays('d_tourDays');}
+function mdRaw(){return rawDays('d_maybeDays');}
 function readTourDays(){return tdRaw().filter(Boolean);}
+function readMaybeDays(){return mdRaw().filter(Boolean);}
 function addTourDay(){syncDraftFromForm();draft.tourDays=tdRaw();draft.tourDays.push('');renderDrawer();}
 function removeTourDay(i){syncDraftFromForm();const a=tdRaw();a.splice(i,1);draft.tourDays=a;renderDrawer();}
+function addMaybeDay(){syncDraftFromForm();draft.maybeDays=mdRaw();draft.maybeDays.push('');renderDrawer();}
+function removeMaybeDay(i){syncDraftFromForm();const a=mdRaw();a.splice(i,1);draft.maybeDays=a;renderDrawer();}
 function openNew(){draft=blank();draft.ticket=nextTicket();openId=null;waSummary="";renderDrawer();showDrawer();}
 function openClient(id){const c=clients.find(x=>x.id===id);draft=JSON.parse(JSON.stringify(c));openId=id;waSummary="";renderDrawer();showDrawer();}
 function showDrawer(){document.getElementById('overlay').classList.add('on');document.getElementById('drawer').classList.add('on');}
@@ -628,9 +639,13 @@ function renderDrawer(){
         <div class="field"><label>🏨 체류 시작일 <span class="es">Llega · 손님이 한국 오는 날</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
         <div class="field"><label>체류 종료일 <span class="es">Se va · 떠나는 날</span></label><input type="date" id="d_hireEnd" value="${d.hireEnd||''}"></div>
       </div>
-      <div class="field"><label>🟡 나를 채용하는 날 <span class="es">Días conmigo · 체류 중 실제 투어일 · 달력에 노란 점</span></label>
+      <div class="field"><label>🟡 나를 채용하는 날 (확정) <span class="es">체류 중 실제 투어일 · 달력에 꽉 찬 노란 점</span></label>
         <div id="d_tourDays">${renderTourDays(d.tourDays)}</div>
-        <button type="button" class="btn ghost" style="padding:6px 11px;font-size:12.5px;margin-top:4px" onclick="addTourDay()">+ 동행일 추가</button>
+        <button type="button" class="btn ghost" style="padding:6px 11px;font-size:12.5px;margin-top:4px" onclick="addTourDay()">+ 채용일 추가</button>
+      </div>
+      <div class="field"><label>⭕ 채용 가능성 있는 날 (미확정) <span class="es">아직 안 정함 · 달력에 빈 노란 점</span></label>
+        <div id="d_maybeDays">${renderMaybeDays(d.maybeDays)}</div>
+        <button type="button" class="btn ghost" style="padding:6px 11px;font-size:12.5px;margin-top:4px" onclick="addMaybeDay()">+ 가능성 날짜 추가</button>
       </div>
       <div class="field"><label>🗓 일정 메모 <span class="es">날짜별 시간·동선</span></label><textarea id="d_scheduleNote" placeholder="예:&#10;6/20 09:00 호텔 픽업 → 경복궁&#10;6/21 남산 → 명동">${d.scheduleNote||''}</textarea></div>
       <div class="field"><label>💳 선호 결제 <span class="es">Método de pago</span></label><div class="chips" id="d_payMethod">${["현금","카드","PayPal","Wise","계좌이체","기타"].map(o=>`<span class="ch ${d.payMethod===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
@@ -782,7 +797,7 @@ function syncDraftFromForm(){
   d.kpop=g('d_kpop');d.food=g('d_food');
   const lb=document.querySelector('#d_local button.on');d.local=lb?lb.dataset.v:'';
   d.hanbok=readSingle('d_hanbok');d.diet=readChips('d_diet');d.concern=readChips('d_concern');
-  d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');d.tourDays=tdRaw();
+  d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');d.tourDays=tdRaw();d.maybeDays=mdRaw();
   d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.wishLinks=g('d_wishLinks');d.payMethod=readSingle('d_payMethod');
   d.stage=document.querySelector('#d_stage .ch.on').dataset.v;
   d.depositPaid=document.getElementById('d_deposit').classList.contains('on');
@@ -798,7 +813,7 @@ function saveClient(){
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
-    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),tourDays:readTourDays(),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
+    diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),tourDays:readTourDays(),maybeDays:readMaybeDays(),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
     tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
