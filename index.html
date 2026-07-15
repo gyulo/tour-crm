@@ -443,15 +443,12 @@ function calendarHTML(list){
   for(let d=1;d<=daysIn;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const cs=byDate[ds]||[];
-    const hasHired=cs.some(e=>e.hired);
-    const hasMaybe=cs.some(e=>e.maybe);
     const solid='display:inline-block;width:7px;height:7px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 1px rgba(0,0,0,.25);margin-right:4px;vertical-align:middle';
     const hollow='display:inline-block;width:7px;height:7px;border-radius:50%;background:transparent;border:1.5px solid #F5C518;box-sizing:border-box;margin-right:4px;vertical-align:middle';
     let chips=cs.slice(0,3).map(e=>`<span class="cal-chip" style="background:${stripe(e.c)};position:relative" onclick="event.stopPropagation();openClient(${e.c.id})">${e.hired?`<span style="${solid}"></span>`:e.maybe?`<span style="${hollow}"></span>`:''}${e.c.name||e.c.ig||'손님'}</span>`).join('');
     if(cs.length>3)chips+=`<span class="cal-more">+${cs.length-3}</span>`;
     const dot=cs.length?`<span class="cal-dot" style="background:${stripe(cs[0].c)}">${cs.length}</span>`:'';
-    const hdot=hasHired?`<span style="${solid};margin-left:3px;margin-right:0;width:8px;height:8px"></span>`:(hasMaybe?`<span style="${hollow};margin-left:3px;margin-right:0;width:8px;height:8px"></span>`:'');
-    cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}" onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}${hdot}</span>${chips}</div>`;
+    cells+=`<div class="cal-cell ${ds===today?'today':''} ${ds===calSel?'sel':''}" onclick="calSelect('${ds}')"><span class="dnum">${d}${dot}</span>${chips}</div>`;
   }
   let agenda='';
   if(calSel){
