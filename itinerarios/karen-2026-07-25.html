@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<!--
+  Itinerario personalizado — Karen Perea (T0003)
+  Sábado 25 de julio de 2026 · Seúl
+  Basado en el mapa guardado de Naver: https://naver.me/FORWTBoy
+  Todos los enlaces abren Naver Map (app o web).
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerario · Sábado 25 julio — Karen</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #F97316;
+      --teal: #0D9488;
+      --teal-dark: #0F766E;
+      --cream: #FFF7ED;
+      --text: #1a1a1a;
+      --muted: #6B7280;
+      --white: #fff;
+      --border: #E5E7EB;
+      --naver: #03C75A;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--text); background: var(--cream); line-height: 1.6; padding: 16px;
+      -webkit-text-size-adjust: 100%;
+    }
+    .page {
+      max-width: 700px; margin: 0 auto; background: var(--white);
+      border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+    .header {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: #fff; padding: 28px 24px; text-align: center;
+    }
+    .header h1 { font-size: 1.45rem; line-height: 1.3; }
+    .header .sub { font-size: .95rem; opacity: .92; margin-top: 6px; }
+    .header .brand { font-size: .8rem; opacity: .72; margin-top: 12px; }
+
+    .info-bar {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1px; background: var(--border); border-bottom: 1px solid var(--border);
+    }
+    .info-item { background: #fff; padding: 14px 12px; text-align: center; }
+    .info-item .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .info-item .value { font-size: .95rem; font-weight: 600; color: var(--teal-dark); margin-top: 2px; }
+
+    .content { padding: 24px 20px; }
+
+    .notes-box {
+      background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 24px; font-size: .88rem; color: #78350F;
+    }
+    .notes-box b { color: #92400E; }
+    .notes-box ul { margin: 8px 0 0 18px; }
+    .notes-box li { margin-bottom: 4px; }
+
+    /* Timeline */
+    .timeline { position: relative; }
+    .timeline::before {
+      content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px;
+      width: 2px; background: var(--border);
+    }
+    .block { position: relative; padding-left: 34px; margin-bottom: 22px; }
+    .block:last-child { margin-bottom: 0; }
+    .dot {
+      position: absolute; left: 2px; top: 4px; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--teal); border: 3px solid #fff;
+      box-shadow: 0 0 0 2px var(--teal);
+    }
+    .block.hl .dot { background: var(--orange); box-shadow: 0 0 0 2px var(--orange); }
+    .block.move .dot { background: var(--muted); box-shadow: 0 0 0 2px var(--muted); width: 12px; height: 12px; left: 4px; top: 8px; }
+
+    .time { font-size: .78rem; font-weight: 700; color: var(--teal); letter-spacing: .4px; }
+    .block.hl .time { color: var(--orange); }
+    .block.move .time { color: var(--muted); }
+    .title { font-size: 1.08rem; font-weight: 700; margin: 2px 0 4px; }
+    .why {
+      display: inline-block; background: var(--cream); color: var(--teal-dark);
+      font-size: .75rem; padding: 2px 10px; border-radius: 50px; font-weight: 600; margin-bottom: 6px;
+    }
+    .desc { font-size: .9rem; color: #374151; }
+    .block.move .desc { font-size: .85rem; color: var(--muted); }
+
+    /* Korean address card */
+    .kaddr {
+      margin-top: 10px; background: #F9FAFB; border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .kaddr .ktag { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .kaddr .ktext { font-size: .95rem; font-weight: 600; margin-top: 2px; word-break: keep-all; }
+    .copy-btn {
+      margin-top: 6px; background: #fff; border: 1px solid var(--border); border-radius: 6px;
+      font-size: .78rem; padding: 4px 10px; cursor: pointer; color: var(--muted); font-family: inherit;
+    }
+    .copy-btn:active { background: #F3F4F6; }
+
+    /* Link buttons */
+    .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .lbtn {
+      display: inline-flex; align-items: center; gap: 5px; text-decoration: none;
+      font-size: .82rem; font-weight: 600; padding: 8px 14px; border-radius: 50px;
+      border: 1px solid var(--border); background: #fff; color: #374151;
+    }
+    .lbtn.naver { background: var(--naver); border-color: var(--naver); color: #fff; }
+    .lbtn.route { background: #fff; border-color: var(--teal); color: var(--teal-dark); }
+
+    /* Footer */
+    .footer {
+      background: var(--cream); padding: 22px 20px; border-top: 1px solid var(--border);
+    }
+    .footer h3 { font-size: .95rem; color: var(--teal-dark); margin-bottom: 10px; }
+    .footer ul { list-style: none; font-size: .85rem; color: #4B5563; }
+    .footer li { margin-bottom: 6px; padding-left: 18px; position: relative; }
+    .footer li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-weight: 700; }
+    .footer .mapall {
+      display: block; text-align: center; margin-top: 16px; padding: 12px;
+      background: var(--naver); color: #fff; border-radius: 10px;
+      text-decoration: none; font-weight: 700; font-size: .9rem;
+    }
+
+    .btnwrap { text-align: center; padding: 20px; }
+    .pdf-btn {
+      padding: 12px 30px; background: var(--orange); color: #fff; border: none;
+      border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; border-radius: 0; }
+      .btnwrap, .copy-btn { display: none; }
+      .header, .dot, .lbtn.naver, .footer .mapall { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .lbtn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: .7rem; word-break: break-all; }
+    }
+    @media (max-width: 420px) {
+      body { padding: 10px; }
+      .content { padding: 20px 14px; }
+      .header h1 { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header">
+    <h1>Itinerario de Karen</h1>
+    <div class="sub">Sábado, 25 de julio · Seúl</div>
+    <div class="brand">Corea en Español · Tu guía Gyudong</div>
+  </div>
+
+  <div class="info-bar">
+    <div class="info-item"><div class="label">Personas</div><div class="value">3</div></div>
+    <div class="info-item"><div class="label">Zona</div><div class="value">Sangbong → Myeongdong</div></div>
+    <div class="info-item"><div class="label">Alojamiento</div><div class="value">YOLO Guesthouse</div></div>
+  </div>
+
+  <div class="content">
+
+    <div class="notes-box">
+      <b>📝 Antes de salir</b>
+      <ul>
+        <li>Hace mucho calor y humedad: lleva agua y usa el metro (con aire acondicionado).</li>
+        <li>Toca el botón verde <b>“Ver en Naver Map”</b> de cada parada — se abre la app y ahí también ves el horario de apertura de hoy.</li>
+        <li>Si tomas un taxi, muestra al conductor el <b>recuadro gris con la dirección en coreano</b>. No hace falta hablar.</li>
+        <li>Los horarios son orientativos: puedes moverlos según cómo os sintáis.</li>
+      </ul>
+    </div>
+
+    <div class="timeline">
+
+      <!-- 1. Clínica -->
+      <div class="block hl">
+        <div class="dot"></div>
+        <div class="time">10:00 – 12:00</div>
+        <div class="title">Vivtone Clinic (Sangbong)</div>
+        <span class="why">Consulta de piel · cita reservada</span>
+        <div class="desc">Tu cita de consulta dermatológica. Edificio Juyeon (주연빌딩), <b>planta 5</b>. Llega 5–10 minutos antes.</div>
+        <div class="kaddr">
+          <div class="ktag">Muestra esto al taxista / en recepción</div>
+          <div class="ktext" id="k1">서울 중랑구 면목로 492 주연빌딩 5층</div>
+          <button class="copy-btn" onclick="copyK('k1', this)">Copiar</button>
+        </div>
+        <div class="links">
+          <a class="lbtn naver" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EC%A4%91%EB%9E%91%EA%B5%AC%20%EB%A9%B4%EB%AA%A9%EB%A1%9C%20492">📍 Ver en Naver Map</a>
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/126.98557,37.55905,%EC%9A%9C%EB%A1%9C%EA%B2%8C%EC%8A%A4%ED%8A%B8%ED%95%98%EC%9A%B0%EC%8A%A4,366534557,PLACE_POI/127.08599,37.59591,%EB%A9%B4%EB%AA%A9%EB%A1%9C%20492,,/-/transit">🚇 Cómo llegar desde el hostal</a>
+        </div>
+      </div>
+
+      <!-- traslado -->
+      <div class="block move">
+        <div class="dot"></div>
+        <div class="time">12:00 – 12:50</div>
+        <div class="title" style="font-size:.98rem;font-weight:600;">Vuelta al alojamiento</div>
+        <div class="desc">Metro desde Sangbong (상봉) hasta Myeongdong, unos 45–50 min. Buen momento para descansar del calor y dejar cosas en la habitación.</div>
+        <div class="links">
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/127.08599,37.59591,%EB%A9%B4%EB%AA%A9%EB%A1%9C%20492,,/126.98557,37.55905,%EC%9A%9C%EB%A1%9C%EA%B2%8C%EC%8A%A4%ED%8A%B8%ED%95%98%EC%9A%B0%EC%8A%A4,366534557,PLACE_POI/-/transit">🚇 Ruta clínica → hostal</a>
+        </div>
+      </div>
+
+      <!-- 2. Descanso + comida -->
+      <div class="block">
+        <div class="dot"></div>
+        <div class="time">13:00 – 14:00</div>
+        <div class="title">YOLO Guesthouse — descanso y comida</div>
+        <span class="why">Base · Myeongdong</span>
+        <div class="desc">Descanso en el alojamiento. Si tenéis hambre, <b>Myeongdong Kyoja</b> (명동교자, el kalguksu más famoso de Seúl) está a 4 min andando y también lo tienes guardado en tu mapa.</div>
+        <div class="kaddr">
+          <div class="ktag">Dirección del alojamiento</div>
+          <div class="ktext" id="k2">서울 중구 퇴계로20나길 2-8</div>
+          <button class="copy-btn" onclick="copyK('k2', this)">Copiar</button>
+        </div>
+        <div class="links">
+          <a class="lbtn naver" target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/366534557">📍 YOLO Guesthouse</a>
+          <a class="lbtn" target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/11592650">🍜 Myeongdong Kyoja (opcional)</a>
+        </div>
+      </div>
+
+      <!-- 3. K-MECCA -->
+      <div class="block hl">
+        <div class="dot"></div>
+        <div class="time">14:15 – 15:00</div>
+        <div class="title">K-MECCA Myeongdong (케이메카)</div>
+        <span class="why">Álbumes de K-pop · photocards</span>
+        <div class="desc">La tienda de álbumes de K-pop en Myeongdong: discos, photocards, pósters y merchandising oficial. A 5 minutos andando del alojamiento.</div>
+        <div class="kaddr">
+          <div class="ktag">Dirección en coreano</div>
+          <div class="ktext" id="k3">서울 중구 명동8나길 5</div>
+          <button class="copy-btn" onclick="copyK('k3', this)">Copiar</button>
+        </div>
+        <div class="links">
+          <a class="lbtn naver" target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/1646852218">📍 Ver en Naver Map</a>
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/126.98557,37.55905,%EC%9A%9C%EB%A1%9C%EA%B2%8C%EC%8A%A4%ED%8A%B8%ED%95%98%EC%9A%B0%EC%8A%A4,366534557,PLACE_POI/126.98465,37.56143,%EC%BC%80%EC%9D%B4%EB%A9%94%EC%B9%B4%20%EB%AA%85%EB%8F%99%EB%B3%B8%EC%A0%90,1646852218,PLACE_POI/-/walk">🚶 Ruta a pie (5 min)</a>
+        </div>
+      </div>
+
+      <!-- 4. SKIN1004 -->
+      <div class="block hl">
+        <div class="dot"></div>
+        <div class="time">15:00 – 15:45</div>
+        <div class="title">SKIN1004 Flagship Store (스킨1004)</div>
+        <span class="why">Skincare coreano · tienda insignia</span>
+        <div class="desc">Tienda principal de SKIN1004 (la marca de la centella asiática de Madagascar). Ideal justo después de la consulta de piel: puedes comprar exactamente lo que te hayan recomendado. Hay testers de todos los productos.</div>
+        <div class="kaddr">
+          <div class="ktag">Dirección en coreano</div>
+          <div class="ktext" id="k4">서울 중구 명동6길 29</div>
+          <button class="copy-btn" onclick="copyK('k4', this)">Copiar</button>
+        </div>
+        <div class="links">
+          <a class="lbtn naver" target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/1895052345">📍 Ver en Naver Map</a>
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/126.98465,37.56143,%EC%BC%80%EC%9D%B4%EB%A9%94%EC%B9%B4%20%EB%AA%85%EB%8F%99%EB%B3%B8%EC%A0%90,1646852218,PLACE_POI/126.98452,37.56202,%EC%8A%A4%ED%82%A81004%20%ED%94%8C%EB%9E%98%EA%B7%B8%EC%8B%AD%20%EC%8A%A4%ED%86%A0%EC%96%B4%20%EB%AA%85%EB%8F%99,1895052345,PLACE_POI/-/walk">🚶 Ruta a pie (2 min)</a>
+        </div>
+      </div>
+
+      <!-- 5. Eulji Dabang -->
+      <div class="block hl">
+        <div class="dot"></div>
+        <div class="time">16:15 – 17:15</div>
+        <div class="title">Eulji Dabang (을지다방)</div>
+        <span class="why">Localización de BTS · café retro</span>
+        <div class="desc">Cafetería <i>dabang</i> de los años 80 en Euljiro, sin reformar: sofás de terciopelo, luz naranja y máquina de discos. Aquí grabó BTS. Pide el <b>ssanghwa-cha</b> (té medicinal con yema de huevo y piñones) o un café helado clásico. Es pequeña y auténtica — perfecta para fotos.</div>
+        <div class="kaddr">
+          <div class="ktag">Dirección en coreano</div>
+          <div class="ktext" id="k5">서울 중구 을지로 124-1</div>
+          <button class="copy-btn" onclick="copyK('k5', this)">Copiar</button>
+        </div>
+        <div class="links">
+          <a class="lbtn naver" target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/20927082">📍 Ver en Naver Map</a>
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/126.98452,37.56202,%EC%8A%A4%ED%82%A81004%20%ED%94%8C%EB%9E%98%EA%B7%B8%EC%8B%AD%20%EC%8A%A4%ED%86%A0%EC%96%B4%20%EB%AA%85%EB%8F%99,1895052345,PLACE_POI/126.99178,37.56617,%EC%9D%84%EC%A7%80%EB%8B%A4%EB%B0%A9,20927082,PLACE_POI/-/walk">🚶 Ruta a pie (12 min)</a>
+        </div>
+      </div>
+
+      <!-- 6. Namdo Bunsik -->
+      <div class="block hl">
+        <div class="dot"></div>
+        <div class="time">17:45 – 19:00</div>
+        <div class="title">Namdo Bunsik Ikseon (남도분식 익선점)</div>
+        <span class="why">Localización de True Beauty · cena</span>
+        <div class="desc">El <i>bunsik</i> (comida callejera de barrio) que sale en <b>True Beauty (여신강림)</b>. Está en Ikseon-dong, el barrio de casitas hanok convertidas en cafés — muy bonito al atardecer. Pide <b>tteokbokki</b>, <b>gimbap</b> y <b>twigim</b> (fritos). Suele haber cola: apunta tu nombre y pasea por las callejuelas mientras esperas.</div>
+        <div class="kaddr">
+          <div class="ktag">Dirección en coreano</div>
+          <div class="ktext" id="k6">서울 종로구 수표로28길 33</div>
+          <button class="copy-btn" onclick="copyK('k6', this)">Copiar</button>
+        </div>
+        <div class="links">
+          <a class="lbtn naver" target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/1129603411">📍 Ver en Naver Map</a>
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/126.99178,37.56617,%EC%9D%84%EC%A7%80%EB%8B%A4%EB%B0%A9,20927082,PLACE_POI/126.9901,37.57317,%EB%82%A8%EB%8F%84%EB%B6%84%EC%8B%9D%20%EC%9D%B5%EC%84%A0%EC%A0%90,1129603411,PLACE_POI/-/walk">🚶 Ruta a pie (12 min)</a>
+        </div>
+      </div>
+
+      <!-- vuelta -->
+      <div class="block move">
+        <div class="dot"></div>
+        <div class="time">19:00</div>
+        <div class="title" style="font-size:.98rem;font-weight:600;">Vuelta al alojamiento</div>
+        <div class="desc">Desde Ikseon-dong: metro línea 3 en Jongno 3-ga (종로3가) → Chungmuro, o un taxi de unos 10 minutos.</div>
+        <div class="links">
+          <a class="lbtn route" target="_blank" rel="noopener"
+             href="https://map.naver.com/p/directions/126.9901,37.57317,%EB%82%A8%EB%8F%84%EB%B6%84%EC%8B%9D%20%EC%9D%B5%EC%84%A0%EC%A0%90,1129603411,PLACE_POI/126.98557,37.55905,%EC%9A%9C%EB%A1%9C%EA%B2%8C%EC%8A%A4%ED%8A%B8%ED%95%98%EC%9A%B0%EC%8A%A4,366534557,PLACE_POI/-/transit">🚇 Ruta de vuelta</a>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+  </div><!-- /content -->
+
+  <div class="footer">
+    <h3>Información útil</h3>
+    <ul>
+      <li>Todo el recorrido de la tarde se hace <b>andando</b>: Myeongdong → Euljiro → Ikseon-dong en línea recta hacia el norte.</li>
+      <li>Paga con la tarjeta T-money en metro y autobús; en las tiendas se acepta tarjeta sin problema.</li>
+      <li>Confirma el horario de cada sitio tocando el botón verde antes de ir (algunos cierran temprano).</li>
+      <li>Si algo se complica, escríbeme por WhatsApp y lo resolvemos al momento.</li>
+    </ul>
+    <a class="mapall" href="https://naver.me/FORWTBoy" target="_blank" rel="noopener">🗺️ Abrir el mapa completo con los 23 sitios guardados</a>
+  </div>
+
+</div>
+
+<div class="btnwrap">
+  <button class="pdf-btn" onclick="window.print()">Guardar como PDF</button>
+</div>
+
+<script>
+  function copyK(id, btn) {
+    var t = document.getElementById(id).textContent;
+    var done = function () {
+      var old = btn.textContent;
+      btn.textContent = '¡Copiado!';
+      setTimeout(function () { btn.textContent = old; }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(done, fallback);
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+</script>
+
+</body>
+</html>
