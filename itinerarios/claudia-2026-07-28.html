@@ -4,6 +4,10 @@
   Martes 28 de julio de 2026 · Seongsu + Itaewon
   Basado en el mapa guardado de Naver: https://naver.me/GkIeDejF
   Los enlaces se generan desde el array STOPS (abajo) — para editar, cambia solo ese array.
+
+  Diseño: Airbnb DESIGN.md (getdesign.md/airbnb)
+    Rausch #ff385c · ink #222 · hairline #ddd · lienzo blanco
+    radios 8 / 14 / full · un solo nivel de sombra · base de espaciado 4px
 -->
 <html lang="es">
 <head>
@@ -13,142 +17,295 @@
   <meta name="robots" content="noindex, nofollow">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --orange: #F97316; --teal: #0D9488; --teal-dark: #0F766E;
-      --cream: #FFF7ED; --text: #1a1a1a; --muted: #6B7280;
-      --border: #E5E7EB; --naver: #03C75A;
+      /* colors */
+      --primary: #ff385c;
+      --primary-active: #e00b41;
+      --ink: #222222;
+      --body: #3f3f3f;
+      --muted: #6a6a6a;
+      --muted-soft: #929292;
+      --hairline: #dddddd;
+      --hairline-soft: #ebebeb;
+      --border-strong: #c1c1c1;
+      --canvas: #ffffff;
+      --surface-soft: #f7f7f7;
+      --surface-strong: #f2f2f2;
+      --on-primary: #ffffff;
+
+      /* radii */
+      --r-xs: 4px; --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 32px; --r-full: 9999px;
+
+      /* spacing (base 4px) */
+      --s-xxs: 2px; --s-xs: 4px; --s-sm: 8px; --s-md: 12px;
+      --s-base: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px; --s-section: 64px;
+
+      /* single shadow tier */
+      --shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
+
+      --font: Inter, 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont,
+              system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
     }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      color: var(--text); background: var(--cream); line-height: 1.6; padding: 16px;
+      font-family: var(--font);
+      background: var(--canvas);
+      color: var(--body);
+      font-size: 16px; font-weight: 400; line-height: 1.5;
       -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
     }
-    .page { max-width: 700px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
-    .header { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: #fff; padding: 28px 24px; text-align: center; }
-    .header h1 { font-size: 1.45rem; line-height: 1.3; }
-    .header .sub { font-size: .95rem; opacity: .92; margin-top: 6px; }
-    .header .brand { font-size: .8rem; opacity: .72; margin-top: 12px; }
 
-    .info-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-    .info-item { background: #fff; padding: 14px 12px; text-align: center; }
-    .info-item .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    .info-item .value { font-size: .95rem; font-weight: 600; color: var(--teal-dark); margin-top: 2px; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--s-lg) var(--s-xxl); }
 
-    .content { padding: 24px 20px; }
+    /* ── Hero ─────────────────────────────────────────────── */
+    .hero { padding: var(--s-xl) 0 var(--s-lg); }
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; line-height: 1.18;
+      color: var(--on-primary); background: var(--primary);
+      border-radius: var(--r-full); padding: 5px 12px;
+      margin-bottom: var(--s-base);
+    }
+    h1 {
+      font-size: 28px; font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.5px; color: var(--ink);
+    }
+    .hero .sub {
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      color: var(--muted); margin-top: var(--s-sm);
+    }
+    .hero .brand {
+      font-size: 13px; font-weight: 400; line-height: 1.23;
+      color: var(--muted-soft); margin-top: var(--s-md);
+    }
 
-    .notes-box { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 14px 16px; margin-bottom: 24px; font-size: .88rem; color: #78350F; }
-    .notes-box b { color: #92400E; }
-    .notes-box ul { margin: 8px 0 0 18px; }
-    .notes-box li { margin-bottom: 4px; }
+    /* ── Facts row ────────────────────────────────────────── */
+    .facts {
+      display: flex; flex-wrap: wrap;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: var(--s-lg);
+    }
+    .fact { flex: 1 1 33%; padding: var(--s-base) 0; }
+    .fact + .fact { border-left: 1px solid var(--hairline-soft); padding-left: var(--s-base); }
+    .fact .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .fact .v {
+      font-size: 16px; font-weight: 600; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs);
+    }
 
+    /* ── Briefing ─────────────────────────────────────────── */
+    .brief {
+      background: var(--surface-soft);
+      border-radius: var(--r-md);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-xl);
+    }
+    .brief h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .brief ul { list-style: none; }
+    .brief li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .brief li + li { margin-top: var(--s-sm); }
+    .brief li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--primary);
+    }
+    .brief b { color: var(--ink); font-weight: 600; }
+
+    /* ── Zone heading ─────────────────────────────────────── */
     .zone {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 1.05rem; font-weight: 700; color: var(--teal-dark);
-      margin: 26px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--cream);
+      padding-top: var(--s-xl); margin-bottom: var(--s-base);
     }
-    .zone:first-child { margin-top: 0; }
-    .zone small { font-weight: 500; color: var(--muted); font-size: .78rem; }
+    .zone h2 {
+      font-size: 22px; font-weight: 500; line-height: 1.18;
+      letter-spacing: -0.44px; color: var(--ink);
+    }
+    .zone p {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--muted); margin-top: var(--s-xs);
+    }
 
-    .timeline { position: relative; }
-    .timeline::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
-    .block { position: relative; padding-left: 34px; margin-bottom: 22px; }
-    .block:last-child { margin-bottom: 0; }
-    .dot { position: absolute; left: 2px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--teal); border: 3px solid #fff; box-shadow: 0 0 0 2px var(--teal); }
-    .block.hl .dot { background: var(--orange); box-shadow: 0 0 0 2px var(--orange); }
-    .block.move .dot { background: var(--muted); box-shadow: 0 0 0 2px var(--muted); width: 12px; height: 12px; left: 4px; top: 8px; }
+    /* ── Stop card ────────────────────────────────────────── */
+    .stop {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--canvas);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-base);
+      transition: box-shadow .2s ease;
+    }
+    .stop:hover { box-shadow: var(--shadow); }
 
-    .time { font-size: .78rem; font-weight: 700; color: var(--teal); letter-spacing: .4px; }
-    .block.hl .time { color: var(--orange); }
-    .block.move .time { color: var(--muted); }
-    .title { font-size: 1.08rem; font-weight: 700; margin: 2px 0 4px; }
-    .block.move .title { font-size: .98rem; font-weight: 600; }
-    .why { display: inline-block; background: var(--cream); color: var(--teal-dark); font-size: .75rem; padding: 2px 10px; border-radius: 50px; font-weight: 600; margin-bottom: 6px; }
-    .desc { font-size: .9rem; color: #374151; }
-    .block.move .desc { font-size: .85rem; color: var(--muted); }
+    .stop-top { display: flex; align-items: flex-start; gap: var(--s-md); }
+    .num {
+      flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--r-full);
+      background: var(--surface-strong); color: var(--ink);
+      font-size: 12px; font-weight: 700; line-height: 32px; text-align: center;
+    }
+    .stop.key .num { background: var(--primary); color: var(--on-primary); }
 
-    .kaddr { margin-top: 10px; background: #F9FAFB; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .kaddr .ktag { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    .kaddr .ktext { font-size: .95rem; font-weight: 600; margin-top: 2px; word-break: keep-all; }
-    .copy-btn { margin-top: 6px; background: #fff; border: 1px solid var(--border); border-radius: 6px; font-size: .78rem; padding: 4px 10px; cursor: pointer; color: var(--muted); font-family: inherit; }
-    .copy-btn:active { background: #F3F4F6; }
+    .when {
+      font-size: 12px; font-weight: 700; line-height: 1.33;
+      color: var(--primary);
+    }
+    .stop h3 {
+      font-size: 20px; font-weight: 600; line-height: 1.2;
+      letter-spacing: -0.18px; color: var(--ink); margin-top: var(--s-xxs);
+    }
+    .why {
+      display: inline-block; margin-top: var(--s-sm);
+      border: 1px solid var(--hairline); border-radius: var(--r-full);
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 600; line-height: 1.18; color: var(--ink);
+    }
+    .desc {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--body); margin-top: var(--s-md);
+    }
+    .desc b { color: var(--ink); font-weight: 600; }
 
-    .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .lbtn { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; font-size: .82rem; font-weight: 600; padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border); background: #fff; color: #374151; }
-    .lbtn.naver { background: var(--naver); border-color: var(--naver); color: #fff; }
-    .lbtn.route { background: #fff; border-color: var(--teal); color: var(--teal-dark); }
+    /* ── Korean address ───────────────────────────────────── */
+    .kaddr {
+      margin-top: var(--s-base);
+      background: var(--surface-soft);
+      border-radius: var(--r-sm);
+      padding: var(--s-md) var(--s-base);
+    }
+    .kaddr .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .kaddr .v {
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs); word-break: keep-all;
+    }
+    .copy {
+      margin-top: var(--s-sm);
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--border-strong); border-radius: var(--r-full);
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      padding: 6px 14px; cursor: pointer;
+    }
+    .copy:active { background: var(--surface-strong); }
 
-    .footer { background: var(--cream); padding: 22px 20px; border-top: 1px solid var(--border); }
-    .footer h3 { font-size: .95rem; color: var(--teal-dark); margin-bottom: 10px; }
-    .footer ul { list-style: none; font-size: .85rem; color: #4B5563; }
-    .footer li { margin-bottom: 6px; padding-left: 18px; position: relative; }
-    .footer li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-weight: 700; }
-    .footer .mapall { display: block; text-align: center; margin-top: 16px; padding: 12px; background: var(--naver); color: #fff; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: .9rem; }
+    /* ── Buttons ──────────────────────────────────────────── */
+    .actions { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-top: var(--s-base); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.29;
+      border-radius: var(--r-full); padding: 10px 20px; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: var(--on-primary); }
+    .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--border-strong); }
+    .btn-secondary:active { background: var(--surface-strong); }
 
-    .btnwrap { text-align: center; padding: 20px; }
-    .pdf-btn { padding: 12px 30px; background: var(--orange); color: #fff; border: none; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+    /* ── Transfer row ─────────────────────────────────────── */
+    .move {
+      display: flex; align-items: flex-start; gap: var(--s-md);
+      padding: var(--s-base) var(--s-lg);
+      margin-bottom: var(--s-base);
+      border-left: 2px dashed var(--hairline);
+    }
+    .move .when { color: var(--muted-soft); }
+    .move h3 { font-size: 16px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
+    .move .desc { font-size: 14px; color: var(--muted); margin-top: var(--s-xs); }
 
+    /* ── Footer ───────────────────────────────────────────── */
+    .foot { border-top: 1px solid var(--hairline); margin-top: var(--s-xl); padding-top: var(--s-lg); }
+    .foot h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .foot ul { list-style: none; }
+    .foot li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .foot li + li { margin-top: var(--s-sm); }
+    .foot li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--hairline);
+    }
+    .foot b { color: var(--ink); font-weight: 600; }
+
+    .cta {
+      display: block; text-align: center; text-decoration: none;
+      background: var(--primary); color: var(--on-primary);
+      border-radius: var(--r-sm); padding: 14px 24px; min-height: 48px;
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      margin-top: var(--s-lg);
+    }
+    .cta:active { background: var(--primary-active); }
+    .cta.ghost {
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--ink); margin-top: var(--s-md);
+    }
+    .cta.ghost:active { background: var(--surface-strong); }
+
+    /* ── Print ────────────────────────────────────────────── */
     @media print {
-      body { background: #fff; padding: 0; }
-      .page { box-shadow: none; border-radius: 0; }
-      .btnwrap, .copy-btn { display: none; }
-      .header, .dot, .lbtn.naver, .footer .mapall { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-      .lbtn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: .7rem; word-break: break-all; }
+      .cta.ghost, .copy { display: none; }
+      .stop { break-inside: avoid; box-shadow: none; }
+      .num, .eyebrow, .btn-primary, .cta { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .btn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: 10px; word-break: break-all; }
     }
-    @media (max-width: 420px) {
-      body { padding: 10px; }
-      .content { padding: 20px 14px; }
-      .header h1 { font-size: 1.25rem; }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 var(--s-base) var(--s-xl); }
+      h1 { font-size: 24px; }
+      .zone h2 { font-size: 20px; }
+      .stop { padding: var(--s-base); }
+      .fact { flex: 1 1 100%; }
+      .fact + .fact { border-left: 0; border-top: 1px solid var(--hairline-soft); padding-left: 0; }
     }
   </style>
 </head>
 <body>
 
-<div class="page">
+<div class="wrap">
 
-  <div class="header">
-    <h1>Itinerario de Claudia y familia</h1>
-    <div class="sub">Martes, 28 de julio · Seongsu &amp; Itaewon</div>
-    <div class="brand">Corea en Español · Tu guía Gyudong</div>
+  <header class="hero">
+    <span class="eyebrow">Martes 28 de julio</span>
+    <h1>Seongsu &amp; Itaewon</h1>
+    <p class="sub">Tiendas y cafés del barrio de moda, y la noche de Itaewon.</p>
+    <p class="brand">Itinerario de Claudia y familia · Corea en Español · Gyudong</p>
+  </header>
+
+  <div class="facts">
+    <div class="fact"><div class="k">Personas</div><div class="v">5</div></div>
+    <div class="fact"><div class="k">Inicio</div><div class="v">15:00 · Seongsu</div></div>
+    <div class="fact"><div class="k">Fin previsto</div><div class="v">21:50 · Itaewon</div></div>
   </div>
 
-  <div class="info-bar">
-    <div class="info-item"><div class="label">Personas</div><div class="value">5</div></div>
-    <div class="info-item"><div class="label">Zonas</div><div class="value">Seongsu → Itaewon</div></div>
-    <div class="info-item"><div class="label">Inicio</div><div class="value">15:00 en Seongsu</div></div>
-  </div>
+  <section class="brief">
+    <h2>Antes de salir</h2>
+    <ul>
+      <li>Julio es caluroso y húmedo: llevad agua. Casi todas las paradas tienen aire acondicionado.</li>
+      <li>Toca <b>“Ver en Naver Map”</b> en cada parada — se abre la app y ahí ves también el horario de hoy.</li>
+      <li>En taxi, muestra al conductor el <b>recuadro gris con la dirección en coreano</b>. No hace falta hablar.</li>
+      <li>Empezamos por la tarde, así que hacemos <b>primero las tiendas y cafés de Seongsu</b> (muchos cierran sobre las 19–20 h) y dejamos <b>Itaewon para la noche</b>, que es cuando mejor se ve.</li>
+    </ul>
+  </section>
 
-  <div class="content">
+  <div id="body"></div>
 
-    <div class="notes-box">
-      <b>📝 Antes de salir</b>
-      <ul>
-        <li>Hace calor y humedad en julio: llevad agua y gorra. Casi todas las paradas tienen aire acondicionado.</li>
-        <li>Toca el botón verde <b>“Ver en Naver Map”</b> de cada parada — se abre la app y ahí ves también el horario de hoy.</li>
-        <li>Si tomáis un taxi, mostrad al conductor el <b>recuadro gris con la dirección en coreano</b>. No hace falta hablar.</li>
-        <li>Seongsu es el barrio de moda de Seúl (antiguas fábricas convertidas en tiendas y cafés) e Itaewon es el barrio internacional.</li>
-        <li>Empezamos por la tarde, así que hacemos <b>primero las tiendas y cafés de Seongsu</b> (muchos cierran sobre las 19–20 h) y dejamos <b>Itaewon para la noche</b>, que es cuando mejor se ve.</li>
-      </ul>
-    </div>
-
-    <div id="body"></div>
-
-  </div>
-
-  <div class="footer">
-    <h3>Información útil</h3>
+  <footer class="foot">
+    <h2>Información útil</h2>
     <ul>
       <li>Dentro de Seongsu todo se hace <b>andando</b> (5–10 min entre paradas). Solo el salto Seongsu → Itaewon es en metro o taxi.</li>
       <li>Pagad con la tarjeta T-money en metro y autobús; en tiendas y cafés se acepta tarjeta sin problema.</li>
       <li>En las cafeterías más famosas puede haber cola: si es larga, se puede reordenar el día sin problema.</li>
       <li>Si algo se complica, escribidme por WhatsApp y lo resolvemos al momento.</li>
     </ul>
-    <a class="mapall" href="https://naver.me/GkIeDejF" target="_blank" rel="noopener">🗺️ Abrir el mapa completo de Naver</a>
-  </div>
+    <a class="cta" href="https://naver.me/GkIeDejF" target="_blank" rel="noopener">Abrir el mapa completo en Naver</a>
+    <a class="cta ghost" href="#" onclick="window.print();return false;">Guardar como PDF</a>
+  </footer>
 
-</div>
-
-<div class="btnwrap">
-  <button class="pdf-btn" onclick="window.print()">Guardar como PDF</button>
 </div>
 
 <script>
@@ -156,11 +313,12 @@
    px/py y sid vienen del mapa guardado de Naver (no inventar sid).
    kind: 'stop' (parada) | 'move' (traslado)
    mode: 'walk' | 'transit'  → modo del enlace "Cómo llegar" desde la parada anterior
+   noRoute: true → esta parada no genera enlace de ruta (ya lo lleva el traslado previo)
 */
 var STOPS = [
-  { zone: 'Seongsu — zona este', zoneNote: 'Tiendas y cafés · todo a pie' },
+  { zone: 'Seongsu · zona este', zoneNote: 'Tiendas y cafés — todo a pie' },
   {
-    kind: 'stop', hl: true, time: '15:00 – 15:40',
+    kind: 'stop', key: true, time: '15:00 – 15:40',
     title: 'Gentle Monster · Haus Nowhere Seoul',
     why: 'Gafas de diseño · edificio insignia',
     desc: 'La tienda insignia de Gentle Monster, la marca de gafas coreana que queríais ver. El edificio entero es una instalación artística. <b>No os perdáis la 4ª planta: hay una cafetería sorprendente</b>, con postres que parecen esculturas.',
@@ -178,7 +336,7 @@ var STOPS = [
     px: 127.05994, py: 37.54016, mode: 'walk'
   },
   {
-    kind: 'stop', hl: true, time: '16:35 – 17:10',
+    kind: 'stop', key: true, time: '16:35 – 17:10',
     title: 'PAVEN (파벤)',
     why: 'La cafetería de la hermana de RM (BTS)',
     desc: 'Cafetería llevada por <b>la hermana mayor de RM, el líder de BTS</b>. Un sitio con encanto y muy conocido entre ARMY.',
@@ -196,9 +354,9 @@ var STOPS = [
     px: 127.05347, py: 37.54265, mode: 'walk'
   },
 
-  { zone: 'Seongsu — zona oeste', zoneNote: 'Seoul Forest · zona K-pop' },
+  { zone: 'Seongsu · zona oeste', zoneNote: 'Seoul Forest — zona K-pop' },
   {
-    kind: 'stop', hl: true, time: '18:00 – 18:25',
+    kind: 'stop', key: true, time: '18:00 – 18:25',
     title: 'SM Entertainment',
     why: 'La agencia de Girls\' Generation',
     desc: 'La sede de SM Entertainment, <b>la agencia de Girls\' Generation (소녀시대)</b>, y también de aespa, NCT, Red Velvet o EXO. Foto obligada delante del edificio y, sobre todo, <b>bajad al sótano: ahí también hay cosas que ver</b>.',
@@ -207,7 +365,7 @@ var STOPS = [
     px: 127.04418, py: 37.54422, mode: 'walk'
   },
   {
-    kind: 'stop', hl: true, time: '18:35 – 18:55',
+    kind: 'stop', key: true, time: '18:35 – 18:55',
     title: 'Jardín del banco de J-Hope (제이홉숲)',
     why: 'Lugar de peregrinación ARMY',
     desc: 'El pequeño jardín con el banco dedicado a <b>J-Hope de BTS</b>, dentro de la zona de Seoul Forest. Muy tranquilo y bonito para fotos — y a esta hora la luz del atardecer es preciosa.',
@@ -222,9 +380,9 @@ var STOPS = [
     px: 126.9918034, py: 37.5350246, name: '정든집', sid: '1402818071', mode: 'transit'
   },
 
-  { zone: 'Itaewon', zoneNote: 'Cena · localizaciones de series de noche' },
+  { zone: 'Itaewon', zoneNote: 'Cena y localizaciones de series, de noche' },
   {
-    kind: 'stop', hl: true, time: '19:40 – 20:50',
+    kind: 'stop', key: true, time: '19:40 – 20:50',
     title: 'Jeongdeunjip (정든집) — cena',
     why: 'El restaurante al que va Jungkook (BTS)',
     desc: 'Cenamos en <b>el restaurante al que va Jungkook de BTS</b>. Comida coreana de barrio, ambiente local y auténtico.',
@@ -233,7 +391,7 @@ var STOPS = [
     px: 126.9918034, py: 37.5350246, noRoute: true
   },
   {
-    kind: 'stop', hl: true, time: '20:55 – 21:15',
+    kind: 'stop', key: true, time: '20:55 – 21:15',
     title: 'Noksapyeong-daero 195',
     why: 'Localización de Itaewon Class',
     desc: 'Uno de los puntos donde se rodó <b>Itaewon Class (이태원 클라쓰)</b>. De noche, con los neones encendidos, se parece mucho más a las escenas de la serie que de día.',
@@ -242,7 +400,7 @@ var STOPS = [
     px: 126.9872241, py: 37.5349868, mode: 'walk'
   },
   {
-    kind: 'stop', hl: true, time: '21:20 – 21:50',
+    kind: 'stop', key: true, time: '21:20 – 21:50',
     title: 'Tanbam (탄밤)',
     why: 'Localización de Itaewon Class · última copa',
     desc: 'Terminamos el día en el local real donde se rodó <b>Itaewon Class</b> — el bar “DanBam” de la serie. Si la habéis visto, reconoceréis la fachada al instante. Es un bar, así que la noche es justo su momento.',
@@ -273,48 +431,58 @@ function placeUrl(s) {
 }
 
 (function render() {
-  var out = '', open = false, prev = null, n = 0;
+  var out = '', prev = null, num = 0, k = 0;
 
   STOPS.forEach(function (s) {
     if (s.zone) {
-      if (open) { out += '</div>'; open = false; }
-      out += '<div class="zone">📍 ' + esc(s.zone) +
-             (s.zoneNote ? ' <small>' + esc(s.zoneNote) + '</small>' : '') + '</div>';
+      out += '<div class="zone"><h2>' + esc(s.zone) + '</h2>' +
+             (s.zoneNote ? '<p>' + esc(s.zoneNote) + '</p>' : '') + '</div>';
       return;
     }
-    if (!open) { out += '<div class="timeline">'; open = true; }
 
-    out += '<div class="block ' + (s.kind === 'move' ? 'move' : (s.hl ? 'hl' : '')) + '">' +
-             '<div class="dot"></div>' +
-             '<div class="time">' + esc(s.time) + '</div>' +
-             '<div class="title">' + esc(s.title) + '</div>' +
-             (s.why ? '<span class="why">' + esc(s.why) + '</span>' : '') +
-             '<div class="desc">' + (s.desc || '') + '</div>';
+    var isMove = s.kind === 'move';
+    if (!isMove) num++;
 
+    var actions = '';
+    var pu = placeUrl(s);
+    if (pu) actions += '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + pu + '">Ver en Naver Map</a>';
+    var ru = s.noRoute ? null : routeUrl(prev, s, s.mode);
+    if (ru) {
+      var label = s.mode === 'walk' ? 'Cómo llegar a pie' : 'Cómo llegar';
+      actions += '<a class="btn btn-secondary" target="_blank" rel="noopener" href="' + ru + '">' + label + '</a>';
+    }
+
+    var addr = '';
     if (s.kaddr) {
-      n++;
-      out += '<div class="kaddr">' +
-               '<div class="ktag">Muéstralo al taxista</div>' +
-               '<div class="ktext" id="k' + n + '">' + esc(s.kaddr) + '</div>' +
-               '<button class="copy-btn" onclick="copyK(\'k' + n + '\', this)">Copiar</button>' +
+      k++;
+      addr = '<div class="kaddr">' +
+               '<div class="k">Muéstralo al taxista</div>' +
+               '<div class="v" id="k' + k + '">' + esc(s.kaddr) + '</div>' +
+               '<button class="copy" onclick="copyK(\'k' + k + '\', this)">Copiar</button>' +
              '</div>';
     }
 
-    var links = '';
-    var pu = placeUrl(s);
-    if (pu) links += '<a class="lbtn naver" target="_blank" rel="noopener" href="' + pu + '">📍 Ver en Naver Map</a>';
-    var ru = s.noRoute ? null : routeUrl(prev, s, s.mode);
-    if (ru) {
-      var icon = s.mode === 'walk' ? '🚶' : '🚇';
-      links += '<a class="lbtn route" target="_blank" rel="noopener" href="' + ru + '">' + icon + ' Cómo llegar</a>';
-    }
-    if (links) out += '<div class="links">' + links + '</div>';
+    var inner = '<div class="when">' + esc(s.time) + '</div>' +
+                '<h3>' + esc(s.title) + '</h3>' +
+                (s.why ? '<div><span class="why">' + esc(s.why) + '</span></div>' : '') +
+                '<div class="desc">' + (s.desc || '') + '</div>' +
+                addr +
+                (actions ? '<div class="actions">' + actions + '</div>' : '');
 
-    out += '</div>';
+    if (isMove) {
+      out += '<div class="move"><div>' + inner + '</div></div>';
+    } else {
+      out += '<div class="stop' + (s.key ? ' key' : '') + '">' +
+               '<div class="stop-top">' +
+                 '<div class="num">' + num + '</div>' +
+                 '<div style="flex:1;min-width:0">' + inner + '</div>' +
+               '</div>' +
+             '</div>';
+    }
+
     prev = s;
   });
 
-  if (open) out += '</div>';
   document.getElementById('body').innerHTML = out;
 })();
 
@@ -322,7 +490,7 @@ function copyK(id, btn) {
   var t = document.getElementById(id).textContent;
   var done = function () {
     var old = btn.textContent;
-    btn.textContent = '¡Copiado!';
+    btn.textContent = 'Copiado';
     setTimeout(function () { btn.textContent = old; }, 1500);
   };
   function fallback() {
