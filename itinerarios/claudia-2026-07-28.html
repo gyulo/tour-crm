@@ -230,7 +230,7 @@ var STOPS = [
     desc: 'Cenamos en <b>el restaurante al que va Jungkook de BTS</b>. Comida coreana de barrio, ambiente local y auténtico.',
     kaddr: '서울 용산구 이태원로19길 13 1층',
     sid: '1402818071', name: '정든집',
-    px: 126.9918034, py: 37.5350246, mode: 'walk'
+    px: 126.9918034, py: 37.5350246, noRoute: true
   },
   {
     kind: 'stop', hl: true, time: '20:55 – 21:15',
@@ -303,7 +303,7 @@ function placeUrl(s) {
     var links = '';
     var pu = placeUrl(s);
     if (pu) links += '<a class="lbtn naver" target="_blank" rel="noopener" href="' + pu + '">📍 Ver en Naver Map</a>';
-    var ru = routeUrl(prev, s, s.mode);
+    var ru = s.noRoute ? null : routeUrl(prev, s, s.mode);
     if (ru) {
       var icon = s.mode === 'walk' ? '🚶' : '🚇';
       links += '<a class="lbtn route" target="_blank" rel="noopener" href="' + ru + '">' + icon + ' Cómo llegar</a>';
