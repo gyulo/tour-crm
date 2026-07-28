@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<!--
+  Itinerario personalizado — Claudia Patricia Herrera (familia, 5 pax)
+  Miércoles 29 de julio de 2026 · Seongsu + Itaewon
+  Basado en el mapa guardado de Naver: https://naver.me/GkIeDejF
+  Los enlaces se generan desde el array STOPS (abajo) — para editar, cambia solo ese array.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerario · Miércoles 29 julio — Claudia</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #F97316; --teal: #0D9488; --teal-dark: #0F766E;
+      --cream: #FFF7ED; --text: #1a1a1a; --muted: #6B7280;
+      --border: #E5E7EB; --naver: #03C75A;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--text); background: var(--cream); line-height: 1.6; padding: 16px;
+      -webkit-text-size-adjust: 100%;
+    }
+    .page { max-width: 700px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+    .header { background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color: #fff; padding: 28px 24px; text-align: center; }
+    .header h1 { font-size: 1.45rem; line-height: 1.3; }
+    .header .sub { font-size: .95rem; opacity: .92; margin-top: 6px; }
+    .header .brand { font-size: .8rem; opacity: .72; margin-top: 12px; }
+
+    .info-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+    .info-item { background: #fff; padding: 14px 12px; text-align: center; }
+    .info-item .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .info-item .value { font-size: .95rem; font-weight: 600; color: var(--teal-dark); margin-top: 2px; }
+
+    .content { padding: 24px 20px; }
+
+    .notes-box { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 14px 16px; margin-bottom: 24px; font-size: .88rem; color: #78350F; }
+    .notes-box b { color: #92400E; }
+    .notes-box ul { margin: 8px 0 0 18px; }
+    .notes-box li { margin-bottom: 4px; }
+
+    .zone {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 1.05rem; font-weight: 700; color: var(--teal-dark);
+      margin: 26px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--cream);
+    }
+    .zone:first-child { margin-top: 0; }
+    .zone small { font-weight: 500; color: var(--muted); font-size: .78rem; }
+
+    .timeline { position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+    .block { position: relative; padding-left: 34px; margin-bottom: 22px; }
+    .block:last-child { margin-bottom: 0; }
+    .dot { position: absolute; left: 2px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--teal); border: 3px solid #fff; box-shadow: 0 0 0 2px var(--teal); }
+    .block.hl .dot { background: var(--orange); box-shadow: 0 0 0 2px var(--orange); }
+    .block.move .dot { background: var(--muted); box-shadow: 0 0 0 2px var(--muted); width: 12px; height: 12px; left: 4px; top: 8px; }
+
+    .time { font-size: .78rem; font-weight: 700; color: var(--teal); letter-spacing: .4px; }
+    .block.hl .time { color: var(--orange); }
+    .block.move .time { color: var(--muted); }
+    .title { font-size: 1.08rem; font-weight: 700; margin: 2px 0 4px; }
+    .block.move .title { font-size: .98rem; font-weight: 600; }
+    .why { display: inline-block; background: var(--cream); color: var(--teal-dark); font-size: .75rem; padding: 2px 10px; border-radius: 50px; font-weight: 600; margin-bottom: 6px; }
+    .desc { font-size: .9rem; color: #374151; }
+    .block.move .desc { font-size: .85rem; color: var(--muted); }
+
+    .kaddr { margin-top: 10px; background: #F9FAFB; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .kaddr .ktag { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .kaddr .ktext { font-size: .95rem; font-weight: 600; margin-top: 2px; word-break: keep-all; }
+    .copy-btn { margin-top: 6px; background: #fff; border: 1px solid var(--border); border-radius: 6px; font-size: .78rem; padding: 4px 10px; cursor: pointer; color: var(--muted); font-family: inherit; }
+    .copy-btn:active { background: #F3F4F6; }
+
+    .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .lbtn { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; font-size: .82rem; font-weight: 600; padding: 8px 14px; border-radius: 50px; border: 1px solid var(--border); background: #fff; color: #374151; }
+    .lbtn.naver { background: var(--naver); border-color: var(--naver); color: #fff; }
+    .lbtn.route { background: #fff; border-color: var(--teal); color: var(--teal-dark); }
+
+    .footer { background: var(--cream); padding: 22px 20px; border-top: 1px solid var(--border); }
+    .footer h3 { font-size: .95rem; color: var(--teal-dark); margin-bottom: 10px; }
+    .footer ul { list-style: none; font-size: .85rem; color: #4B5563; }
+    .footer li { margin-bottom: 6px; padding-left: 18px; position: relative; }
+    .footer li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-weight: 700; }
+    .footer .mapall { display: block; text-align: center; margin-top: 16px; padding: 12px; background: var(--naver); color: #fff; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: .9rem; }
+
+    .btnwrap { text-align: center; padding: 20px; }
+    .pdf-btn { padding: 12px 30px; background: var(--orange); color: #fff; border: none; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; border-radius: 0; }
+      .btnwrap, .copy-btn { display: none; }
+      .header, .dot, .lbtn.naver, .footer .mapall { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .lbtn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: .7rem; word-break: break-all; }
+    }
+    @media (max-width: 420px) {
+      body { padding: 10px; }
+      .content { padding: 20px 14px; }
+      .header h1 { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header">
+    <h1>Itinerario de Claudia y familia</h1>
+    <div class="sub">Miércoles, 29 de julio · Seongsu &amp; Itaewon</div>
+    <div class="brand">Corea en Español · Tu guía Gyudong</div>
+  </div>
+
+  <div class="info-bar">
+    <div class="info-item"><div class="label">Personas</div><div class="value">5</div></div>
+    <div class="info-item"><div class="label">Zonas</div><div class="value">Seongsu → Itaewon</div></div>
+    <div class="info-item"><div class="label">Duración</div><div class="value">≈ 8 horas</div></div>
+  </div>
+
+  <div class="content">
+
+    <div class="notes-box">
+      <b>📝 Antes de salir</b>
+      <ul>
+        <li>Hace calor y humedad en julio: llevad agua y gorra. Casi todas las paradas tienen aire acondicionado.</li>
+        <li>Toca el botón verde <b>“Ver en Naver Map”</b> de cada parada — se abre la app y ahí ves también el horario de hoy.</li>
+        <li>Si tomáis un taxi, mostrad al conductor el <b>recuadro gris con la dirección en coreano</b>. No hace falta hablar.</li>
+        <li>Seongsu es el barrio de moda de Seúl (antiguas fábricas convertidas en tiendas y cafés) e Itaewon es el barrio internacional. Los horarios son orientativos.</li>
+      </ul>
+    </div>
+
+    <div id="body"></div>
+
+  </div>
+
+  <div class="footer">
+    <h3>Información útil</h3>
+    <ul>
+      <li>Dentro de Seongsu todo se hace <b>andando</b> (5–10 min entre paradas). Solo el salto Seongsu → Itaewon es en metro o taxi.</li>
+      <li>Pagad con la tarjeta T-money en metro y autobús; en tiendas y cafés se acepta tarjeta sin problema.</li>
+      <li>En las cafeterías más famosas puede haber cola: si es larga, se puede reordenar el día sin problema.</li>
+      <li>Si algo se complica, escribidme por WhatsApp y lo resolvemos al momento.</li>
+    </ul>
+    <a class="mapall" href="https://naver.me/GkIeDejF" target="_blank" rel="noopener">🗺️ Abrir el mapa completo de Naver</a>
+  </div>
+
+</div>
+
+<div class="btnwrap">
+  <button class="pdf-btn" onclick="window.print()">Guardar como PDF</button>
+</div>
+
+<script>
+/* ── Datos del día. Para editar el itinerario, cambia solo este array. ────────
+   px/py y sid vienen del mapa guardado de Naver (no inventar sid).
+   kind: 'stop' (parada) | 'move' (traslado)
+   mode: 'walk' | 'transit'  → modo del enlace "Cómo llegar" desde la parada anterior
+*/
+var STOPS = [
+  { zone: 'Seongsu — zona este', zoneNote: 'Tiendas y cafés · todo a pie' },
+  {
+    kind: 'stop', hl: true, time: '11:00 – 11:50',
+    title: 'Gentle Monster · Haus Nowhere Seoul',
+    why: 'Gafas de diseño · edificio insignia',
+    desc: 'La tienda insignia de Gentle Monster, la marca de gafas coreana que queríais ver. El edificio entero es una instalación artística. <b>No os perdáis la 4ª planta: hay una cafetería sorprendente</b>, con postres que parecen esculturas.',
+    kaddr: '서울 성동구 뚝섬로 433',
+    sid: '2084983689', name: '젠틀몬스터 하우스 노웨어 서울',
+    px: 127.0589367, py: 37.538179
+  },
+  {
+    kind: 'stop', time: '12:00 – 12:50',
+    title: 'ETF Bakery Seongsu',
+    why: 'Panadería-cafetería · buena relación calidad-precio',
+    desc: 'Una cafetería preciosa y, sobre todo, <b>con el pan a precio razonable</b> (algo poco común en esta zona). Perfecta para una comida ligera antes de seguir.',
+    kaddr: '서울 성동구 성수이로16길 32',
+    sid: '2004674248', name: 'ETF베이커리 성수',
+    px: 127.05994, py: 37.54016, mode: 'walk'
+  },
+  {
+    kind: 'stop', hl: true, time: '13:00 – 13:40',
+    title: 'PAVEN (파벤)',
+    why: 'La cafetería de la hermana de RM (BTS)',
+    desc: 'Cafetería llevada por <b>la hermana mayor de RM, el líder de BTS</b>. Un sitio con encanto y muy conocido entre ARMY.',
+    kaddr: '서울 성동구 성수이로 65',
+    sid: '1825800661', name: '파벤',
+    px: 127.0555175, py: 37.5410259, mode: 'walk'
+  },
+  {
+    kind: 'stop', time: '13:50 – 14:30',
+    title: 'Medicube Seongsu',
+    why: 'Skincare coreano · tienda de marca',
+    desc: 'Tienda de Medicube, una de las marcas coreanas de cuidado facial más conocidas. Buen sitio para las cremas y el skincare que buscabais.',
+    kaddr: '서울 성동구 성수이로7길 40',
+    sid: '2033714178', name: '메디큐브 성수',
+    px: 127.05347, py: 37.54265, mode: 'walk'
+  },
+
+  { zone: 'Seongsu — zona oeste', zoneNote: 'Seoul Forest · zona K-pop' },
+  {
+    kind: 'stop', hl: true, time: '14:50 – 15:30',
+    title: 'SM Entertainment',
+    why: 'Sede de la agencia de K-pop',
+    desc: 'La sede de SM Entertainment, la agencia de aespa, NCT, Red Velvet o EXO. Parada obligada para foto delante del edificio.',
+    kaddr: '서울 성동구 왕십리로 83-21',
+    sid: '12115416', name: 'SM엔터테인먼트',
+    px: 127.04418, py: 37.54422, mode: 'walk'
+  },
+  {
+    kind: 'stop', hl: true, time: '15:40 – 16:10',
+    title: 'Jardín del banco de J-Hope (제이홉숲)',
+    why: 'Lugar de peregrinación ARMY',
+    desc: 'El pequeño jardín con el banco dedicado a <b>J-Hope de BTS</b>, dentro de la zona de Seoul Forest. Muy tranquilo y bonito para fotos.',
+    kaddr: '서울 성동구 성수동1가 720',
+    sid: '1777961900', name: '제이홉숲 벤치정원',
+    px: 127.0383954, py: 37.5439233, mode: 'walk'
+  },
+  {
+    kind: 'move', time: '16:10 – 16:50',
+    title: 'Traslado a Itaewon',
+    desc: 'Cruzamos al otro lado de la ciudad: unos 35–40 minutos en metro (o taxi, similar en tiempo).',
+    px: 126.9872241, py: 37.5349868, name: '녹사평대로 195', mode: 'transit'
+  },
+
+  { zone: 'Itaewon', zoneNote: 'Localizaciones de series · cena' },
+  {
+    kind: 'stop', hl: true, time: '16:55 – 17:20',
+    title: 'Noksapyeong-daero 195',
+    why: 'Localización de Itaewon Class',
+    desc: 'Uno de los puntos donde se rodó <b>Itaewon Class (이태원 클라쓰)</b>. Zona de fotos con las vistas del barrio.',
+    kaddr: '서울 용산구 녹사평대로 195',
+    search: '서울 용산구 녹사평대로 195', name: '녹사평대로 195',
+    px: 126.9872241, py: 37.5349868, mode: 'walk'
+  },
+  {
+    kind: 'stop', hl: true, time: '17:25 – 17:55',
+    title: 'Tanbam (탄밤)',
+    why: 'Localización de Itaewon Class',
+    desc: 'El local real donde se rodó <b>Itaewon Class</b> — el bar “DanBam” de la serie. Si lo habéis visto, reconoceréis la fachada al instante.',
+    kaddr: '서울 용산구 이태원동 57-28',
+    sid: '1876909809', name: '탄밤',
+    px: 126.98899, py: 37.53445, mode: 'walk'
+  },
+  {
+    kind: 'stop', hl: true, time: '18:05 – 19:30',
+    title: 'Jeongdeunjip (정든집) — cena',
+    why: 'El restaurante al que va Jungkook (BTS)',
+    desc: 'Cerramos el día cenando en <b>el restaurante al que va Jungkook de BTS</b>. Comida coreana de barrio, ambiente local y auténtico.',
+    kaddr: '서울 용산구 이태원로19길 13 1층',
+    sid: '1402818071', name: '정든집',
+    px: 126.9918034, py: 37.5350246, mode: 'walk'
+  }
+];
+
+/* ── Render ──────────────────────────────────────────────────────────────── */
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function e(s) { return encodeURIComponent(s == null ? '' : s); }
+
+/* Naver: /p/directions/{lng},{lat},{nombre},{sid},PLACE_POI/{destino}/-/{modo} */
+function poi(s) {
+  if (!s) return null;
+  return s.px + ',' + s.py + ',' + e(s.name) + ',' + (s.sid || '') + ',' + (s.sid ? 'PLACE_POI' : '');
+}
+function routeUrl(from, to, mode) {
+  var a = poi(from), b = poi(to);
+  if (!a || !b) return null;
+  return 'https://map.naver.com/p/directions/' + a + '/' + b + '/-/' + (mode || 'transit');
+}
+function placeUrl(s) {
+  if (s.sid) return 'https://map.naver.com/p/entry/place/' + s.sid;
+  if (s.search) return 'https://map.naver.com/p/search/' + e(s.search);
+  return null;
+}
+
+(function render() {
+  var out = '', open = false, prev = null, n = 0;
+
+  STOPS.forEach(function (s) {
+    if (s.zone) {
+      if (open) { out += '</div>'; open = false; }
+      out += '<div class="zone">📍 ' + esc(s.zone) +
+             (s.zoneNote ? ' <small>' + esc(s.zoneNote) + '</small>' : '') + '</div>';
+      return;
+    }
+    if (!open) { out += '<div class="timeline">'; open = true; }
+
+    out += '<div class="block ' + (s.kind === 'move' ? 'move' : (s.hl ? 'hl' : '')) + '">' +
+             '<div class="dot"></div>' +
+             '<div class="time">' + esc(s.time) + '</div>' +
+             '<div class="title">' + esc(s.title) + '</div>' +
+             (s.why ? '<span class="why">' + esc(s.why) + '</span>' : '') +
+             '<div class="desc">' + (s.desc || '') + '</div>';
+
+    if (s.kaddr) {
+      n++;
+      out += '<div class="kaddr">' +
+               '<div class="ktag">Muéstralo al taxista</div>' +
+               '<div class="ktext" id="k' + n + '">' + esc(s.kaddr) + '</div>' +
+               '<button class="copy-btn" onclick="copyK(\'k' + n + '\', this)">Copiar</button>' +
+             '</div>';
+    }
+
+    var links = '';
+    var pu = placeUrl(s);
+    if (pu) links += '<a class="lbtn naver" target="_blank" rel="noopener" href="' + pu + '">📍 Ver en Naver Map</a>';
+    var ru = routeUrl(prev, s, s.mode);
+    if (ru) {
+      var icon = s.mode === 'walk' ? '🚶' : '🚇';
+      links += '<a class="lbtn route" target="_blank" rel="noopener" href="' + ru + '">' + icon + ' Cómo llegar</a>';
+    }
+    if (links) out += '<div class="links">' + links + '</div>';
+
+    out += '</div>';
+    prev = s;
+  });
+
+  if (open) out += '</div>';
+  document.getElementById('body').innerHTML = out;
+})();
+
+function copyK(id, btn) {
+  var t = document.getElementById(id).textContent;
+  var done = function () {
+    var old = btn.textContent;
+    btn.textContent = '¡Copiado!';
+    setTimeout(function () { btn.textContent = old; }, 1500);
+  };
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, fallback);
+  } else { fallback(); }
+}
+</script>
+
+</body>
+</html>
