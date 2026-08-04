@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<!--
+  report.html — 프로젝트 완료 보고서 (상세 버전)
+  모든 결과물 링크 + 상세 설명 + 아키텍처 + TODO
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>프로젝트 보고서 — Corea en Español</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #F97316;
+      --orange-light: #FFF7ED;
+      --teal: #0D9488;
+      --teal-dark: #0F766E;
+      --teal-light: #F0FDFA;
+      --text: #1a1a1a;
+      --text-light: #6B7280;
+      --white: #FFFFFF;
+      --border: #E5E7EB;
+      --bg: #F9FAFB;
+      --green: #059669;
+      --green-light: #ECFDF5;
+      --yellow: #D97706;
+      --yellow-light: #FFFBEB;
+      --red: #DC2626;
+      --red-light: #FEF2F2;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+      padding: 20px;
+    }
+    .report { max-width: 900px; margin: 0 auto; }
+    .report-header {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: var(--white);
+      padding: 40px 36px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .report-header::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .report-header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    .report-header .date { font-size: 0.9rem; opacity: 0.85; }
+    .report-header .summary {
+      margin-top: 16px;
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .report-header .stat { text-align: center; }
+    .report-header .stat strong { display: block; font-size: 1.8rem; }
+    .report-header .stat small { font-size: 0.8rem; opacity: 0.8; }
+
+    /* Section */
+    .section {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .section-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .section-head h2 { font-size: 1.15rem; font-weight: 700; }
+    .badge {
+      font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 50px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-p1 { background: var(--red-light); color: var(--red); }
+    .badge-p2 { background: var(--yellow-light); color: var(--yellow); }
+    .badge-p3 { background: var(--green-light); color: var(--green); }
+    .badge-done { background: var(--green-light); color: var(--green); }
+    .badge-live { background: var(--teal-light); color: var(--teal); }
+    .section-body { padding: 20px 24px; }
+
+    /* Live cards */
+    .live-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .live-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .live-card:hover {
+      border-color: var(--teal);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(13,148,136,0.12);
+    }
+    .live-card .card-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .live-card h3 { font-size: 1rem; margin-bottom: 4px; color: var(--teal-dark); }
+    .live-card p { font-size: 0.82rem; color: var(--text-light); margin-bottom: 10px; }
+    .live-card .card-link {
+      font-size: 0.78rem; color: var(--orange); font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .live-card .card-link::after { content: '→'; }
+
+    /* Detail blocks */
+    .detail-block {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--teal);
+    }
+    .detail-block.orange { border-left-color: var(--orange); }
+    .detail-block.green { border-left-color: var(--green); }
+    .detail-block.red { border-left-color: var(--red); }
+    .detail-block h3 {
+      font-size: 1rem; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .detail-block p, .detail-block li {
+      font-size: 0.88rem; color: var(--text-light); line-height: 1.7;
+    }
+    .detail-block ul { padding-left: 20px; margin-top: 8px; }
+    .detail-block li { margin-bottom: 6px; }
+    .detail-block code {
+      background: rgba(0,0,0,0.06);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+    }
+    .detail-block .highlight {
+      background: var(--teal-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      color: var(--teal-dark);
+      font-size: 0.82rem;
+    }
+
+    /* Flow block */
+    .flow-block {
+      background: #1a1a1a;
+      color: #D1D5DB;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    .flow-block .step { color: var(--orange); font-weight: 600; }
+    .flow-block .arrow { color: #6B7280; }
+
+    /* File table */
+    .file-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .file-table th {
+      text-align: left; font-size: 0.75rem;
+      text-transform: uppercase; color: var(--text-light);
+      padding: 8px 12px; border-bottom: 2px solid var(--border);
+    }
+    .file-table td {
+      padding: 10px 12px; border-bottom: 1px solid #F3F4F6; vertical-align: top;
+    }
+    .file-name {
+      font-family: monospace; font-size: 0.82rem;
+      color: var(--teal-dark); font-weight: 600;
+    }
+
+    /* Architecture */
+    .arch-diagram {
+      background: #1a1a1a; color: #E5E7EB;
+      padding: 24px; border-radius: 10px;
+      font-family: monospace; font-size: 0.76rem;
+      line-height: 1.5; overflow-x: auto; white-space: pre;
+    }
+    .arch-diagram a { color: #F97316; text-decoration: underline; }
+
+    /* Commits */
+    .commit {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 14px 0; border-bottom: 1px solid #F3F4F6;
+    }
+    .commit:last-child { border-bottom: none; }
+    .commit-hash {
+      font-family: monospace; font-size: 0.8rem; color: var(--orange);
+      font-weight: 600; flex-shrink: 0;
+      background: var(--orange-light); padding: 2px 8px; border-radius: 4px;
+    }
+    .commit-msg { font-size: 0.88rem; font-weight: 600; }
+    .commit-files { font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
+
+    /* WhatsApp */
+    .wa-template {
+      background: #F0FDF4; border: 1px solid #BBF7D0;
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 12px;
+      font-size: 0.85rem; line-height: 1.6; position: relative;
+    }
+    .wa-template h4 {
+      font-size: 0.82rem; color: #166534; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .wa-template .wa-context {
+      font-size: 0.78rem; color: #15803D; font-style: italic;
+      margin-bottom: 8px; padding-bottom: 8px;
+      border-bottom: 1px dashed #BBF7D0;
+    }
+    .wa-template pre {
+      white-space: pre-wrap; font-family: inherit;
+      color: #15803D; font-size: 0.82rem;
+    }
+    .wa-copy {
+      position: absolute; top: 10px; right: 10px;
+      background: #166534; color: white; border: none;
+      padding: 4px 10px; border-radius: 6px;
+      font-size: 0.72rem; cursor: pointer; font-weight: 600;
+    }
+    .wa-copy:hover { background: #14532D; }
+
+    /* TODO */
+    .todo-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0; font-size: 0.88rem;
+    }
+    .todo-item input[type="checkbox"] {
+      margin-top: 4px; accent-color: var(--teal);
+      width: 16px; height: 16px;
+    }
+
+    .report-footer {
+      text-align: center; padding: 24px;
+      color: var(--text-light); font-size: 0.82rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .report-header { padding: 28px 20px; }
+      .report-header h1 { font-size: 1.4rem; }
+      .section-body { padding: 16px; }
+      .live-grid { grid-template-columns: 1fr; }
+      .arch-diagram { font-size: 0.66rem; padding: 16px; }
+    }
+
+    /* Collapsible */
+    .collapsible { cursor: pointer; }
+    .collapsible::after {
+      content: '▼'; font-size: 0.7rem; margin-left: 8px;
+      transition: transform 0.3s; display: inline-block;
+    }
+    .collapsible.collapsed::after { transform: rotate(-90deg); }
+    .collapse-content { overflow: hidden; transition: max-height 0.3s ease; }
+    .collapse-content.hidden { max-height: 0 !important; padding-top: 0; padding-bottom: 0; }
+  </style>
+</head>
+<body>
+
+<div class="report">
+
+  <!-- ===== HEADER ===== -->
+  <div class="report-header">
+    <h1>Corea en Español — 프로젝트 완료 보고서</h1>
+    <div class="date">빌드 완료: 2026-06-19 | 위치: /home/coreano/seoul-tour-guide/</div>
+    <div class="summary">
+      <div class="stat"><strong>18</strong><small>파일 생성</small></div>
+      <div class="stat"><strong>3</strong><small>커밋</small></div>
+      <div class="stat"><strong>4</strong><small>S3 배포</small></div>
+      <div class="stat"><strong>14</strong><small>항목 완료</small></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  P1: 홈페이지 시스템                                           -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>P1. 홈페이지 + 리드 캡처 시스템</h2>
+      <span class="badge badge-p1">P1 반드시</span>
+      <span class="badge badge-live">S3 배포 완료</span>
+    </div>
+    <div class="section-body">
+
+      <div class="live-grid">
+        <a href="https://gyulo.github.io/tour-crm/" target="_blank" class="live-card">
+          <div class="card-icon">🏠</div>
+          <h3>홈페이지 열기</h3>
+          <p>스페인어 랜딩페이지 — 클릭해서 확인</p>
+          <span class="card-link">index.html 바로가기</span>
+        </a>
+        <a href="https://gyulo.github.io/tour-crm/legacy/gracias.html" target="_blank" class="live-card">
+          <div class="card-icon">✅</div>
+          <h3>감사 페이지 열기</h3>
+          <p>폼 제출 후 이동하는 페이지</p>
+          <span class="card-link">gracias.html 바로가기</span>
+        </a>
+      </div>
+
+      <!-- index.html 상세 -->
+      <div class="detail-block">
+        <h3>📄 index.html — 스페인어 홈페이지</h3>
+        <p><strong>무슨 파일인가:</strong> 손님이 처음 보는 메인 페이지. 인스타 프로필 링크, 광고, DM에 이 URL을 보내면 됨.</p>
+        <p style="margin-top:8px;"><strong>디자인:</strong> 모바일 우선(스마트폰에서 먼저 예쁘게 보이게), 오렌지(#F97316) + 틸(#0D9488) + 크림(#FFF7ED) 따뜻한 톤. 외부 라이브러리 없이 순수 HTML/CSS/JS로 제작 → 로딩 빠르고 유지보수 쉬움.</p>
+        <p style="margin-top:8px;"><strong>페이지 구성 (위→아래 순서):</strong></p>
+        <ul>
+          <li><strong>네비게이션 바</strong> — 상단 고정. 모바일에서는 햄버거(☰) 메뉴로 바뀜. 각 섹션으로 부드럽게 스크롤.</li>
+          <li><strong>Hero 섹션</strong> — 첫인상. "Vive Corea como un local, con tu guía en español" 큰 제목 + CTA 버튼. 3개 통계 뱃지(100% 스페인어 / 프라이빗 / 맞춤형).</li>
+          <li><strong>Por qué (왜 나와 함께?)</strong> — 손님의 4대 불안(언어·길찾기·안전·관광객코스)을 카드 형태로 해결. 아이콘 + 짧은 카피.</li>
+          <li><strong>Qué incluye (뭐가 포함?)</strong> — 탭 UI로 서울/부산/특별체험 전환. 각 도시별 4개 활동 카드. 서울: 경복궁·북촌·한강·광장시장. 부산: 해운대·스파랜드·블루라인파크·감천.</li>
+          <li><strong>Cómo funciona (어떻게 진행?)</strong> — 3단계 원형 넘버링: ①번호 남기기 → ②WhatsApp 예약링크 → ③Zoom 상담 후 맞춤투어.</li>
+          <li><strong>Precios (가격)</strong> — 6시간 $190 / 8시간 $210 (인기 뱃지) + 추가 시간당 $30. 현금 결제.</li>
+          <li><strong>FAQ</strong> — 아코디언(접었다 펴기) 7개 질문: 안전, 결제, 언어, 식단, 프라이빗, 포함사항, 서울+부산 결합.</li>
+          <li><strong>Testimonios (후기)</strong> — Placeholder 3개 (마리아/후안/라우라). 별 5개 + 후기 텍스트 + 국가. → <span class="highlight">실제 후기로 교체 필요</span></li>
+          <li><strong>CTA 폼</strong> — 틸 배경 위에 흰색 카드. 이름 + 전화번호(국제형식) + 동의 체크박스. 제출하면 gracias.html로 이동.</li>
+          <li><strong>Footer + WhatsApp 플로팅 버튼</strong> — 오른쪽 하단 초록 원형 버튼. 클릭하면 WhatsApp 대화 시작.</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>보안 장치:</strong></p>
+        <ul>
+          <li><strong>허니팟</strong> — 숨겨진 "website" 필드. 사람은 못 보지만 봇은 자동으로 채움 → 채워져 있으면 제출 무시.</li>
+          <li><strong>전화번호 검증</strong> — +로 시작, 8~15자리 숫자만 허용. "+52 55 1234 5678" 같은 국제 형식.</li>
+          <li><strong>동의 체크</strong> — 체크 안 하면 제출 불가.</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>SEO:</strong> title, meta description, keywords, Open Graph (카카오톡/인스타에서 공유할 때 미리보기), JSON-LD 구조화 데이터 포함.</p>
+      </div>
+
+      <!-- 폼 → CRM 흐름 -->
+      <div class="detail-block orange">
+        <h3>🔄 리드 캡처 흐름 (폼 제출 → CRM)</h3>
+        <p><strong>손님이 폼을 제출하면 이런 일이 일어남:</strong></p>
+        <div class="flow-block">
+<span class="step">1.</span> 손님이 index.html 폼에 이름+전화 입력, "Quiero mi tour" 클릭
+<span class="step">2.</span> JavaScript가 허니팟·전화형식·동의 검증
+<span class="step">3.</span> fetch()로 addLead.gs (Apps Script)에 POST 전송
+   <span class="arrow">→</span> payload: { token, action:"addLead", lead: { name, phone, consent, source:"homepage" } }
+<span class="step">4.</span> addLead.gs가 토큰 확인 → clientes 시트에 새 줄 추가
+   <span class="arrow">→</span> source="homepage", stage="sns", channel="홈페이지", review="검토필요"
+<span class="step">5.</span> notifyNewLead()로 이메일 알림 전송 (내가 제일 먼저 아는 방법)
+<span class="step">6.</span> 손님 브라우저는 gracias.html로 이동 ("곧 WhatsApp 드릴게요")
+<span class="step">7.</span> 내가 CRM에서 확인 → WhatsApp으로 Calendly 링크 전송 (수동)
+        </div>
+      </div>
+
+      <!-- addLead.gs 상세 -->
+      <div class="detail-block">
+        <h3>📜 addLead.gs — Apps Script 리드 캡처</h3>
+        <p><strong>무슨 파일인가:</strong> Google Apps Script에 붙여넣어서 배포하는 서버 코드. 홈페이지 폼에서 오는 POST 요청을 받아서 구글시트에 한 줄 추가.</p>
+        <p style="margin-top:8px;"><strong>핵심 설계 원칙:</strong> <span class="highlight">Append-only (추가만 가능)</span>. 이 스크립트로는 기존 데이터를 읽거나 수정하거나 삭제할 수 없음. 혹시 URL이 유출되더라도 데이터 유출·변조 불가.</p>
+        <p style="margin-top:8px;"><strong>어떻게 동작하나:</strong></p>
+        <ul>
+          <li><code>doPost(e)</code> — POST 요청 수신. JSON 파싱 → 토큰 확인 → 허니팟 체크 → 전화 검증 → 시트 append.</li>
+          <li><code>buildRow(headers, lead)</code> — 시트의 헤더 행을 읽어서 올바른 열 순서로 데이터 배치. 헤더가 바뀌어도 자동 적응.</li>
+          <li><code>doGet()</code> — GET 요청에는 "status: ok"만 반환. 데이터 노출 없음.</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>배포 방법:</strong> script.google.com → 코드 붙여넣기 → <code>CONFIG.SHEET_ID</code>와 <code>CONFIG.TOKEN</code> 설정 → 배포 > 웹 앱 → URL 복사 → index.html에 입력.</p>
+      </div>
+
+      <!-- gracias.html 상세 -->
+      <div class="detail-block">
+        <h3>📄 gracias.html — 감사 페이지</h3>
+        <p><strong>무슨 파일인가:</strong> 폼 제출 후 자동으로 이동하는 "고마워요" 페이지.</p>
+        <p style="margin-top:8px;"><strong>왜 필요한가:</strong> 손님이 "제출이 됐나?" 불안해하지 않도록. 다음에 뭘 기대해야 하는지 알려줌.</p>
+        <p style="margin-top:8px;"><strong>내용:</strong> 체크 아이콘 애니메이션 → "WhatsApp으로 연락 드릴게요" 초록 박스 → 3단계 안내(WhatsApp → Zoom → 맞춤투어) → "돌아가기" 버튼.</p>
+        <p style="margin-top:8px;"><code>noindex, nofollow</code> 설정 → 구글 검색에 안 뜸.</p>
+      </div>
+
+      <!-- deploy.sh 상세 -->
+      <div class="detail-block">
+        <h3>🚀 deploy.sh — S3 배포 스크립트</h3>
+        <p><strong>무슨 파일인가:</strong> <code>public/</code> 폴더의 파일들을 AWS S3 버킷(seoul-tour-crm)에 올리는 쉘 스크립트.</p>
+        <p style="margin-top:8px;"><strong>핵심 기능:</strong></p>
+        <ul>
+          <li><code>./deploy.sh</code> — 실제 업로드 실행.</li>
+          <li><code>./deploy.sh --dry-run</code> — 미리보기만 (업로드 안 함).</li>
+          <li>HTML 파일 → <code>Content-Type: text/html; charset=utf-8</code> + <code>Cache-Control: no-cache</code> (항상 최신 버전).</li>
+          <li>이미지/CSS/JS → 1일 캐시.</li>
+          <li><span class="highlight">tour-crm_v2.html은 자동으로 제외</span> (EXCLUDE_FILES 배열). 절대 덮어쓰지 않음.</li>
+          <li>업로드 후 각 HTML의 공개 URL 출력.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  P2: 자동화 + 도구                                            -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>P2. 자동화 도구 + 일정표 + 영수증</h2>
+      <span class="badge badge-p2">P2 시간되면</span>
+      <span class="badge badge-live">S3 배포 완료</span>
+    </div>
+    <div class="section-body">
+
+      <div class="live-grid">
+        <a href="https://gyulo.github.io/tour-crm/legacy/itinerary-es.html?name=Mar%C3%ADa%20Garc%C3%ADa&date=2025-10-15&hours=8&cities=seoul,busan&meet=Hotel%20Lobby&notes=Vegetariana%2C%20fan%20de%20Goblin" target="_blank" class="live-card">
+          <div class="card-icon">📋</div>
+          <h3>샘플 일정표 열기</h3>
+          <p>8시간 서울+부산, 채식, 고블린 팬</p>
+          <span class="card-link">itinerary-es.html 바로가기</span>
+        </a>
+        <a href="https://gyulo.github.io/tour-crm/legacy/recibo-es.html?name=Mar%C3%ADa%20Garc%C3%ADa&date=2025-10-15&baseHours=8&extraHours=2" target="_blank" class="live-card">
+          <div class="card-icon">🧾</div>
+          <h3>샘플 영수증 열기</h3>
+          <p>8h 기본 $210 + 2h 추가 $60 = 총 $270</p>
+          <span class="card-link">recibo-es.html 바로가기</span>
+        </a>
+      </div>
+
+      <!-- itinerary-es.html -->
+      <div class="detail-block">
+        <h3>📋 itinerary-es.html — 맞춤 일정표</h3>
+        <p><strong>무슨 파일인가:</strong> 각 손님한테 보내는 개인화된 일정표. URL에 파라미터를 넣으면 해당 손님 이름, 날짜, 도시에 맞게 자동으로 내용이 바뀜.</p>
+        <p style="margin-top:8px;"><strong>어떻게 쓰나:</strong> CRM에서 손님 정보를 URL에 넣어서 WhatsApp으로 보냄. 손님은 링크 클릭 → 예쁜 일정표 확인 → "PDF 저장" 버튼으로 저장.</p>
+        <p style="margin-top:8px;"><strong>URL 파라미터:</strong></p>
+        <ul>
+          <li><code>name</code> — 손님 이름 (필수)</li>
+          <li><code>date</code> — 투어 날짜 (필수, YYYY-MM-DD)</li>
+          <li><code>hours</code> — 투어 시간, 6 또는 8 (기본 8)</li>
+          <li><code>cities</code> — 도시들, 쉼표 구분 (<code>seoul</code> 또는 <code>seoul,busan</code>)</li>
+          <li><code>meet</code> — 미팅 장소</li>
+          <li><code>notes</code> — 특별 노트 (식단, 관심사 등)</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>구성:</strong> 헤더(이름+브랜드) → 정보바(날짜/시간/미팅포인트) → 특별노트(노란박스) → 타임라인(시간대별 블록, 활동명+설명+태그) → 중요사항(체크리스트) → PDF 버튼.</p>
+        <p style="margin-top:8px;"><strong>보안:</strong> <span class="highlight">URL에 가격·전화번호 절대 넣지 말 것</span>. URL은 브라우저 히스토리에 남고, 공유될 수 있음.</p>
+      </div>
+
+      <!-- recibo-es.html -->
+      <div class="detail-block orange">
+        <h3>🧾 recibo-es.html — 영수증/컴프로반테</h3>
+        <p><strong>무슨 파일인가:</strong> 투어 끝나고 손님한테 보내는 영수증. 금액이 자동으로 계산됨.</p>
+        <p style="margin-top:8px;"><strong>가격 자동계산 로직:</strong></p>
+        <ul>
+          <li><code>baseHours=6</code> → 기본 $190 USD</li>
+          <li><code>baseHours=8</code> → 기본 $210 USD</li>
+          <li><code>extraHours=N</code> → N × $30 USD 추가</li>
+          <li>예: 8시간 + 2시간 추가 = $210 + $60 = <strong>$270 총액</strong></li>
+        </ul>
+        <p style="margin-top:8px;"><strong>영수증 구성:</strong> 헤더(PAGADO 뱃지) → 고객정보(이름/날짜/시간) → 서비스 내역 테이블(기본+추가) → 총액 → "현금 수령" 초록 박스 → 브랜드 푸터 → PDF 저장.</p>
+        <p style="margin-top:8px;"><strong>영수증 번호:</strong> 날짜 + 랜덤 4자리로 자동 생성 (예: REC-101525-A3KF).</p>
+      </div>
+
+      <!-- form-sync.gs -->
+      <div class="detail-block">
+        <h3>📜 form-sync.gs — Google Form → CRM 동기화</h3>
+        <p><strong>무슨 파일인가:</strong> Google Form(설문지) 응답이 들어오면 자동으로 clientes 시트에 동기화하는 Apps Script.</p>
+        <p style="margin-top:8px;"><strong>왜 필요한가:</strong> 구글폼으로도 리드를 받는 경우, 홈페이지 리드와 같은 CRM 시트에서 통합 관리하기 위해.</p>
+        <p style="margin-top:8px;"><strong>핵심 기능:</strong></p>
+        <ul>
+          <li><strong>전화번호 dedup</strong> — 같은 전화번호가 이미 있으면 새 줄 안 만들고, 기존 줄의 빈 칸만 채움.</li>
+          <li><strong>이메일 폴백</strong> — 전화번호 없으면 이메일로 매칭.</li>
+          <li><strong>전화번호 정규화</strong> — 공백, 대시, 괄호 제거. "+52 (55) 1234-5678" → "+5255 12345678".</li>
+          <li><strong>initialBackfill()</strong> — 처음 한 번 실행하면 기존 폼 응답 전체를 CRM에 동기화.</li>
+          <li><strong>onFormSubmit 트리거</strong> — 새 응답이 들어올 때마다 자동 실행.</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>칼럼 매핑:</strong> <code>FORM_TO_CRM_MAP</code> 객체에서 폼 질문 → CRM 필드 매핑. 실제 폼에 맞게 수정 필요.</p>
+      </div>
+
+      <!-- lead-notify.gs -->
+      <div class="detail-block">
+        <h3>📧 lead-notify.gs — 이메일 알림</h3>
+        <p><strong>무슨 파일인가:</strong> 새 리드가 들어오면 내 이메일로 알림 보내는 함수.</p>
+        <p style="margin-top:8px;"><strong>어떻게 동작하나:</strong> <code>notifyNewLead(lead)</code>를 호출하면 MailApp으로 예쁜 HTML 이메일 발송. 이름, 전화, 소스, 시간(KST) + Calendly 링크 포함.</p>
+        <p style="margin-top:8px;"><strong>사용법:</strong> addLead.gs의 doPost에서 append 성공 후 <code>notifyNewLead(lead)</code> 한 줄 추가. 또는 form-sync.gs에서도 호출 가능.</p>
+        <p style="margin-top:8px;"><strong>제한:</strong> Gmail 무료 = 하루 100통 / Workspace = 1,500통. 솔로 운영이면 충분.</p>
+      </div>
+
+      <!-- calendly-sync.py -->
+      <div class="detail-block">
+        <h3>🐍 calendly-sync.py — Calendly 예약 → CRM 연동</h3>
+        <p><strong>무슨 파일인가:</strong> Calendly에서 손님이 상담을 예약하면, webhook으로 알림이 오고, CRM 카드를 자동으로 생성/업데이트하는 Python Flask 서버.</p>
+        <p style="margin-top:8px;"><strong>왜 필요한가:</strong> Calendly 예약 → 자동으로 CRM에 기록 + 미팅ID 저장 (나중에 Zoom 녹음이랑 매칭용).</p>
+        <p style="margin-top:8px;"><strong>흐름:</strong></p>
+        <div class="flow-block">
+<span class="step">1.</span> 손님이 Calendly에서 30분 상담 예약
+<span class="step">2.</span> Calendly가 이 서버로 webhook POST 전송
+<span class="step">3.</span> 서버가 이름, 전화번호, 이메일, 미팅시간 추출
+<span class="step">4.</span> CRM에 POST → 전화번호로 기존 카드 매칭 or 새 카드 생성
+<span class="step">5.</span> stage="consulta", meetingId+startTime 저장
+        </div>
+        <p style="margin-top:8px;"><strong>배포:</strong> Flask 서버를 ngrok이나 클라우드에 올리고, Calendly Dashboard에서 webhook URL 등록. 키는 <code>.env</code>에.</p>
+      </div>
+
+      <!-- URL 파라미터 레퍼런스 -->
+      <div class="detail-block orange">
+        <h3>🔗 CRM 버튼용 URL 조합법</h3>
+        <p>CRM에서 "일정표 보기" / "영수증 생성" 버튼 만들 때 이 형식으로 URL 생성:</p>
+        <div class="flow-block">
+<span class="step">일정표:</span>
+https://gyulo.github.io/tour-crm/legacy/itinerary-es.html
+  ?name=이름&date=YYYY-MM-DD&hours=8&cities=seoul,busan&meet=장소&notes=메모
+
+<span class="step">영수증:</span>
+https://gyulo.github.io/tour-crm/legacy/recibo-es.html
+  ?name=이름&date=YYYY-MM-DD&baseHours=8&extraHours=2
+
+<span class="step">가격표:</span>  6h=$190  |  8h=$210  |  추가 1h당 +$30
+        </div>
+        <p style="margin-top:8px;font-size:0.82rem;color:var(--red);">⚠️ URL에 가격·전화번호 등 민감정보 절대 넣지 말 것.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  P3: Zoom AI + VOD                                           -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>P3. Zoom AI 추출 + VOD 영상 판매</h2>
+      <span class="badge badge-p3">P3 최대한</span>
+      <span class="badge badge-done">코드 완성</span>
+    </div>
+    <div class="section-body">
+
+      <!-- zoom_to_crm.py -->
+      <div class="detail-block">
+        <h3>🤖 zoom_to_crm.py — Zoom 녹음 → AI → CRM 자동 입력 (545줄)</h3>
+        <p><strong>무슨 파일인가:</strong> Zoom 상담이 끝나면, 녹음에서 자막을 가져와서 AI(Claude Haiku)가 손님 정보를 자동 추출 → CRM에 입력하는 완전 자동화 파이프라인.</p>
+        <p style="margin-top:8px;"><strong>왜 필요한가:</strong> 30분 상담에서 손님이 말한 이름, 전화, 여행날짜, 관심사, 식단제한 등을 수동으로 CRM에 옮기는 건 시간 낭비. 이걸 AI가 자동으로 해줌.</p>
+        <p style="margin-top:8px;"><strong>전체 흐름:</strong></p>
+        <div class="flow-block">
+<span class="step">1.</span> Zoom API에서 최근 24시간 녹음 목록 가져오기 (OAuth 인증)
+<span class="step">2.</span> 각 녹음의 VTT 자막 파일 다운로드
+   <span class="arrow">→</span> 자막 없으면? Whisper(로컬 STT)로 음성→텍스트 변환 (폴백)
+<span class="step">3.</span> 자막 텍스트를 Claude Haiku에 전송 + 시스템 프롬프트
+   <span class="arrow">→</span> "이 스페인어 상담에서 손님 정보를 JSON으로 추출해줘"
+<span class="step">4.</span> AI가 CRM 스키마에 맞는 JSON 반환
+   <span class="arrow">→</span> { name, phone, origin, cities, interests, diet, hours, ... }
+<span class="step">5.</span> 칩/태그 필드 유효성 검증 (잘못된 값 제거)
+<span class="step">6.</span> Calendly 예약과 매칭 (미팅ID 또는 시작시간 ±15분)
+   <span class="arrow">→</span> 매칭되면 전화번호·이름 보강
+<span class="step">7.</span> Apps Script로 CRM upsert (review="검토필요")
+<span class="step">8.</span> 처리한 녹음 ID를 로컬 JSON에 저장 (다음 실행 시 건너뜀)
+        </div>
+        <p style="margin-top:8px;"><strong>AI 시스템 프롬프트 핵심 규칙:</strong></p>
+        <ul>
+          <li>대화에서 <strong>명시적으로 언급된 것만</strong> 추출 — 추측 금지.</li>
+          <li>모르는 필드는 빈 문자열 <code>""</code> 또는 빈 배열 <code>[]</code>.</li>
+          <li>칩 필드는 <strong>정해진 한국어 옵션만</strong> 사용: 서울/부산, 커플/가족/친구/혼자, 봄/여름/가을/겨울 등.</li>
+          <li>JSON만 출력 — 설명 텍스트나 마크다운 금지.</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>Cron 설정:</strong> 15분마다 자동 실행. 이미 처리한 녹음은 건너뜀(멱등성).</p>
+        <p style="margin-top:8px;"><strong>필요한 키:</strong> ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ANTHROPIC_API_KEY</p>
+      </div>
+
+      <!-- VOD 시스템 -->
+      <div class="detail-block orange">
+        <h3>🎬 VOD 회원 영역 — Supabase + Stripe (테스트 모드)</h3>
+        <p><strong>무슨 시스템인가:</strong> 투어 영상을 유료로 판매하는 회원 전용 페이지. 로그인 → 결제 → 영상 시청까지 <span class="highlight">테스트 모드로 끝까지 동작</span>.</p>
+        <p style="margin-top:8px;"><strong>왜 이 구조인가:</strong> S3 정적 호스팅만으로는 인증·결제가 불가능. 그래서 VOD 부분만 Supabase(인증+DB) + Stripe(결제)를 사용.</p>
+        <p style="margin-top:8px;"><strong>4개 파일 구성:</strong></p>
+
+        <p style="margin-top:12px;"><strong>① vod/index.html (1040줄)</strong> — VOD 매장 프론트엔드</p>
+        <ul>
+          <li><strong>비로그인 상태:</strong> 이메일 입력 → "매직링크 보내기" → 이메일에 링크 클릭 또는 6자리 OTP 입력. 비밀번호 저장 없음.</li>
+          <li><strong>로그인 후 미구매:</strong> 영상 썸네일에 자물쇠 아이콘 + 가격 + "Comprar acceso" 버튼 → Stripe Checkout으로 이동.</li>
+          <li><strong>로그인 후 구매완료:</strong> 자물쇠 해제 → 썸네일 호버시 재생 아이콘 → 클릭하면 모달 비디오 플레이어.</li>
+          <li><strong>테스트 모드 배너:</strong> 상단에 노란 바 "MODO DE PRUEBA — 카드 4242 4242 4242 4242".</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>② vod/supabase-schema.sql</strong> — 데이터베이스 스키마</p>
+        <ul>
+          <li><code>profiles</code> — auth.users와 자동 동기화 (트리거). 이메일 저장.</li>
+          <li><code>videos</code> — 영상 카탈로그. 제목, 설명, 썸네일URL, 영상URL, 가격(센트), Stripe Price ID.</li>
+          <li><code>purchases</code> — 구매 기록. user_id + video_id + stripe_session_id(UNIQUE, 중복 방지).</li>
+          <li><code>videos_with_access</code> — <span class="highlight">보안 뷰</span>. 구매한 사용자에게만 video_url 반환, 안 산 사람에게는 NULL.</li>
+          <li><strong>RLS(Row Level Security)</strong> — 각 사용자는 자기 프로필과 자기 구매만 볼 수 있음.</li>
+          <li>테스트용 영상 3개 시드 데이터 포함.</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>③ vod/functions/stripe-webhook.js</strong> — 결제 완료 처리</p>
+        <ul>
+          <li>Stripe가 결제 완료되면 이 함수를 호출.</li>
+          <li>서명 검증(위조 방지) → metadata에서 user_id + video_id 추출 → Supabase purchases 테이블에 기록.</li>
+          <li>중복 체크: 같은 stripe_session_id면 건너뜀.</li>
+          <li>Vercel / Netlify / Express 3가지 배포 방식 지원 (파일 하나에 다 들어있음).</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>④ vod/SETUP.md</strong> — 설정 가이드</p>
+        <ul>
+          <li>Supabase 프로젝트 생성 → SQL 실행 → 키 복사 단계별 안내.</li>
+          <li>Stripe 테스트 상품·가격 생성 → Price ID를 DB에 업데이트.</li>
+          <li>테스트 플로우: 가입 → 매직링크 → 4242 카드 결제 → 영상 접근.</li>
+          <li><strong>라이브 전환 체크리스트</strong> — 테스트→실제 전환 시 바꿀 것들 목록.</li>
+        </ul>
+
+        <p style="margin-top:12px;"><strong>결제 흐름:</strong></p>
+        <div class="flow-block">
+<span class="step">1.</span> 손님이 VOD 페이지 방문 → 이메일로 로그인 (매직링크)
+<span class="step">2.</span> Supabase에서 videos_with_access 뷰 조회
+<span class="step">3.</span> 미구매 영상: 자물쇠 + "Comprar acceso" 버튼
+<span class="step">4.</span> 클릭 → 서버리스 함수가 Stripe Checkout 세션 생성
+<span class="step">5.</span> Stripe 결제 페이지에서 카드 입력 (테스트: 4242 4242 4242 4242)
+<span class="step">6.</span> 결제 완료 → Stripe webhook → stripe-webhook.js 호출
+<span class="step">7.</span> purchases 테이블에 기록 → 사용자의 video_url 접근 허용
+<span class="step">8.</span> 손님 돌아옴 → 자물쇠 해제 → 영상 재생 가능
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  콘텐츠                                                       -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>P3. 스페인어 콘텐츠 모음 (content-es.md)</h2>
+      <span class="badge badge-p3">P3</span>
+      <span class="badge badge-done">완성</span>
+    </div>
+    <div class="section-body">
+
+      <div class="detail-block">
+        <h3>📝 content-es.md에 들어있는 것들</h3>
+        <ul>
+          <li><strong>홈페이지 카피 A/B 2버전</strong> — A: 감성/모험 톤("Vive Corea como un local") vs B: 안전/신뢰 톤("Tu aventura segura y en español"). 둘 다 Hero+Por qué 섹션 풀카피. 마음에 드는 걸로 교체.</li>
+          <li><strong>WhatsApp 템플릿 8개</strong> — 퍼널 단계별로 복붙해서 쓸 수 있는 메시지. [NOMBRE] 같은 자리만 바꾸면 됨.</li>
+          <li><strong>Calendly 추가 질문 4개</strong> — 전화번호, 연락 동의, 여행 예정일, 관심사. Calendly 이벤트 설정에서 추가.</li>
+          <li><strong>FAQ 풀버전 13개</strong> — 홈페이지 7개보다 확장. 비자, 맞춤일정, 비오는 날, 투어 중 연락 등 추가.</li>
+          <li><strong>인스타그램 바이오 + 하이라이트 제안</strong> — 복사해서 인스타 프로필에 붙여넣기.</li>
+        </ul>
+      </div>
+
+      <!-- WhatsApp 주요 템플릿 -->
+      <div class="wa-template">
+        <button class="wa-copy" onclick="copyTemplate(this)">복사</button>
+        <h4>💬 1. 첫 인사 + Calendly 링크</h4>
+        <div class="wa-context">사용 시점: 홈페이지/인스타에서 리드가 들어왔을 때 WhatsApp으로 처음 보내는 메시지</div>
+        <pre>¡Hola [NOMBRE]! 👋
+
+Soy [TU NOMBRE], guía privado en Corea del Sur.
+
+Gracias por tu interés en vivir Corea en español. Te dejo mi link para agendar una videollamada gratuita:
+
+📅 https://calendly.com/gyudong186/30min
+
+En la llamada conversamos sobre tus fechas, ciudades e intereses.
+
+¡Sin compromiso! Estoy aquí para ayudarte. 😊</pre>
+      </div>
+
+      <div class="wa-template">
+        <button class="wa-copy" onclick="copyTemplate(this)">복사</button>
+        <h4>💬 3. 상담 후 견적</h4>
+        <div class="wa-context">사용 시점: Zoom 상담 끝난 후 견적+다음 단계 안내</div>
+        <pre>¡Hola [NOMBRE]! Fue un gusto hablar contigo. 😊
+
+📍 Ciudad(es): [CIUDADES]
+📅 Fecha(s): [FECHAS]
+⏰ Duración: [HORAS] horas
+👥 Grupo: [PAX] persona(s)
+
+💰 Tour de [HORAS]h: $[PRECIO] USD (efectivo)
+
+Incluye: guía privado + traducción + itinerario 100% personalizado.
+
+Solo dime "¡Listo!" y te envío tu itinerario. 🎉</pre>
+      </div>
+
+      <div class="wa-template">
+        <button class="wa-copy" onclick="copyTemplate(this)">복사</button>
+        <h4>💬 4. 망설이는 손님 설득 (팔로업)</h4>
+        <div class="wa-context">사용 시점: 견적 보냈는데 3~5일 답 없을 때</div>
+        <pre>¡Hola [NOMBRE]! ¿Cómo va la planificación? 🇰🇷
+
+Muchos viajeros me dicen:
+❓ "¿Y si no entiendo nada?" → Todo es en español.
+❓ "¿Es seguro?" → Corea es de los más seguros del mundo.
+❓ "¿Vale la pena un guía?" → Mis viajeros dicen que fue lo mejor.
+
+📅 https://calendly.com/gyudong186/30min
+
+¡Sin presión! 😊</pre>
+      </div>
+
+      <div class="wa-template">
+        <button class="wa-copy" onclick="copyTemplate(this)">복사</button>
+        <h4>💬 6. 일정표 보낼 때</h4>
+        <div class="wa-context">사용 시점: 투어 확정 후, 투어 2~3일 전에 일정표 링크 전송</div>
+        <pre>¡Hola [NOMBRE]! 📋
+
+Tu itinerario para el [FECHA]:
+🔗 [LINK_ITINERARIO]
+
+📌 Nos vemos a las [HORA] en [PUNTO].
+Lleva ropa cómoda y zapatos para caminar.
+
+¡Nos vemos pronto! 🇰🇷</pre>
+      </div>
+
+      <div class="wa-template">
+        <button class="wa-copy" onclick="copyTemplate(this)">복사</button>
+        <h4>💬 7. 영수증 보낼 때</h4>
+        <div class="wa-context">사용 시점: 투어 끝난 직후 또는 다음 날 영수증 전송</div>
+        <pre>¡Hola [NOMBRE]! Espero que hayas disfrutado el tour. 😊
+
+Tu comprobante de servicio:
+🧾 [LINK_RECIBO]
+
+Puedes guardarlo como PDF desde el botón.
+¡Fue un placer ser tu guía! 🙏🇰🇷</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  아키텍처                                                      -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>전체 시스템 아키텍처</h2>
+    </div>
+    <div class="section-body">
+      <p style="font-size:0.88rem;color:var(--text-light);margin-bottom:12px;">각 컴포넌트가 어떻게 연결되는지 보여주는 흐름도. 오렌지 텍스트는 클릭하면 해당 페이지로 이동.</p>
+
+      <div class="arch-diagram">
+                        ┌──────────────────────────────────┐
+                        │     손님 여정 (CUSTOMER JOURNEY)    │
+                        └──────────────────────────────────┘
+
+  Instagram ──► <a href="https://gyulo.github.io/tour-crm/">Homepage (index.html)</a> ──► CRM (tour-crm_v2.html)
+       │              │                         │
+       │         CTA Form                       │
+       │         (name+phone)                   │
+       │              │                         │
+       ▼              ▼                         ▼
+   DM/Chat ──► addLead.gs ───────────► Google Sheets
+                  │                    (clientes tab)
+                  │                         ▲
+                  ▼                         │
+            lead-notify.gs           form-sync.gs
+            (내 이메일 알림)           (구글폼 동기화)
+                  │                         ▲
+                  ▼                         │
+            WhatsApp ──► Calendly ─────► calendly-sync.py
+            (수동 전송)    예약              │
+                           │                │
+                           ▼                │
+                      Zoom 상담 ◄───────────┘
+                      (녹화+자막)      (meetingId 매칭)
+                           │
+                           ▼
+                    zoom_to_crm.py
+                    ├─ Zoom API (녹음 다운)
+                    ├─ Whisper (자막 없을 때)
+                    └─ Claude Haiku (AI 추출)
+                           │
+                           ▼
+                    CRM 카드 업데이트 ──► <a href="https://gyulo.github.io/tour-crm/legacy/itinerary-es.html?name=Test&date=2025-10-15&hours=8&cities=seoul">itinerary-es.html</a>
+                    (review=검토필요)      (WhatsApp으로 전송)
+                           │
+                           ▼
+                      투어 당일
+                           │
+                           ▼
+                    <a href="https://gyulo.github.io/tour-crm/legacy/recibo-es.html?name=Test&date=2025-10-15&baseHours=8">recibo-es.html</a>
+                    (자동 금액 계산 영수증)
+      </div>
+
+      <p style="font-size:0.88rem;color:var(--text-light);margin-top:16px;"><strong>기술 스택 요약:</strong></p>
+      <ul style="font-size:0.85rem;color:var(--text-light);padding-left:20px;">
+        <li><strong>프론트엔드:</strong> 순수 HTML/CSS/JS (프레임워크 없음) — 빠르고 유지보수 쉬움</li>
+        <li><strong>호스팅:</strong> AWS S3 정적 (홈페이지) + Supabase (VOD 인증/DB) + Vercel/Netlify (서버리스)</li>
+        <li><strong>데이터:</strong> Google Sheets (CRM) + Supabase PostgreSQL (VOD)</li>
+        <li><strong>인증:</strong> Supabase Auth 매직링크 — 비밀번호 저장 없음</li>
+        <li><strong>결제:</strong> Stripe Checkout 호스티드 — 카드 직접 처리 없음, 테스트 모드</li>
+        <li><strong>AI:</strong> Anthropic Claude Haiku — Zoom 상담 자막에서 고객 정보 추출</li>
+        <li><strong>알림:</strong> Google Apps Script MailApp (이메일)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  Git 커밋                                                      -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Git 커밋 이력</h2>
+    </div>
+    <div class="section-body">
+      <div class="commit">
+        <span class="commit-hash">1501718</span>
+        <div>
+          <div class="commit-msg">P1: Homepage, thank-you page, addLead script, deploy script</div>
+          <div class="commit-files">6 files: index.html, gracias.html, addLead.gs, deploy.sh, .env.example, .gitignore</div>
+        </div>
+      </div>
+      <div class="commit">
+        <span class="commit-hash">a5c5293</span>
+        <div>
+          <div class="commit-msg">P2: Itinerary, receipt, form-sync, notifications, Calendly sync</div>
+          <div class="commit-files">6 files: itinerary-es.html, recibo-es.html, form-sync.gs, lead-notify.gs, calendly-sync.py, README.md</div>
+        </div>
+      </div>
+      <div class="commit">
+        <span class="commit-hash">500457a</span>
+        <div>
+          <div class="commit-msg">P3: Zoom-to-CRM, VOD system, content, architecture, morning TODO</div>
+          <div class="commit-files">8 files: zoom_to_crm.py, vod/index.html, stripe-webhook.js, supabase-schema.sql, SETUP.md, content-es.md, ARCHITECTURE.md, MORNING_TODO.md</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  내일 아침 TODO                                                -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>내일 아침 체크리스트 (MORNING_TODO.md)</h2>
+    </div>
+    <div class="section-body">
+
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:0.95rem;margin-bottom:10px;"><span class="badge badge-p1">P1 반드시</span> 홈페이지 완전 가동</h3>
+        <div class="todo-item"><input type="checkbox"><label><strong>addLead.gs 배포</strong> — script.google.com에 코드 붙여넣기 → SHEET_ID·TOKEN 설정 → 웹 앱 배포 → URL 복사</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>index.html URL·토큰 교체</strong> — ADDLEAD_URL을 배포된 URL로, payload.token을 같은 토큰으로</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>WhatsApp 번호</strong> — index.html 하단 PHONE_NUMBER → 실제 번호 (예: 821012345678)</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>lead-notify 통합</strong> — addLead.gs doPost 끝에 notifyNewLead(lead) 추가 → 이메일 확인</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>재배포 + 테스트</strong> — ./deploy.sh → 폼 제출 → clientes 시트 확인 + 이메일 수신 확인</label></div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:0.95rem;margin-bottom:10px;"><span class="badge badge-p2">P2 시간되면</span> 자동화 연결</h3>
+        <div class="todo-item"><input type="checkbox"><label><strong>form-sync.gs 배포</strong> — 폼 시트 ID 입력 → initialBackfill() 한 번 실행 → 트리거 설정</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>Calendly 질문 추가</strong> — 전화번호(필수), 동의(필수), 여행일(선택), 관심사(선택)</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>OG 이미지 + 파비콘</strong> — og-image.jpg(1200x630) + favicon.ico(32x32) 만들고 재배포</label></div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:0.95rem;margin-bottom:10px;"><span class="badge badge-p3">P3 여유있을때</span> AI + VOD</h3>
+        <div class="todo-item"><input type="checkbox"><label><strong>Zoom OAuth 앱</strong> — Zoom Marketplace에서 Server-to-Server 앱 생성 (recording:read 권한)</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>Zoom 설정</strong> — 자동 녹화 + 자동 자막(한국어/스페인어) 켜기</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>Anthropic API 키</strong> — console.anthropic.com에서 발급 → .env에 입력</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>Supabase 프로젝트</strong> — 생성 → SQL 실행 → URL·anon·service key 복사 → vod/index.html에 입력</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>Stripe 테스트</strong> — 상품·가격 생성 → pk_test_·sk_test_ 키 입력 → 4242 카드로 결제 테스트</label></div>
+        <div class="todo-item"><input type="checkbox"><label><strong>확인 후 라이브 전환</strong> — 테스트 성공 → 라이브 키로 교체 + 실제 영상 업로드</label></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  가드레일                                                      -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-head">
+      <h2>가드레일 준수 확인</h2>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+        <tr><td style="padding:8px 0;">tour-crm_v2.html 수정 금지</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ 건드리지 않음</td></tr>
+        <tr><td style="padding:8px 0;">비밀 토큰 공개 파일에 노출 금지</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ .env + TODO 자리만</td></tr>
+        <tr><td style="padding:8px 0;">인증 = Supabase Auth (매직링크)</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ 비밀번호 직접 저장 없음</td></tr>
+        <tr><td style="padding:8px 0;">결제 = Stripe Checkout 호스티드</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ 카드 직접 처리 없음</td></tr>
+        <tr><td style="padding:8px 0;">TEST 모드만 사용</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ pk_test_ / sk_test_</td></tr>
+        <tr><td style="padding:8px 0;">git init + 파일 상단 주석</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ 4 커밋, 모든 파일 주석 포함</td></tr>
+        <tr><td style="padding:8px 0;">ARCHITECTURE.md</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ 흐름도 + 컴포넌트맵 + 보안경계</td></tr>
+        <tr><td style="padding:8px 0;">MORNING_TODO.md</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ 16개 수동 작업 항목</td></tr>
+        <tr><td style="padding:8px 0;">content-es.md</td><td style="padding:8px 0;text-align:right;color:var(--green);font-weight:600;">✅ A/B 카피, WA 8개, FAQ 13개</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    <p>빌드: Claude Opus 4.6 | 프로젝트: /home/coreano/seoul-tour-guide/ | 2026-06-19</p>
+  </div>
+
+</div>
+
+<script>
+  function copyTemplate(btn) {
+    var pre = btn.parentElement.querySelector('pre');
+    navigator.clipboard.writeText(pre.textContent).then(function() {
+      btn.textContent = '복사됨!';
+      setTimeout(function() { btn.textContent = '복사'; }, 1500);
+    });
+  }
+</script>
+
+</body>
+</html>

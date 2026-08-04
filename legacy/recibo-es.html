@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<!--
+  recibo-es.html — Comprobante/recibo de tour (español)
+  Parámetros URL: ?name=&date=&baseHours=&extraHours=
+  Cálculo automático: 6h=190 / 8h=210 / +30 USD por hora extra
+  NO incluir teléfono en URL. Mobile + print + PDF.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprobante de Servicio — Corea en Español</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #F97316;
+      --teal: #0D9488;
+      --teal-dark: #0F766E;
+      --cream: #FFF7ED;
+      --text: #1a1a1a;
+      --text-light: #6B7280;
+      --white: #FFFFFF;
+      --border: #E5E7EB;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: #F3F4F6;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .receipt {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--white);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    /* Header */
+    .receipt-header {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: var(--white);
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .receipt-header h1 { font-size: 1.3rem; }
+    .receipt-header .receipt-id {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+    .receipt-header .receipt-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Client info */
+    .client-info {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .client-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .client-row:last-child { margin-bottom: 0; }
+    .client-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+    .client-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Line items */
+    .items {
+      padding: 24px 32px;
+    }
+    .items h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+    .item-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .item-table th {
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-light);
+      padding: 8px 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .item-table th:last-child { text-align: right; }
+    .item-table td {
+      padding: 12px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: top;
+    }
+    .item-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .item-desc {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* Totals */
+    .totals {
+      padding: 0 32px 24px;
+    }
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 0.9rem;
+    }
+    .total-line.subtotal {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      color: var(--text-light);
+    }
+    .total-line.grand {
+      border-top: 2px solid var(--text);
+      margin-top: 8px;
+      padding-top: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--teal-dark);
+    }
+
+    /* Payment info */
+    .payment-info {
+      background: #F0FDF4;
+      border-top: 1px solid #BBF7D0;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .payment-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .payment-text h3 {
+      font-size: 0.9rem;
+      color: #166534;
+      margin-bottom: 2px;
+    }
+    .payment-text p {
+      font-size: 0.8rem;
+      color: #15803D;
+    }
+
+    /* Footer */
+    .receipt-footer {
+      padding: 20px 32px;
+      text-align: center;
+      background: var(--cream);
+      border-top: 1px solid var(--border);
+    }
+    .receipt-footer p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .receipt-footer .brand {
+      font-weight: 600;
+      color: var(--teal-dark);
+    }
+
+    /* PDF button */
+    .pdf-btn-wrap {
+      text-align: center;
+      padding: 24px;
+    }
+    .pdf-btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: var(--orange);
+      color: var(--white);
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-family: inherit;
+    }
+    .pdf-btn:hover { background: #EA580C; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+    .empty-state h2 { margin-bottom: 8px; color: var(--text); }
+
+    /* Print */
+    @media print {
+      body { background: white; padding: 0; }
+      .receipt { box-shadow: none; border-radius: 0; }
+      .pdf-btn-wrap { display: none; }
+      .receipt-header, .payment-info { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+
+    @media (max-width: 480px) {
+      .receipt-header { flex-direction: column; text-align: center; gap: 12px; padding: 20px; }
+      .client-info, .items, .totals { padding-left: 20px; padding-right: 20px; }
+      .payment-info { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="receipt" id="receipt">
+    <!-- Filled by JavaScript -->
+  </div>
+
+  <div class="pdf-btn-wrap" id="pdfBtnWrap">
+    <button class="pdf-btn" onclick="window.print()">Guardar como PDF</button>
+  </div>
+
+  <script>
+    /**
+     * PRICING LOGIC
+     * 6 hours = $190 USD
+     * 8 hours = $210 USD
+     * Each extra hour = +$30 USD
+     */
+    var PRICING = {
+      6: 190,
+      8: 210,
+      EXTRA_PER_HOUR: 30
+    };
+
+    function getParams() {
+      var params = {};
+      var search = window.location.search.substring(1);
+      if (!search) return params;
+      search.split('&').forEach(function(pair) {
+        var parts = pair.split('=');
+        params[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || '');
+      });
+      return params;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function calculatePricing(baseHours, extraHours) {
+      baseHours = parseInt(baseHours) || 6;
+      extraHours = parseInt(extraHours) || 0;
+
+      // Determine base price
+      var basePrice;
+      if (baseHours <= 6) {
+        basePrice = PRICING[6];
+        baseHours = 6;
+      } else {
+        basePrice = PRICING[8];
+        baseHours = 8;
+      }
+
+      var extraPrice = extraHours * PRICING.EXTRA_PER_HOUR;
+      var total = basePrice + extraPrice;
+
+      return {
+        baseHours: baseHours,
+        basePrice: basePrice,
+        extraHours: extraHours,
+        extraPrice: extraPrice,
+        totalHours: baseHours + extraHours,
+        total: total
+      };
+    }
+
+    function render() {
+      var p = getParams();
+      var container = document.getElementById('receipt');
+
+      if (!p.name && !p.date) {
+        container.innerHTML = '<div class="empty-state">' +
+          '<h2>Comprobante no disponible</h2>' +
+          '<p>Este enlace necesita parámetros para generar el comprobante.</p>' +
+          '<p style="margin-top:12px;font-size:0.85rem;">Parámetros: ?name=&date=&baseHours=&extraHours=</p>' +
+          '</div>';
+        document.getElementById('pdfBtnWrap').style.display = 'none';
+        return;
+      }
+
+      var name = p.name || 'Cliente';
+      var date = p.date || new Date().toLocaleDateString('es-MX');
+      var calc = calculatePricing(p.baseHours, p.extraHours);
+
+      // Generate receipt ID
+      var receiptId = 'REC-' + date.replace(/[^0-9]/g, '').slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+      var html = '';
+
+      // Header
+      html += '<div class="receipt-header">' +
+        '<div>' +
+        '<h1>Comprobante de Servicio</h1>' +
+        '<div class="receipt-id">N° ' + receiptId + '</div>' +
+        '</div>' +
+        '<div class="receipt-badge">PAGADO</div>' +
+        '</div>';
+
+      // Client info
+      html += '<div class="client-info">' +
+        '<div class="client-row"><span class="client-label">Cliente</span><span class="client-value">' + escapeHtml(name) + '</span></div>' +
+        '<div class="client-row"><span class="client-label">Fecha del tour</span><span class="client-value">' + escapeHtml(date) + '</span></div>' +
+        '<div class="client-row"><span class="client-label">Duración total</span><span class="client-value">' + calc.totalHours + ' horas</span></div>' +
+        '</div>';
+
+      // Line items
+      html += '<div class="items">' +
+        '<h2>Detalle del servicio</h2>' +
+        '<table class="item-table">' +
+        '<thead><tr><th>Concepto</th><th>Monto</th></tr></thead>' +
+        '<tbody>';
+
+      // Base service
+      html += '<tr>' +
+        '<td>Guía privado y traducción en español<div class="item-desc">Tour personalizado — ' + calc.baseHours + ' horas base</div></td>' +
+        '<td>$' + calc.basePrice + ' USD</td>' +
+        '</tr>';
+
+      // Extra hours (if any)
+      if (calc.extraHours > 0) {
+        html += '<tr>' +
+          '<td>Horas adicionales<div class="item-desc">' + calc.extraHours + ' hora' + (calc.extraHours > 1 ? 's' : '') + ' extra × $' + PRICING.EXTRA_PER_HOUR + ' USD</div></td>' +
+          '<td>$' + calc.extraPrice + ' USD</td>' +
+          '</tr>';
+      }
+
+      html += '</tbody></table></div>';
+
+      // Totals
+      html += '<div class="totals">';
+
+      if (calc.extraHours > 0) {
+        html += '<div class="total-line subtotal"><span>Servicio base (' + calc.baseHours + 'h)</span><span>$' + calc.basePrice + ' USD</span></div>';
+        html += '<div class="total-line subtotal"><span>Horas extra (' + calc.extraHours + 'h)</span><span>$' + calc.extraPrice + ' USD</span></div>';
+      }
+
+      html += '<div class="total-line grand"><span>Total</span><span>$' + calc.total + ' USD</span></div>';
+      html += '</div>';
+
+      // Payment info
+      html += '<div class="payment-info">' +
+        '<div class="payment-icon">💵</div>' +
+        '<div class="payment-text">' +
+        '<h3>Pago recibido en efectivo</h3>' +
+        '<p>Monto: $' + calc.total + ' USD — Fecha: ' + escapeHtml(date) + '</p>' +
+        '</div>' +
+        '</div>';
+
+      // Footer
+      html += '<div class="receipt-footer">' +
+        '<p class="brand">Corea en Español</p>' +
+        '<p>Servicio de guía turístico privado y traducción</p>' +
+        '<p>Seúl y Busán, Corea del Sur</p>' +
+        '<p style="margin-top:8px;">¡Gracias por tu confianza! Espero que hayas disfrutado Corea.</p>' +
+        '</div>';
+
+      container.innerHTML = html;
+      document.title = 'Comprobante — ' + name + ' — Corea en Español';
+    }
+
+    render();
+  </script>
+
+</body>
+</html>
