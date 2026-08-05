@@ -168,6 +168,13 @@
     .cal-chip{display:none;}
     .cal-dot{display:inline-flex;}
   }
+
+/* 결제 가능 손님 안의 소분류 머리 */
+.subhead{display:flex;align-items:center;gap:6px;margin:10px 0 4px;padding:3px 8px;
+  font-size:11px;font-weight:700;color:#8a6d1e;background:#FDF4E0;
+  border-left:3px solid #D98A1E;border-radius:0 6px 6px 0;letter-spacing:-.2px}
+.subhead .cnt{margin-left:auto;background:#D98A1E;color:#fff;border-radius:8px;
+  padding:0 6px;font-size:10px}
 </style>
 </head>
 <body>
@@ -402,11 +409,28 @@ function render(){
   if(view==="kanban"){
     wrap.innerHTML=`<div class="kanban">${STAGES.map(s=>{
       const cs=list.filter(c=>c.stage===s.id);
+      /* 「결제 가능 손님」은 한 덩어리로 두면 누가 급한지 안 보입니다.
+         a(답만 하면 됨)부터 f(보류)까지 결제까지의 거리 순으로 묶어서 그립니다.
+         열을 다섯 개로 쪼개는 대신 한 열 안에서 나누는 이유는, 쪼개면 다른 단계
+         (여행 확정·여행 중…)가 화면 밖으로 밀려나기 때문입니다. */
+      let body;
+      if(s.id==='lead'){
+        body=SUBSTAGES.map(sub=>{
+          const g=cs.filter(c=>(c.sub||'d')===sub.id);
+          if(!g.length) return '';
+          return `<div class="subhead" title="${sub.hint}">${sub.label}<span class="cnt">${g.length}</span></div>`
+                 + g.map(card).join('');
+        }).join('');
+        const rest=cs.filter(c=>!SUBSTAGES.some(x=>x.id===(c.sub||'d')));
+        if(rest.length) body+=`<div class="subhead">미분류<span class="cnt">${rest.length}</span></div>`+rest.map(card).join('');
+      } else {
+        body=cs.map(card).join('');
+      }
       return `<div class="col">
         <h3><span class="dot" style="background:${s.color}"></span>${s.label}
           ${s.deposit?'<span class="dep">💵$'+DEPOSIT_AMT+'</span>':''}
           <span class="cnt">${cs.length}</span></h3>
-        ${cs.map(card).join('')||'<div style="font-size:11px;color:var(--muted);padding:8px 6px;">—</div>'}
+        ${body||'<div style="font-size:11px;color:var(--muted);padding:8px 6px;">—</div>'}
       </div>`;}).join('')}</div>`;
   } else if(view==="calendar"){
     document.getElementById('wrap').innerHTML=calendarHTML(list);
