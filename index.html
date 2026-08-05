@@ -198,13 +198,26 @@
 
 <script>
 /* ---------- model ---------- */
+/* 2026-08-05 회장님 지시로 단계를 다시 짰습니다.
+   전에는 파는 과정이 다섯 칸(SNS→DM→줌1→링크→줌2)이었고 그 뒤가 없었습니다.
+   이제 **앞의 다섯을 「결제 가능 손님」 한 칸으로 접고**, 뒤에 여행 중·여행 후·
+   한 번 더를 붙였습니다. 파는 과정의 세부는 칸을 늘리는 대신 아래 SUBSTAGES
+   (a~f)로 옮겼습니다 — 칸반에 열이 열 개면 한눈에 안 들어옵니다. */
 const STAGES=[
-  {id:"sns",label:"SNS 발견",color:"#E0457F"},
-  {id:"dm",label:"DM 가격안내",color:"#D98A1E"},
-  {id:"zoom1",label:"1차 ZOOM",color:"#C8A21E",deposit:true},
-  {id:"link",label:"링크 공유",color:"#1E88A8"},
-  {id:"zoom2",label:"2차 ZOOM",color:"#6A4BC4"},
-  {id:"confirmed",label:"가이드 확정",color:"#2F7D5B"},
+  {id:"lead",label:"결제 가능 손님",color:"#D98A1E"},
+  {id:"confirmed",label:"여행 확정",color:"#2F7D5B",deposit:true},
+  {id:"traveling",label:"여행 중",color:"#0E7C86"},
+  {id:"done",label:"여행 후",color:"#5B6B7C"},
+  {id:"again",label:"한 번 더",color:"#B8860B"},
+  {id:"hold",label:"보류·취소",color:"#9AA0AB"},
+];
+/* 「결제 가능 손님」 안에서 어디까지 갔는지. 결제까지의 거리 순입니다. */
+const SUBSTAGES=[
+  {id:"a",label:"a 답만 하면 됨",  hint:"요청이 구체적. 내 답 한 마디가 남음"},
+  {id:"b",label:"b 줌 잡힘",       hint:"줌 예약됨 / 1차 줌 함"},
+  {id:"c",label:"c 링크만 보냄",   hint:"Calendly 보냈고 반응 확인 안 됨"},
+  {id:"d",label:"d 날짜 없음",     hint:"관심은 있는데 시기가 미정"},
+  {id:"f",label:"f 보류·거절",     hint:"조건이 안 맞아 멈춤. 조건 바뀌면 살아남"},
 ];
 const DEPOSIT_FROM=STAGES.findIndex(s=>s.deposit); // 1차 ZOOM index
 const DEPOSIT_AMT=50;
@@ -653,6 +666,7 @@ function renderDrawer(){
 
     <div class="grp"><h4>⑤ 영업 · Operación</h4>
       <div class="field"><label>퍼널 단계</label><div class="stagesel" id="d_stage">${STAGES.map(s=>`<span class="ch ${d.stage===s.id?'on':''}" data-v="${s.id}" style="--stagecol:${s.color}">${s.label}</span>`).join('')}</div></div>
+      <div class="field" id="d_subwrap" style="${d.stage==='lead'?'':'display:none'}"><label>어디까지 갔나 <span class="es">결제 가능 손님일 때만</span></label><div class="stagesel" id="d_sub">${SUBSTAGES.map(s=>`<span class="ch ${(d.sub||'d')===s.id?'on':''}" data-v="${s.id}" title="${s.hint}" style="--stagecol:#D98A1E">${s.label}</span>`).join('')}</div></div>
       <div class="field"><label>투어 시간</label><div class="chips" id="d_hours">${["4시간","6시간","8시간","다중일"].map(o=>`<span class="ch ${d.hours===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
       <div class="row2">
         <div class="field"><label>🏨 체류 시작일 <span class="es">Llega · 손님이 한국 오는 날</span></label><input type="date" id="d_hireStart" value="${d.hireStart||d.tourDate||''}"></div>
@@ -698,7 +712,7 @@ function wireDrawer(){
   // stage select
   const ss=document.getElementById('d_stage');ss.querySelectorAll('.ch').forEach(ch=>ch.onclick=()=>{ss.querySelectorAll('.ch').forEach(x=>x.classList.remove('on'));ch.classList.add('on');
     // auto deposit when >= 1차 ZOOM
-    const idx=STAGES.findIndex(s=>s.id===ch.dataset.v);if(idx>=DEPOSIT_FROM)document.getElementById('d_deposit').classList.add('on');});
+    const idx=STAGES.findIndex(s=>s.id===ch.dataset.v);if(idx>=DEPOSIT_FROM)document.getElementById('d_deposit').classList.add('on');const sw=document.getElementById('d_subwrap');if(sw)sw.style.display=(ch.dataset.v==='lead')?'':'none';});
   // deposit toggle
   document.getElementById('d_deposit').onclick=function(){this.classList.toggle('on');};
   // 가고 싶은 곳 링크: 입력하는 즉시 클릭 가능한 미리보기 갱신
@@ -833,7 +847,7 @@ function saveClient(){
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
     diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),tourDays:readTourDays(),maybeDays:readMaybeDays(),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
-    stage:document.querySelector('#d_stage .ch.on').dataset.v,depositPaid:document.getElementById('d_deposit').classList.contains('on'),
+    stage:document.querySelector('#d_stage .ch.on').dataset.v,sub:(document.querySelector('#d_sub .ch.on')||{dataset:{}}).dataset.v||'',depositPaid:document.getElementById('d_deposit').classList.contains('on'),
     tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
   else{clients.push(obj);}
