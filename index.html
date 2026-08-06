@@ -175,6 +175,9 @@
   border-left:3px solid #D98A1E;border-radius:0 6px 6px 0;letter-spacing:-.2px}
 .subhead .cnt{margin-left:auto;background:#D98A1E;color:#fff;border-radius:8px;
   padding:0 6px;font-size:10px}
+.waitb{display:flex;align-items:center;gap:6px;margin:4px 0 2px;padding:3px 7px;border-radius:6px;
+  color:#fff;font-size:11px;font-weight:600;line-height:1.35}
+.waitb span{font-weight:400;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -415,6 +418,7 @@ function render(){
          (여행 확정·여행 중…)가 화면 밖으로 밀려나기 때문입니다. */
       let body;
       if(s.id==='lead'){
+        cs.sort((a,b)=>((b.myTurn?b.waitDays||0:-1)-(a.myTurn?a.waitDays||0:-1)));
         body=SUBSTAGES.map(sub=>{
           const g=cs.filter(c=>(c.sub||'d')===sub.id);
           if(!g.length) return '';
@@ -447,10 +451,23 @@ function render(){
   document.querySelector('.save-note')?.remove();
   wrap.insertAdjacentHTML('beforeend','<div class="save-note">데이터는 이 브라우저에 자동 저장됩니다 · 새 손님은 + 버튼</div>');
 }
+
+/* ── 며칠 기다렸나 ────────────────────────────────────────
+   이 데이터에서 손님을 잃은 자리는 전부 「답이 없어서」였습니다.
+   그래서 단계보다 이게 먼저 보여야 합니다. 카드를 열지 않아도 보이게. */
+function waitBadge(c){
+  if(!c.myTurn||c.waitDays==null) return '';
+  const d=c.waitDays;
+  if(d<2) return '';
+  const col = d>=30 ? '#B14A3B' : (d>=7 ? '#C0492F' : '#B8860B');
+  const txt = d>=30 ? `🔴 ${d}일째 답 없음` : `🔴 ${d}일 기다리는 중`;
+  return `<div class="waitb" style="background:${col}">${txt}${c.lastMsg?`<span>${escH(String(c.lastMsg).slice(0,34))}</span>`:''}</div>`;
+}
 function card(c){
   const si=STAGES.findIndex(s=>s.id===c.stage);
   return `<div class="card" style="--stripe:${stripe(c)}" onclick="openClient(${c.id})">
     <div class="nm">${c.name||'(이름)'}${c.ticket?`<span style="margin-left:auto;font-size:10px;color:var(--accent);font-family:'IBM Plex Mono',monospace;background:var(--chip);padding:1px 6px;border-radius:6px">${escH(c.ticket)}</span>`:''}</div>
+    ${waitBadge(c)}
     ${c.ig?`<div class="ig">${c.ig}</div>`:''}
     <div class="meta"><span>${c.origin||'-'}${c.city?' · '+c.city:''}</span><span>${c.pax||'?'}명</span>${c.season?'<span>'+c.season+'</span>':''}${extractUrls(c.wishLinks).length?'<span>📍'+extractUrls(c.wishLinks).length+' 링크</span>':''}</div>
     ${(c.interests&&c.interests.length)?`<div class="tags">${c.interests.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
