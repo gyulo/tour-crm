@@ -214,13 +214,28 @@
    한 번 더를 붙였습니다. 파는 과정의 세부는 칸을 늘리는 대신 아래 SUBSTAGES
    (a~f)로 옮겼습니다 — 칸반에 열이 열 개면 한눈에 안 들어옵니다. */
 const STAGES=[
-  {id:"lead",label:"결제 가능 손님",color:"#D98A1E"},
-  {id:"confirmed",label:"여행 확정",color:"#2F7D5B",deposit:true},
-  {id:"traveling",label:"여행 중",color:"#0E7C86"},
+  {id:"lead",label:"결제 가능 손님",color:"#DBA400"},
+  {id:"confirmed",label:"여행 확정",color:"#1E88E5",deposit:true},
+  {id:"traveling",label:"여행 중",color:"#2E9E44"},
   {id:"done",label:"여행 후",color:"#5B6B7C"},
   {id:"again",label:"한 번 더",color:"#B8860B"},
   {id:"hold",label:"보류·취소",color:"#9AA0AB"},
 ];
+/* 왓츠앱 연락처 이모지와 같은 말·같은 색 (contact_refresh.sh 규칙 미러)
+   🔴 곧(2주 내 도착) · 🟢 여행 중 · 🔵 예정 · ✅ 다함(done·again·날짜 지남) · 🟡 상담 중 */
+const WA_COLORS={"🔴":"#E53935","🟢":"#2E9E44","🔵":"#1E88E5","✅":"#5B6B7C","🟡":"#DBA400"};
+function waCat(c){
+  const p=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+  const today=new Date();today.setHours(0,0,0,0);
+  if(c.stage==='done'||c.stage==='again')return '✅';
+  if(c.stage==='lead'||c.stage==='hold')return '🟡';
+  const st=p(c.hireStart)||p(c.tourDate);
+  const en=p(c.hireEnd)||st;
+  if(!st)return c.stage==='traveling'?'🟢':'🟡';
+  if(en&&en<today)return '✅';
+  if(st<=today)return '🟢';
+  return (st-today<=14*86400000)?'🔴':'🔵';
+}
 /* 「결제 가능 손님」 안에서 어디까지 갔는지. 결제까지의 거리 순입니다. */
 const SUBSTAGES=[
   {id:"a",label:"a 답만 하면 됨",  hint:"요청이 구체적. 내 답 한 마디가 남음"},
@@ -444,7 +459,7 @@ function render(){
       <tbody>${list.map(c=>{const st=STAGES.find(s=>s.id===c.stage);return `<tr style="--stripe:${stripe(c)}" onclick="openClient(${c.id})">
         <td data-l="이름"><b>${c.name||'(이름)'}</b></td><td data-l="인스타"><span class="ig" style="color:var(--accent)">${c.ig||'-'}</span></td>
         <td data-l="국가">${c.origin||'-'}${c.city?' / '+c.city:''}</td><td data-l="시즌">${c.season||'-'}</td><td data-l="인원">${c.pax||'-'}명</td>
-        <td data-l="단계"><span class="pill-stage" style="background:${st.color}">${st.label}</span></td>
+        <td data-l="단계"><span class="pill-stage" style="background:${WA_COLORS[waCat(c)]}">${waCat(c)} ${st.label}</span></td>
         <td data-l="예약금">${depositOf(c)?'<span class="badge-dep">$'+DEPOSIT_AMT+'</span>':'<span style="color:var(--muted)">—</span>'}</td></tr>`;}).join('')}</tbody></table>
       ${list.length?'':'<div class="empty">검색 결과가 없어요.</div>'}`;
   }
@@ -466,7 +481,7 @@ function waitBadge(c){
 function card(c){
   const si=STAGES.findIndex(s=>s.id===c.stage);
   return `<div class="card" style="--stripe:${stripe(c)}" onclick="openClient(${c.id})">
-    <div class="nm">${c.name||'(이름)'}${c.ticket?`<span style="margin-left:auto;font-size:10px;color:var(--accent);font-family:'IBM Plex Mono',monospace;background:var(--chip);padding:1px 6px;border-radius:6px">${escH(c.ticket)}</span>`:''}</div>
+    <div class="nm"><span title="왓츠앱 연락처와 같은 상태색">${waCat(c)}</span>${c.name||'(이름)'}${c.ticket?`<span style="margin-left:auto;font-size:10px;color:var(--accent);font-family:'IBM Plex Mono',monospace;background:var(--chip);padding:1px 6px;border-radius:6px">${escH(c.ticket)}</span>`:''}</div>
     ${waitBadge(c)}
     ${c.ig?`<div class="ig">${c.ig}</div>`:''}
     <div class="meta"><span>${c.origin||'-'}${c.city?' · '+c.city:''}</span><span>${c.pax||'?'}명</span>${c.season?'<span>'+c.season+'</span>':''}${extractUrls(c.wishLinks).length?'<span>📍'+extractUrls(c.wishLinks).length+' 링크</span>':''}</div>
