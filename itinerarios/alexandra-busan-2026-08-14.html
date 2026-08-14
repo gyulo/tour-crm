@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<!--
+  Itinerario personalizado — Claudia Patricia Herrera (familia, 5 pax)
+  Martes 28 de julio de 2026 · Seongsu + Itaewon
+  Basado en el mapa guardado de Naver: https://naver.me/GkIeDejF
+  Los enlaces se generan desde el array STOPS (abajo) — para editar, cambia solo ese array.
+
+  Diseño: Airbnb DESIGN.md (getdesign.md/airbnb)
+    Rausch #ff385c · ink #222 · hairline #ddd · lienzo blanco
+    radios 8 / 14 / full · un solo nivel de sombra · base de espaciado 4px
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerario · Viernes 14 agosto — Busan</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* colors */
+      --primary: #ff385c;
+      --primary-active: #e00b41;
+      --ink: #222222;
+      --body: #3f3f3f;
+      --muted: #6a6a6a;
+      --muted-soft: #929292;
+      --hairline: #dddddd;
+      --hairline-soft: #ebebeb;
+      --border-strong: #c1c1c1;
+      --canvas: #ffffff;
+      --surface-soft: #f7f7f7;
+      --surface-strong: #f2f2f2;
+      --on-primary: #ffffff;
+
+      /* radii */
+      --r-xs: 4px; --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 32px; --r-full: 9999px;
+
+      /* spacing (base 4px) */
+      --s-xxs: 2px; --s-xs: 4px; --s-sm: 8px; --s-md: 12px;
+      --s-base: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px; --s-section: 64px;
+
+      /* single shadow tier */
+      --shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
+
+      --font: Inter, 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont,
+              system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--canvas);
+      color: var(--body);
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--s-lg) var(--s-xxl); }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+    .hero { padding: var(--s-xl) 0 var(--s-lg); }
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; line-height: 1.18;
+      color: var(--on-primary); background: var(--primary);
+      border-radius: var(--r-full); padding: 5px 12px;
+      margin-bottom: var(--s-base);
+    }
+    h1 {
+      font-size: 28px; font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.5px; color: var(--ink);
+    }
+    .hero .sub {
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      color: var(--muted); margin-top: var(--s-sm);
+    }
+    .hero .brand {
+      font-size: 13px; font-weight: 400; line-height: 1.23;
+      color: var(--muted-soft); margin-top: var(--s-md);
+    }
+
+    /* ── Facts row ────────────────────────────────────────── */
+    .facts {
+      display: flex; flex-wrap: wrap;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: var(--s-lg);
+    }
+    .fact { flex: 1 1 33%; padding: var(--s-base) 0; }
+    .fact + .fact { border-left: 1px solid var(--hairline-soft); padding-left: var(--s-base); }
+    .fact .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .fact .v {
+      font-size: 16px; font-weight: 600; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs);
+    }
+
+    /* ── Briefing ─────────────────────────────────────────── */
+    .brief {
+      background: var(--surface-soft);
+      border-radius: var(--r-md);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-xl);
+    }
+    .brief h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .brief ul { list-style: none; }
+    .brief li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .brief li + li { margin-top: var(--s-sm); }
+    .brief li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--primary);
+    }
+    .brief b { color: var(--ink); font-weight: 600; }
+
+    /* ── Zone heading ─────────────────────────────────────── */
+    .zone {
+      padding-top: var(--s-xl); margin-bottom: var(--s-base);
+    }
+    .zone h2 {
+      font-size: 22px; font-weight: 500; line-height: 1.18;
+      letter-spacing: -0.44px; color: var(--ink);
+    }
+    .zone p {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--muted); margin-top: var(--s-xs);
+    }
+
+    /* ── Stop card ────────────────────────────────────────── */
+    .stop {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--canvas);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-base);
+      transition: box-shadow .2s ease;
+    }
+    .stop:hover { box-shadow: var(--shadow); }
+
+    .stop-top { display: flex; align-items: flex-start; gap: var(--s-md); }
+    .num {
+      flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--r-full);
+      background: var(--surface-strong); color: var(--ink);
+      font-size: 12px; font-weight: 700; line-height: 32px; text-align: center;
+    }
+    .stop.key .num { background: var(--primary); color: var(--on-primary); }
+
+    .when {
+      font-size: 12px; font-weight: 700; line-height: 1.33;
+      color: var(--primary);
+    }
+    .stop h3 {
+      font-size: 20px; font-weight: 600; line-height: 1.2;
+      letter-spacing: -0.18px; color: var(--ink); margin-top: var(--s-xxs);
+    }
+    .why {
+      display: inline-block; margin-top: var(--s-sm);
+      border: 1px solid var(--hairline); border-radius: var(--r-full);
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 600; line-height: 1.18; color: var(--ink);
+    }
+    .desc {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--body); margin-top: var(--s-md);
+    }
+    .desc b { color: var(--ink); font-weight: 600; }
+
+    /* ── Korean address ───────────────────────────────────── */
+    .kaddr {
+      margin-top: var(--s-base);
+      background: var(--surface-soft);
+      border-radius: var(--r-sm);
+      padding: var(--s-md) var(--s-base);
+    }
+    .kaddr .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .kaddr .v {
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs); word-break: keep-all;
+    }
+    .copy {
+      margin-top: var(--s-sm);
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--border-strong); border-radius: var(--r-full);
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      padding: 6px 14px; cursor: pointer;
+    }
+    .copy:active { background: var(--surface-strong); }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .actions { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-top: var(--s-base); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.29;
+      border-radius: var(--r-full); padding: 10px 20px; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: var(--on-primary); }
+    .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--border-strong); }
+    .btn-secondary:active { background: var(--surface-strong); }
+
+    /* ── Transfer row ─────────────────────────────────────── */
+    .move {
+      display: flex; align-items: flex-start; gap: var(--s-md);
+      padding: var(--s-base) var(--s-lg);
+      margin-bottom: var(--s-base);
+      border-left: 2px dashed var(--hairline);
+    }
+    .move .when { color: var(--muted-soft); }
+    .move h3 { font-size: 16px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
+    .move .desc { font-size: 14px; color: var(--muted); margin-top: var(--s-xs); }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    .foot { border-top: 1px solid var(--hairline); margin-top: var(--s-xl); padding-top: var(--s-lg); }
+    .foot h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .foot ul { list-style: none; }
+    .foot li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .foot li + li { margin-top: var(--s-sm); }
+    .foot li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--hairline);
+    }
+    .foot b { color: var(--ink); font-weight: 600; }
+
+    .cta {
+      display: block; text-align: center; text-decoration: none;
+      background: var(--primary); color: var(--on-primary);
+      border-radius: var(--r-sm); padding: 14px 24px; min-height: 48px;
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      margin-top: var(--s-lg);
+    }
+    .cta:active { background: var(--primary-active); }
+    .cta.ghost {
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--ink); margin-top: var(--s-md);
+    }
+    .cta.ghost:active { background: var(--surface-strong); }
+
+    /* ── Print ────────────────────────────────────────────── */
+    @media print {
+      .cta.ghost, .copy { display: none; }
+      .stop { break-inside: avoid; box-shadow: none; }
+      .num, .eyebrow, .btn-primary, .cta { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .btn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: 10px; word-break: break-all; }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 var(--s-base) var(--s-xl); }
+      h1 { font-size: 24px; }
+      .zone h2 { font-size: 20px; }
+      .stop { padding: var(--s-base); }
+      .fact { flex: 1 1 100%; }
+      .fact + .fact { border-left: 0; border-top: 1px solid var(--hairline-soft); padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Viernes 14 de agosto · Busan</span>
+    <h1>Busan en un día</h1>
+    <p class="sub">El pueblo de colores, el museo de luz y el mar. De la estación al atardecer.</p>
+    <p class="brand">Itinerario de Alexandra, José y Alejandro · Corea en Español · Gyudong</p>
+  </header>
+
+  <div class="facts"><div class="fact"><div class="k">Personas</div><div class="v">3</div></div><div class="fact"><div class="k">Inicio</div><div class="v">13:00 · Estación de Busan</div></div><div class="fact"><div class="k">Fin previsto</div><div class="v">21:00 · Haeundae</div></div></div>
+    <section class="brief">
+    <h2>Antes de salir</h2>
+      <ul>
+        <li>Toca <b>“Ver en Naver Map”</b> en cada parada — se abre el mapa y ahí ves el horario de hoy. Google Maps casi no funciona en Corea; Naver sí.</li>
+        <li>En el taxi <b>no hace falta hablar</b>: enseña al conductor el <b>recuadro gris con la dirección en coreano</b>. Con eso basta, lo hacen todos los días.</li>
+        <li>Hoy <b>casi todo es en taxi</b>. En Busan el taxi se coge fácil y es barato — entre paradas salen unos 8.000–15.000 won (5–10 €). Somos tres, así que compensa.</li>
+        <li><b>Gamcheon es cuesta y escaleras.</b> Zapatos cómodos y agua. Alejandro subirá corriendo; vosotros id despacio, no hay prisa.</li>
+        <li>Busan en agosto es <b>más húmedo que Seúl</b>. Por la noche en la playa refresca — una camiseta de manga larga.</li>
+      </ul>
+  </section>
+
+  <div id="body"></div>
+
+  <footer class="foot">
+    <h2>Información útil</h2>
+      <ul>
+        <li><b>Taxi:</b> en Busan se para en la calle sin problema. Enseñad el recuadro gris de la dirección y ya.</li>
+        <li><b>Metro y autobús:</b> la tarjeta T-money de Seúl también vale aquí, no hay que comprar otra.</li>
+        <li><b>Sin picante:</b> decid <b>“안 맵게 해주세요”</b> (an mep-ge he-ju-se-yo) = “sin picante, por favor”. También podéis enseñar esta línea en el móvil.</li>
+        <li>El día es de tarde: si el KTX llega a otra hora, movemos todo y os lo mando otra vez.</li>
+        <li>Cualquier cosa, escribidme por WhatsApp y lo resolvemos al momento.</li>
+      </ul>
+    <a class="cta" href="https://naver.me/xLNdt8Ka" target="_blank" rel="noopener">Abrir el mapa completo en Naver</a>
+    <a class="cta ghost" href="#" onclick="window.print();return false;">Guardar como PDF</a>
+  </footer>
+
+</div>
+
+<script>
+/* ── Datos del día. Para editar el itinerario, cambia solo este array. ────────
+   px/py y sid vienen del mapa guardado de Naver (no inventar sid).
+   kind: 'stop' (parada) | 'move' (traslado)
+   mode: 'walk' | 'transit'  → modo del enlace "Cómo llegar" desde la parada anterior
+   noRoute: true → esta parada no genera enlace de ruta (ya lo lleva el traslado previo)
+*/
+var STOPS = [
+  { zone: "Llegada", zoneNote: "La estación de Busan — aquí empieza el día" },
+  {
+    kind: "stop",
+    key: true,
+    time: "13:00 – 13:20",
+    title: "Estación de Busan (부산역)",
+    why: "Llegada en KTX · la foto de los trenes",
+    desc: "Bajamos del KTX y seguimos los carteles hacia la <b>planta 1 (salida)</b>. <b>Alejandro: en el andén, antes de bajar, es donde se ven los KTX de cerca</b> — es la mejor foto de tren del viaje, mejor hacerla ahí que abajo.<br><br><b>Para el taxi:</b> salid a la plaza y buscad la <b>salida 5 (este)</b> — ahí está la parada de taxis grande, siempre hay cola de taxis esperando. También hay parada en la <b>salida 1 (oeste)</b>, que queda justo enfrente de la puerta principal, pero es más pequeña. <b>Si en la 1 no hay taxis, cruzad la plaza a la 5.</b><br><br>En la parada os ponéis en la fila y subís al primero. No hay que llamar a nadie ni pedir app: enseñáis la dirección en coreano de Gamcheon (el recuadro gris de abajo) y ya está.",
+    kaddr: "부산 동구 중앙대로 206",
+    search: "부산역",
+    name: "부산역",
+    px: 129.0415,
+    py: 35.1149,
+  },
+  { zone: "Gamcheon · el pueblo de colores", zoneNote: "Casas de colores en la ladera — se anda" },
+  {
+    kind: "stop",
+    key: true,
+    time: "14:00 – 16:00",
+    title: "Gamcheon Culture Village (감천문화마을)",
+    why: "El barrio de casas de colores en la montaña",
+    desc: "Un barrio entero pintado de colores, escalonado por la ladera de la montaña. Empezó siendo el barrio de los refugiados de la guerra y los vecinos lo pintaron; <b>hoy sigue viviendo gente ahí</b>, así que se habla bajito y no se entra en las casas. El taxi os deja en el aparcamiento de arriba: <b>desde allí todo el recorrido es cuesta abajo</b>. Buscad al <b>Principito sentado en la barandilla</b> — es la foto del pueblo, suele haber cola.",
+    kaddr: "부산 서구 옥천로 138-20",
+    sid: "35408600",
+    name: "감천문화마을공영주차장",
+    px: 129.0111175,
+    py: 35.0975477,
+    mode: "transit",
+  },
+  { zone: "Yeongdo · luz y mar", zoneNote: "La isla al otro lado del puente" },
+  {
+    kind: "stop",
+    key: true,
+    time: "16:40 – 18:10",
+    title: "Arte Museum Busan (아르떼뮤지엄 부산)",
+    why: "Museo de luz — salas enteras proyectadas",
+    desc: "No son cuadros: son <b>salas enormes donde la pintura se mueve por las paredes y el suelo</b>, con sonido. Está en la isla de Yeongdo, cruzando el puente. Es lo que mejor funciona con un niño de 13 años y con adultos a la vez — se entra y ya está, no hay que leer nada. Dentro hace fresco, que a esa hora se agradece. <b>Mirad el horario y las entradas en el botón de Naver</b> antes de ir.",
+    kaddr: "부산 영도구 해양로247번길 29",
+    sid: "1425685396",
+    name: "아르떼뮤지엄 부산",
+    px: 129.07585,
+    py: 35.08654,
+    mode: "transit",
+  },
+  { zone: "Haeundae · el final del día", zoneNote: "La playa — cena y luces" },
+  {
+    kind: "stop",
+    key: true,
+    time: "18:50 – 21:00",
+    title: "Haeundae (해운대)",
+    why: "La playa · cena frente al mar",
+    desc: "Terminamos en la playa más conocida de Corea. Llegamos con el sol bajando: <b>al anochecer se encienden los rascacielos detrás de la arena</b> y esa es la postal de Busan. Se puede andar por la orilla descalzos. Para cenar, la calle de detrás de la playa está llena de sitios; <b>lo pedimos sin picante</b> — el <b>돼지국밥</b> (sopa de cerdo, típica de Busan) no lleva picante, el picante va aparte en un platito.",
+    kaddr: "부산 해운대구 해운대해변로 264",
+    search: "해운대해수욕장",
+    name: "해운대해수욕장",
+    px: 129.1603,
+    py: 35.1587,
+    mode: "transit",
+  },
+];
+
+/* ── Render ──────────────────────────────────────────────────────────────── */
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function e(s) { return encodeURIComponent(s == null ? '' : s); }
+
+/* Naver: /p/directions/{lng},{lat},{nombre},{sid},PLACE_POI/{destino}/-/{modo} */
+function poi(s) {
+  if (!s) return null;
+  return s.px + ',' + s.py + ',' + e(s.name) + ',' + (s.sid || '') + ',' + (s.sid ? 'PLACE_POI' : '');
+}
+function routeUrl(from, to, mode) {
+  var a = poi(from), b = poi(to);
+  if (!a || !b) return null;
+  return 'https://map.naver.com/p/directions/' + a + '/' + b + '/-/' + (mode || 'transit');
+}
+function placeUrl(s) {
+  if (s.sid) return 'https://map.naver.com/p/entry/place/' + s.sid;
+  if (s.search) return 'https://map.naver.com/p/search/' + e(s.search);
+  return null;
+}
+
+(function render() {
+  var out = '', prev = null, num = 0, k = 0;
+
+  STOPS.forEach(function (s) {
+    if (s.zone) {
+      out += '<div class="zone"><h2>' + esc(s.zone) + '</h2>' +
+             (s.zoneNote ? '<p>' + esc(s.zoneNote) + '</p>' : '') + '</div>';
+      return;
+    }
+
+    var isMove = s.kind === 'move';
+    if (!isMove) num++;
+
+    var actions = '';
+    var pu = placeUrl(s);
+    if (pu) actions += '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + pu + '">Ver en Naver Map</a>';
+    var ru = s.noRoute ? null : routeUrl(prev, s, s.mode);
+    if (ru) {
+      var label = s.mode === 'walk' ? 'Cómo llegar a pie' : 'Cómo llegar';
+      actions += '<a class="btn btn-secondary" target="_blank" rel="noopener" href="' + ru + '">' + label + '</a>';
+    }
+
+    var addr = '';
+    if (s.kaddr) {
+      k++;
+      addr = '<div class="kaddr">' +
+               '<div class="k">Muéstralo al taxista</div>' +
+               '<div class="v" id="k' + k + '">' + esc(s.kaddr) + '</div>' +
+               '<button class="copy" onclick="copyK(\'k' + k + '\', this)">Copiar</button>' +
+             '</div>';
+    }
+
+    var inner = '<div class="when">' + esc(s.time) + '</div>' +
+                '<h3>' + esc(s.title) + '</h3>' +
+                (s.why ? '<div><span class="why">' + esc(s.why) + '</span></div>' : '') +
+                '<div class="desc">' + (s.desc || '') + '</div>' +
+                addr +
+                (actions ? '<div class="actions">' + actions + '</div>' : '');
+
+    if (isMove) {
+      out += '<div class="move"><div>' + inner + '</div></div>';
+    } else {
+      out += '<div class="stop' + (s.key ? ' key' : '') + '">' +
+               '<div class="stop-top">' +
+                 '<div class="num">' + num + '</div>' +
+                 '<div style="flex:1;min-width:0">' + inner + '</div>' +
+               '</div>' +
+             '</div>';
+    }
+
+    prev = s;
+  });
+
+  document.getElementById('body').innerHTML = out;
+})();
+
+function copyK(id, btn) {
+  var t = document.getElementById(id).textContent;
+  var done = function () {
+    var old = btn.textContent;
+    btn.textContent = 'Copiado';
+    setTimeout(function () { btn.textContent = old; }, 1500);
+  };
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, fallback);
+  } else { fallback(); }
+}
+</script>
+
+</body>
+</html>
