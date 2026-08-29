@@ -787,7 +787,7 @@ function salesHTML(){
   const custs=salesAllCust?st.custs:st.custs.slice(0,10);
   const issues=[];
   if(st.unpriced.length)issues.push(`<li><b>가격 미입력 ${st.unpriced.length}일</b> — ${st.unpriced.slice(0,3).map(r=>`${escH(r.name)} ${r.date||r.rawDate}`).join(', ')}${st.unpriced.length>3?` 외 ${st.unpriced.length-3}일`:''}. 합계에 안 들어감</li>`);
-  if(st.recheck.length)issues.push(`<li><b>「다시 체크」 표시 ${st.recheck.length}일</b> — ${escH(st.recheck[0].name)} ${st.recheck[0].date}~${st.recheck[st.recheck.length-1].date}</li>`);
+  // 「다시 체크」 메모는 경고 안 띄움 — 회장님 지시(2026-08-29): 적힌 값 그대로 집계
   if(st.badDate.length)issues.push(`<li><b>날짜 못 읽음 ${st.badDate.length}줄</b> — ${st.badDate.slice(0,3).map(r=>`${escH(r.no)} "${escH(r.rawDate)}"`).join(', ')}</li>`);
   return `<div class="sales">
     <div class="panel">
