@@ -195,11 +195,6 @@
 .sales .kpi .k{font-size:11px;color:var(--muted);margin-top:5px;}
 .sales .kpi .d{font-size:11px;margin-top:3px;font-weight:600;}
 .sales .kpi .d.up{color:var(--money);} .sales .kpi .d.dn{color:var(--warn);} .sales .kpi .d.eq{color:var(--muted);}
-.sales .chart{position:relative;}
-.sales .chart svg{display:block;overflow:visible;max-width:none;}
-.sales .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .08s;z-index:5;}
-.sales .tip.on{opacity:1;}
-.sales .tip b{font-weight:700;}
 .sales .tw{overflow-x:auto;}
 .sales table.stbl{width:100%;border-collapse:collapse;border-spacing:0;font-size:13px;}
 .sales table.stbl th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 10px 6px;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap;}
@@ -225,24 +220,25 @@
 .sales .tools button{border:1px solid var(--line2);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:12px;color:var(--ink);}
 .sales .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;}
 
-.sales .coin{background:#0B1220;border:1px solid #1E293B;border-radius:14px;padding:14px 16px 10px;color:#E5E7EB;box-shadow:var(--shadow);}
-.sales .coin-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
-.sales .coin-name{font-family:"Space Grotesk",monospace;font-size:12px;letter-spacing:.06em;color:#94A3B8;font-weight:700;}
-.sales .coin-name span{font-family:"Noto Sans KR",sans-serif;font-weight:400;letter-spacing:0;margin-left:6px;}
-.sales .coin-price{font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:700;font-size:30px;line-height:1.15;color:#F8FAFC;}
-.sales .coin-price small{font-size:14px;color:#94A3B8;font-weight:600;margin-left:2px;}
-.sales .coin-chg{font-size:12.5px;font-weight:700;color:#94A3B8;}
-.sales .coin-chg.up{color:#22C55E;} .sales .coin-chg.dn{color:#F87171;}
-.sales .rng{margin-left:auto;display:flex;gap:4px;align-items:center;}
-.sales .rng button{border:1px solid #1E293B;background:#111A2E;color:#94A3B8;border-radius:7px;padding:5px 10px;font-family:"Space Grotesk",monospace;font-size:12px;font-weight:700;cursor:pointer;}
-.sales .rng button.on{background:#22C55E;color:#052E16;border-color:#22C55E;}
-.sales .rng .togl{color:#94A3B8;margin-left:6px;}
-.sales .coin .tip{background:#E5E7EB;color:#0B1220;}
-.sales .coin .tip b{color:#0B1220;}
-.sales .coin-foot{font-size:11px;color:#64748B;margin-top:4px;}
-.sales .coin svg{touch-action:pan-y;}
-@keyframes coinPulse{0%{r:5;opacity:.6}100%{r:14;opacity:0}}
-.coin-pulse{animation:coinPulse 1.8s ease-out infinite;}
+
+.sales .lwc{height:260px;width:100%;}
+/* lightweight-charts는 내부가 table이라 CRM 전역 table 규칙(패딩·테두리·모바일 block)을 되돌린다 */
+.sales .lwc table{border-collapse:separate!important;border-spacing:0!important;display:table!important;width:auto!important;}
+.sales .lwc tbody{display:table-row-group!important;}
+.sales .lwc tr{display:table-row!important;border:none!important;margin:0!important;border-radius:0!important;}
+.sales .lwc td{display:table-cell!important;padding:0!important;border:none!important;border-radius:0!important;font-size:inherit;}
+.sales .lwc.short{height:210px;}
+.sales .stripe-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+.sales .stripe-head .k{font-size:12px;color:var(--muted);}
+.sales .stripe-head .big{font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:700;font-size:30px;line-height:1.1;}
+.sales .stripe-head .big small{font-size:14px;color:var(--muted);font-weight:600;margin-left:2px;}
+.sales .stripe-head .d{font-size:12.5px;font-weight:600;margin-top:3px;}
+.sales .stripe-head .d.up,.sales .cmp.up{color:var(--money);} .sales .stripe-head .d.dn,.sales .cmp.dn{color:var(--warn);} .sales .stripe-head .d.eq,.sales .cmp.eq{color:var(--muted);}
+.sales .lg{font-size:12px;color:var(--muted);min-height:18px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.sales .lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
+.sales .lg b{color:var(--ink);}
+.sales .cmp{font-size:13.5px;font-weight:700;margin:0 0 4px;}
+.sales .up-row{cursor:pointer;} .sales .up-row:hover td{background:#F7F6FF;}
 .sales .togl{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;margin-left:auto;font-family:"Noto Sans KR",sans-serif;}
 @media(max-width:640px){
   .sales .hero .big{font-size:34px;}
@@ -278,6 +274,7 @@
 <div class="drawer" id="drawer"><div id="drawerContent"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script>
 /* ---------- model ---------- */
 /* 2026-08-05 회장님 지시로 단계를 다시 짰습니다.
@@ -508,8 +505,10 @@ function render(){
   const list=clients.filter(matches);
   if(view==="sales"){
     wrap.innerHTML=salesHTML();
+    salesMountCharts();
     return;
   }
+  if(_lwc.length){_lwc.forEach(c=>{try{c.remove();}catch(e){}});_lwc=[];}
   if(view==="kanban"){
     wrap.innerHTML=`<div class="kanban">${STAGES.map(s=>{
       const cs=list.filter(c=>c.stage===s.id);
@@ -745,124 +744,109 @@ function salesStats(rows){
   return {total,days,avg:days?Math.round(total/days):0,seq,thisYm,yearTotal,yearDays,thisYear,custs,unpriced,recheck,badDate,repeat};
 }
 
-/* 코인 차트: 누적 매출 = 시세선(계단), 월매출 = 거래량 막대. 회장님 요청 "비트코인처럼" (2026-08-29) */
-const SALES_RANGES=[{id:'1M',m:1},{id:'3M',m:3},{id:'6M',m:6},{id:'ALL',m:0,label:'전체'}];
-let salesRange='ALL';
-let _salesRz=null;window.addEventListener('resize',()=>{if(view!=='sales')return;clearTimeout(_salesRz);_salesRz=setTimeout(render,150);});
-function salesSeries(rows){
-  const byDate={};
-  rows.filter(r=>r.price!=null&&r.date).forEach(r=>{const d=byDate[r.date]||(byDate[r.date]={date:r.date,day:0,names:[]});d.day+=r.price;if(!d.names.includes(r.name))d.names.push(r.name);});
-  const pts=Object.values(byDate).sort((a,b)=>a.date<b.date?-1:1);
-  let cum=0;pts.forEach(p=>{cum+=p.day;p.cum=cum;p.t=new Date(p.date+'T00:00:00').getTime();});
-  return pts;
+/* ---------- 매출 차트: 스트라이프식 (TradingView lightweight-charts) ----------
+   회장님 선택(2026-08-29): 점 = 한 달 매출, 연한 막대 = 투어일수, 점선 = 확정 예정.
+   + 「이번 달 vs 지난 달」 1일부터 누적 비교, + 「확정 예정 매출」 = CRM 여행확정 카드의 확정 금액. */
+const USD_KRW=1380; // 확정 금액이 달러면 이 환율로 원화 환산(대략치)
+const LWC_UP='#635BFF',LWC_PREV='#B9B6D9',LWC_BAR='#E7E5FB',LWC_FUT='#A9A5EA';
+let _lwc=[];
+function lwcTime(t){if(t&&typeof t==='object')return {y:t.year,m:t.month,d:t.day};if(typeof t==='string'){const [y,m,d]=t.split('-').map(Number);return {y,m,d};}const x=new Date(t*1000);return {y:x.getUTCFullYear(),m:x.getUTCMonth()+1,d:x.getUTCDate()};}
+function lwcFmt(v){return v>=1e4?wonMan(v):(Math.abs(v)<5e3?'0':' ');}
+function lwcBase(el,extra){
+  const LW=window.LightweightCharts;
+  const o={autoSize:true,
+    layout:{background:{type:'solid',color:'#FFFFFF'},textColor:'#8A8FA3',fontFamily:'"Noto Sans KR",system-ui,sans-serif',fontSize:11},
+    grid:{vertLines:{visible:false},horzLines:{color:'#F1F0F7'}},
+    rightPriceScale:{borderVisible:false},
+    timeScale:{borderVisible:false,fixLeftEdge:true,fixRightEdge:true},
+    crosshair:{mode:LW.CrosshairMode.Magnet,vertLine:{color:'#C7C4F2',labelBackgroundColor:LWC_UP},horzLine:{visible:false,labelVisible:false}},
+    handleScroll:false,handleScale:false,
+    localization:{priceFormatter:lwcFmt}};
+  extra=extra||{};
+  if(extra.localization)o.localization=Object.assign(o.localization,extra.localization);
+  if(extra.timeScale)o.timeScale=Object.assign(o.timeScale,extra.timeScale);
+  return LW.createChart(el,o);
 }
-function niceStep(range,target){const nice=[1e5,2e5,5e5,1e6,2e6,5e6,1e7,2e7,5e7,1e8];return nice.find(s=>range/s<=target)||1e8;}
-function salesCoinSVG(rows,st){
-  const pts=salesSeries(rows);
-  if(!pts.length)return {svg:'<div style="color:#94A3B8;font-size:12px;padding:20px 0">가격 있는 줄이 없음</div>',chg:0,pct:null,last:0,rangeLabel:''};
-  const wrapEl=document.getElementById('wrap');
-  const cw=wrapEl?Math.floor(wrapEl.clientWidth-(window.innerWidth<=640?26:36)-34):900;
-  const W=Math.max(cw,320),padL=8,padR=62,padT=20,ph=190,gap=16,vh=56,axb=26,H=padT+ph+gap+vh+axb;
-  const iw=W-padL-padR;
-  const today=new Date();today.setHours(0,0,0,0);const todayT=today.getTime();
-  const rg=SALES_RANGES.find(r=>r.id===salesRange)||SALES_RANGES[3];
-  let startT=rg.m?new Date(today.getFullYear(),today.getMonth()-rg.m,today.getDate()).getTime():pts[0].t;
-  if(startT<pts[0].t)startT=pts[0].t;
-  const before=pts.filter(p=>p.t<startT);const base=before.length?before[before.length-1]:null;
-  const inR=pts.filter(p=>p.t>=startT);
-  const ser=[];
-  if(base)ser.push({t:startT,cum:base.cum,synthetic:true});
-  inR.forEach(p=>ser.push(p));
-  const last=ser[ser.length-1];
-  const endT=Math.max(todayT,last.t);
-  if(endT>last.t)ser.push({t:endT,cum:last.cum,synthetic:true});
-  const span=Math.max(1,endT-startT);
-  const xs=t=>padL+(t-startT)/span*iw;
-  let ymin=Math.min(...ser.map(p=>p.cum)),ymax=Math.max(...ser.map(p=>p.cum));
-  if(ymax===ymin){ymax+=1e5;ymin=Math.max(0,ymin-1e5);}
-  const padY=(ymax-ymin)*0.08;ymin=Math.max(0,ymin-padY);ymax+=padY;
-  const ys=v=>padT+ph-(v-ymin)/(ymax-ymin)*ph;
-  const yStep=niceStep(ymax-ymin,5);
-  const lx=xs(last.t),ly=ys(last.cum);
-  // 격자 + 오른쪽 가격축 (현재가 태그와 겹치는 눈금 글자는 생략)
-  let grid='';
-  for(let v=Math.ceil(ymin/yStep)*yStep;v<=ymax;v+=yStep){const yy=ys(v),y=yy.toFixed(1);grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}" stroke="#1E293B" stroke-width="1"/>`+(Math.abs(yy-ly)>12?`<text x="${W-padR+8}" y="${y}" font-size="10" fill="#94A3B8" dominant-baseline="middle" style="font-variant-numeric:tabular-nums">${wonMan(v)}</text>`:'');}
-  // 시간축 눈금
-  const days=span/864e5;let ticks=[];
-  if(days<=45){for(let t=startT+7*864e5;t<=endT;t+=7*864e5)ticks.push({t,l:`${new Date(t).getMonth()+1}/${new Date(t).getDate()}`});}
-  else{const d0=new Date(startT);let d=new Date(d0.getFullYear(),d0.getMonth()+1,1);const minPx=days>400?70:52;let lastX=-1e9;
-    while(d.getTime()<=endT){const x=xs(d.getTime());if(x-lastX>=minPx){ticks.push({t:d.getTime(),l:`${String(d.getFullYear()).slice(2)}.${d.getMonth()+1}`});lastX=x;}d=new Date(d.getFullYear(),d.getMonth()+1,1);}}
-  const yAx=padT+ph+gap+vh;
-  ticks=ticks.filter(k=>xs(k.t)>=padL+16&&xs(k.t)<=W-padR-16);
-  let xax=ticks.map(k=>`<line x1="${xs(k.t).toFixed(1)}" x2="${xs(k.t).toFixed(1)}" y1="${padT}" y2="${yAx}" stroke="#1E293B" stroke-width="1"/><text x="${xs(k.t).toFixed(1)}" y="${yAx+16}" font-size="10" fill="#94A3B8" text-anchor="middle">${k.l}</text>`).join('');
-  // 시세선(계단) + 면
-  let d=`M${xs(ser[0].t).toFixed(1)},${ys(ser[0].cum).toFixed(1)}`;
-  for(let i=1;i<ser.length;i++){d+=` H${xs(ser[i].t).toFixed(1)} V${ys(ser[i].cum).toFixed(1)}`;}
-  const area=d+` V${(padT+ph).toFixed(1)} H${xs(ser[0].t).toFixed(1)} Z`;
-  // 거래량(월매출)
-  const byMonth={};st.seq.forEach(m=>byMonth[m.ym]=m.sum);
-  let vol='';const vmax=Math.max(1,...st.seq.filter(m=>{const [y,mo]=m.ym.split('-').map(Number);return new Date(y,mo,0).getTime()>=startT;}).map(m=>m.sum));
-  const s0=new Date(startT);let md=new Date(s0.getFullYear(),s0.getMonth(),1);
-  while(md.getTime()<=endT){
-    const me=new Date(md.getFullYear(),md.getMonth()+1,1);
-    const ym=`${md.getFullYear()}-${String(md.getMonth()+1).padStart(2,'0')}`;const v=byMonth[ym]||0;
-    const x0=Math.max(xs(Math.max(md.getTime(),startT)),padL),x1=Math.min(xs(Math.min(me.getTime(),endT)),W-padR);
-    const cx=(x0+x1)/2,bw=Math.max(3,Math.min(24,(x1-x0)*0.5));
-    const h=v/vmax*vh,by=padT+ph+gap+vh-h;
-    if(v>0)vol+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="#22C55E" fill-opacity=".38"><title>${ymLong(ym)} ${won(v)}</title></rect>`;
-    md=me;
-  }
-  // 상태 저장(십자선용)
-  window._salesChart={pts:inR,xs:{startT,span,padL,iw},ys:{ymin,ymax,padT,ph},W,H,padR,yAx};
-  const svg=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" id="coinSvg" onmousemove="salesXhair(event)" onmouseleave="salesXhair(null)" ontouchstart="salesXhair(event)" ontouchmove="salesXhair(event)" ontouchend="salesXhair(null)">
-    <defs><linearGradient id="coinFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22C55E" stop-opacity=".28"/><stop offset="1" stop-color="#22C55E" stop-opacity=".02"/></linearGradient></defs>
-    ${grid}${xax}
-    <line x1="${padL}" x2="${W-padR}" y1="${padT+ph+gap+vh}" y2="${padT+ph+gap+vh}" stroke="#334155" stroke-width="1"/>
-    ${vol}
-    <path d="${area}" fill="url(#coinFill)"/>
-    <path d="${d}" fill="none" stroke="#22C55E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    <line x1="${padL}" x2="${W-padR}" y1="${ly.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="#22C55E" stroke-opacity=".35" stroke-width="1"/>
-    <g><rect x="${W-padR+3}" y="${(ly-9).toFixed(1)}" width="${padR-5}" height="18" rx="4" fill="#22C55E"/><text x="${W-padR+3+(padR-5)/2}" y="${ly.toFixed(1)}" font-size="10.5" font-weight="700" fill="#052E16" text-anchor="middle" dominant-baseline="middle">${wonMan(last.cum)}</text></g>
-    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="9" fill="#22C55E" fill-opacity=".25" class="coin-pulse"/>
-    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4" fill="#22C55E" stroke="#0B1220" stroke-width="2"/>
-    <g id="xh" style="display:none">
-      <line id="xh-v" y1="${padT}" y2="${yAx}" stroke="#94A3B8" stroke-width="1" stroke-opacity=".7"/>
-      <line id="xh-h" x1="${padL}" x2="${W-padR}" stroke="#94A3B8" stroke-width="1" stroke-opacity=".7"/>
-      <circle id="xh-dot" r="5" fill="#E5E7EB" stroke="#0B1220" stroke-width="2"/>
-      <rect id="xh-yr" x="${W-padR+3}" width="${padR-5}" height="18" rx="4" fill="#E5E7EB"/><text id="xh-yt" x="${W-padR+3+(padR-5)/2}" font-size="10.5" font-weight="700" fill="#0B1220" text-anchor="middle" dominant-baseline="middle"></text>
-      <rect id="xh-xr" y="${yAx+4}" width="44" height="17" rx="4" fill="#E5E7EB"/><text id="xh-xt" y="${yAx+12.5}" font-size="10" font-weight="700" fill="#0B1220" text-anchor="middle" dominant-baseline="middle"></text>
-    </g>
-    <rect x="${padL}" y="${padT}" width="${iw}" height="${yAx-padT}" fill="transparent"/>
-  </svg>`;
-  const chg=last.cum-(base?base.cum:0);
-  const pct=base&&base.cum>0?chg/base.cum*100:null;
-  const rangeLabel=rg.m?`최근 ${rg.m}개월`:'전체 기간';
-  return {svg,chg,pct,last:last.cum,rangeLabel,n:inR.length,ser};
+function salesAddDays(s,n){const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+/* 이번 달 vs 지난 달: 1일부터 누적, 둘 다 이번 달 날짜 위에 올려 겹침 */
+function salesCompare(){
+  const rows=salesRows||[];
+  const t=new Date();const y=t.getFullYear(),m=t.getMonth();
+  const curYm=`${y}-${String(m+1).padStart(2,'0')}`;
+  const pd=new Date(y,m-1,1);const prevYm=`${pd.getFullYear()}-${String(pd.getMonth()+1).padStart(2,'0')}`;
+  const curDays=t.getDate(),prevLen=new Date(pd.getFullYear(),pd.getMonth()+1,0).getDate(),curLen=new Date(y,m+1,0).getDate();
+  const dayMap=ym=>{const o={};rows.forEach(r=>{if(r.price!=null&&r.date&&r.date.slice(0,7)===ym){const d=+r.date.slice(8,10);o[d]=(o[d]||0)+r.price;}});return o;};
+  const cm=dayMap(curYm),pm=dayMap(prevYm);
+  const cur=[],prev=[];let a=0,b=0;
+  for(let d=1;d<=curDays;d++){a+=cm[d]||0;cur.push({time:`${curYm}-${String(d).padStart(2,'0')}`,value:a});}
+  for(let d=1;d<=Math.min(prevLen,curLen);d++){b+=pm[d]||0;prev.push({time:`${curYm}-${String(d).padStart(2,'0')}`,value:b});}
+  let prevSame=0;for(let d=1;d<=Math.min(curDays,prevLen);d++)prevSame+=pm[d]||0;
+  return {cur,prev,curNow:a,prevSame,prevTotal:b,curLabel:`${m+1}월`,prevLabel:`${pd.getMonth()+1}월`,curDays};
 }
-function salesXhair(ev){
-  const g=document.getElementById('xh'),tip=document.getElementById('salesTip'),svg=document.getElementById('coinSvg');
-  if(!g||!svg)return;
-  if(!ev){g.style.display='none';if(tip)tip.classList.remove('on');return;}
-  const C=window._salesChart;if(!C||!C.pts.length)return;
-  const p0=ev.touches?ev.touches[0]:ev;
-  const box=svg.getBoundingClientRect();
-  const x=(p0.clientX-box.left)*(C.W/box.width);
-  const t=C.xs.startT+(x-C.xs.padL)/C.xs.iw*C.xs.span;
-  let best=C.pts[0];for(const p of C.pts){if(Math.abs(p.t-t)<Math.abs(best.t-t))best=p;}
-  const px=C.xs.padL+(best.t-C.xs.startT)/C.xs.span*C.xs.iw,py=C.ys.padT+C.ys.ph-(best.cum-C.ys.ymin)/(C.ys.ymax-C.ys.ymin)*C.ys.ph;
-  g.style.display='';
-  const S=(id,k,v)=>document.getElementById(id).setAttribute(k,v);
-  S('xh-v','x1',px);S('xh-v','x2',px);S('xh-h','y1',py);S('xh-h','y2',py);
-  S('xh-dot','cx',px);S('xh-dot','cy',py);
-  S('xh-yr','y',py-9);S('xh-yt','y',py);document.getElementById('xh-yt').textContent=wonMan(best.cum);
-  const xr=Math.min(Math.max(px-22,C.xs.padL),C.W-C.padR-44);S('xh-xr','x',xr);S('xh-xt','x',xr+22);document.getElementById('xh-xt').textContent=best.date.slice(2).replace(/-/g,'.');
-  if(tip){
-    tip.innerHTML=`<b>${best.date.slice(5).replace('-','/')}</b> ${escH(best.names.join(', '))}<br>그날 <b>+${wonMan(best.day)}</b> · 누적 ${wonMan(best.cum)}원`;
-    const host=tip.parentElement.getBoundingClientRect();
-    const sx=px*(box.width/C.W)+(box.left-host.left),sy=py*(box.height/C.H)+(box.top-host.top);
-    tip.style.left=Math.min(Math.max(sx,90),host.width-90)+'px';tip.style.top=(sy-10)+'px';tip.classList.add('on');
+/* 확정 예정 매출: 여행 확정(+여행 중) 카드의 확정 금액 */
+function salesUpcoming(){
+  const today=todayStr();
+  const list=clients.filter(c=>c.stage==='confirmed'||c.stage==='traveling').map(c=>{
+    const start=c.hireStart||c.tourDate||'';const end=c.hireEnd||start;
+    const td=Array.isArray(c.tourDays)?c.tourDays.filter(Boolean):[];
+    const days=td.length||daysBetween(start,end).length;
+    const amt=(c.feeAmt!==''&&c.feeAmt!=null&&!isNaN(+c.feeAmt)&&+c.feeAmt>0)?Math.round(+c.feeAmt*((c.feeCur||'KRW')==='USD'?USD_KRW:1)):null;
+    return {c,start,end,days,amt,ym:start?start.slice(0,7):''};
+  }).filter(x=>!x.start||x.end>today||x.start>=today)
+    .sort((a,b)=>(a.start||'9999')<(b.start||'9999')?-1:1);
+  const lim=salesAddDays(today,30);
+  const in30=list.filter(x=>x.start&&x.start<=lim&&x.amt!=null).reduce((s,x)=>s+x.amt,0);
+  const bm={};list.forEach(x=>{if(x.ym&&x.amt!=null)bm[x.ym]=(bm[x.ym]||0)+x.amt;});
+  const byMonth=Object.keys(bm).sort().map(ym=>({ym,sum:bm[ym]}));
+  const total=list.filter(x=>x.amt!=null).reduce((s,x)=>s+x.amt,0);
+  return {list,in30,byMonth,total,missing:list.filter(x=>x.amt==null).length,noDate:list.filter(x=>!x.start).length};
+}
+function salesMountCharts(){
+  _lwc.forEach(c=>{try{c.remove();}catch(e){}});_lwc=[];
+  const st=window._salesStats;if(!st||!window.LightweightCharts)return;
+  const LW=window.LightweightCharts;
+  // ① 월매출
+  const elM=document.getElementById('chM');
+  if(elM){
+    const ch=lwcBase(elM,{localization:{timeFormatter:t=>{const o=lwcTime(t);return `${o.y}년 ${o.m}월`;}},
+      timeScale:{tickMarkFormatter:t=>{const o=lwcTime(t);return (o.m===1?`${String(o.y).slice(2)}년 `:'')+`${o.m}월`;}}});
+    const bars=ch.addHistogramSeries({priceScaleId:'days',priceFormat:{type:'volume'},lastValueVisible:false,priceLineVisible:false,color:LWC_BAR});
+    bars.setData(st.seq.map(m=>({time:m.ym+'-01',value:m.days})));
+    ch.priceScale('days').applyOptions({scaleMargins:{top:0.72,bottom:0},visible:false});
+    const line=ch.addLineSeries({color:LWC_UP,lineWidth:2,priceLineVisible:false,lastValueVisible:false,crosshairMarkerRadius:5,crosshairMarkerBorderColor:'#fff',crosshairMarkerBackgroundColor:LWC_UP,pointMarkersVisible:true,pointMarkersRadius:3});
+    line.setData(st.seq.map(m=>({time:m.ym+'-01',value:m.sum})));
+    const up=salesUpcoming();const curM=st.seq[st.seq.length-1];
+    const futPts=up.byMonth.filter(m=>m.ym>curM.ym).map(m=>({time:m.ym+'-01',value:m.sum}));
+    let fut=null;
+    if(futPts.length){
+      fut=ch.addLineSeries({color:LWC_FUT,lineWidth:2,lineStyle:LW.LineStyle.Dashed,priceLineVisible:false,lastValueVisible:false,crosshairMarkerRadius:4,crosshairMarkerBorderColor:'#fff',crosshairMarkerBackgroundColor:LWC_FUT,pointMarkersVisible:true,pointMarkersRadius:3});
+      fut.setData([{time:curM.ym+'-01',value:curM.sum}].concat(futPts));
+    }
+    ch.priceScale('right').applyOptions({scaleMargins:{top:0.12,bottom:0.3}});
+    ch.timeScale().fitContent();
+    const lg=document.getElementById('chM-lg');
+    ch.subscribeCrosshairMove(p=>{if(!lg)return;if(!p.time){lg.textContent='';return;}const o=lwcTime(p.time);const v=p.seriesData.get(line),b=p.seriesData.get(bars),f=fut?p.seriesData.get(fut):null;
+      lg.innerHTML=`<b>${o.y}년 ${o.m}월</b> · ${v?won(v.value):(f?'예정 '+won(f.value):'—')}${b?` · 투어 ${b.value}일`:''}`;});
+    _lwc.push(ch);
   }
-  if(ev.touches&&ev.cancelable)ev.preventDefault();
+  // ② 이번 달 vs 지난 달
+  const elC=document.getElementById('chC');
+  if(elC){
+    const cmp=salesCompare();
+    const ch=lwcBase(elC,{localization:{timeFormatter:t=>`${lwcTime(t).d}일`},timeScale:{tickMarkFormatter:t=>`${lwcTime(t).d}일`}});
+    const prev=ch.addLineSeries({color:LWC_PREV,lineWidth:2,lineStyle:LW.LineStyle.Dashed,priceLineVisible:false,lastValueVisible:false,crosshairMarkerRadius:4,crosshairMarkerBorderColor:'#fff',crosshairMarkerBackgroundColor:LWC_PREV});
+    prev.setData(cmp.prev);
+    const cur=ch.addLineSeries({color:LWC_UP,lineWidth:2,priceLineVisible:false,lastValueVisible:true,crosshairMarkerRadius:5,crosshairMarkerBorderColor:'#fff',crosshairMarkerBackgroundColor:LWC_UP});
+    cur.setData(cmp.cur);
+    ch.priceScale('right').applyOptions({scaleMargins:{top:0.12,bottom:0.08}});
+    ch.timeScale().fitContent();
+    const lg=document.getElementById('chC-lg');
+    const idle=()=>{if(lg)lg.innerHTML=`<i style="background:${LWC_UP}"></i>${cmp.curLabel} <b>${wonMan(cmp.curNow)}</b> &nbsp; <i style="background:${LWC_PREV}"></i>${cmp.prevLabel} 같은 날 <b>${wonMan(cmp.prevSame)}</b> · ${cmp.prevLabel} 전체 ${wonMan(cmp.prevTotal)}`;};
+    idle();
+    ch.subscribeCrosshairMove(p=>{if(!lg)return;if(!p.time){idle();return;}const d=lwcTime(p.time).d;const a=p.seriesData.get(cur),b=p.seriesData.get(prev);
+      lg.innerHTML=`<b>${d}일까지</b> &nbsp; <i style="background:${LWC_UP}"></i>${cmp.curLabel} <b>${a?wonMan(a.value):'—'}</b> &nbsp; <i style="background:${LWC_PREV}"></i>${cmp.prevLabel} <b>${b?wonMan(b.value):'—'}</b>`;});
+    _lwc.push(ch);
+  }
 }
 function salesHTML(){
   const rows=salesRows||[];
@@ -881,6 +865,9 @@ function salesHTML(){
   const at=salesAt?new Date(salesAt):null;
   const atTxt=at?`${at.getMonth()+1}/${at.getDate()} ${String(at.getHours()).padStart(2,'0')}:${String(at.getMinutes()).padStart(2,'0')} 읽음`:'';
   const custs=salesAllCust?st.custs:st.custs.slice(0,10);
+  const best=st.seq.reduce((b,m)=>m.sum>b.sum?m:b,st.seq[0]);
+  const up=salesUpcoming();const cmp=salesCompare();const diff=cmp.curNow-cmp.prevSame;
+  const hasLW=!!window.LightweightCharts;
   const issues=[];
   if(st.unpriced.length)issues.push(`<li><b>가격 미입력 ${st.unpriced.length}일</b> — ${st.unpriced.slice(0,3).map(r=>`${escH(r.name)} ${r.date||r.rawDate}`).join(', ')}${st.unpriced.length>3?` 외 ${st.unpriced.length-3}일`:''}. 합계에 안 들어감</li>`);
   // 「다시 체크」 메모는 경고 안 띄움 — 회장님 지시(2026-08-29): 적힌 값 그대로 집계
@@ -896,30 +883,39 @@ function salesHTML(){
       </div>
     </div>
     <div class="kpis">
-      <div class="kpi"><div class="v">${wonMan(cur.sum)}<small>원</small></div><div class="k">이번 달 (${ymLong(st.thisYm)}) · 투어 ${cur.days}일${cur.unpriced?` · <span style="color:var(--warn)">미입력 ${cur.unpriced}일</span>`:''}</div>${dtxt?`<div class="d ${dcls}">${dtxt}</div>`:''}</div>
-      <div class="kpi"><div class="v">${wonMan(prev.sum)}<small>원</small></div><div class="k">지난 달 (${ymLong(prev.ym||st.thisYm)}) · 투어 ${prev.days}일</div></div>
-      <div class="kpi"><div class="v">${wonMan(st.avg)}<small>원</small></div><div class="k">하루 평균 단가 (가격 있는 ${st.days}일)</div></div>
-      <div class="kpi"><div class="v">${st.custs.length}<small>명</small></div><div class="k">손님(팀) 수 · 두 번 이상 온 손님 ${st.repeat}</div></div>
+      <div class="kpi"><div class="v">${wonMan(st.avg)}<small>원</small></div><div class="k">하루 평균 단가 (${st.days}일)</div></div>
+      <div class="kpi"><div class="v">${st.custs.length}<small>팀</small></div><div class="k">손님 수 · 두 번 이상 ${st.repeat}팀</div></div>
+      <div class="kpi"><div class="v">${wonMan(best.sum)}<small>원</small></div><div class="k">최고 달 (${ymLong(best.ym)} · 투어 ${best.days}일)</div></div>
+      <div class="kpi"><div class="v">${wonMan(up.total)}<small>원</small></div><div class="k">확정 예정 (${up.list.length}팀${up.missing?` · <span style="color:var(--warn)">금액 미입력 ${up.missing}</span>`:''})</div></div>
     </div>
     ${issues.length?`<div class="warnbox"><b>⚠️ 시트에서 손볼 것</b><ul>${issues.join('')}</ul></div>`:''}
-    ${(()=>{const ch=salesTable?null:salesCoinSVG(rows,st);
-      const chgTxt=ch?(ch.chg>0?`▲ +${wonMan(ch.chg)}`:ch.chg<0?`▼ ${wonMan(ch.chg)}`:'— 0')+(ch.pct!=null?` (${ch.pct>=0?'+':''}${ch.pct.toFixed(1)}%)`:'')+` · ${ch.rangeLabel}${ch.n?` · 투어일 ${ch.n}`:''}`:'';
-      const rng=SALES_RANGES.map(r=>`<button class="${salesRange===r.id?'on':''}" onclick="salesRange='${r.id}';render()">${r.label||r.id}</button>`).join('');
-      return salesTable
-      ?`<div class="panel"><h3>월별 매출 <span class="sub">표</span><span class="togl" onclick="salesTable=!salesTable;render()">차트 보기</span></h3>
-        <div class="tw"><table class="stbl"><thead><tr><th>달</th><th class="num">매출</th><th class="num">투어일</th><th class="num">하루 평균</th><th class="num">미입력</th></tr></thead><tbody>${st.seq.slice().reverse().map(m=>`<tr><td>${ymLong(m.ym)}</td><td class="num">${won(m.sum)}</td><td class="num">${m.days}</td><td class="num">${m.days?won(Math.round(m.sum/m.days)):'—'}</td><td class="num">${m.unpriced||''}</td></tr>`).join('')}</tbody></table></div></div>`
-      :`<div class="coin">
-        <div class="coin-head">
-          <div>
-            <div class="coin-name">GYUDONG / KRW <span>누적 매출 · 계단 = 투어 하루</span></div>
-            <div class="coin-price">${wonMan(ch.last)}<small>원</small></div>
-            <div class="coin-chg ${ch.chg>0?'up':ch.chg<0?'dn':''}">${chgTxt}</div>
-          </div>
-          <div class="rng">${rng}<span class="togl" onclick="salesTable=!salesTable;render()">표</span></div>
+    <div class="panel">
+      <h3>월매출 <span class="sub">점 = 한 달 매출 · 연한 막대 = 투어일수 · 점선 = 확정 예정</span><span class="togl" onclick="salesTable=!salesTable;render()">${salesTable?'차트':'표'}</span></h3>
+      ${salesTable||!hasLW
+      ?`${!hasLW?'<div class="warnbox" style="margin-bottom:10px">차트 라이브러리를 못 불러왔어요(인터넷?) — 표로 보여드려요</div>':''}<div class="tw"><table class="stbl"><thead><tr><th>달</th><th class="num">매출</th><th class="num">투어일</th><th class="num">하루 평균</th><th class="num">미입력</th></tr></thead><tbody>${st.seq.slice().reverse().map(m=>`<tr><td>${ymLong(m.ym)}</td><td class="num">${won(m.sum)}</td><td class="num">${m.days}</td><td class="num">${m.days?won(Math.round(m.sum/m.days)):'—'}</td><td class="num">${m.unpriced||''}</td></tr>`).join('')}</tbody></table></div>`
+      :`<div class="stripe-head">
+          <div><div class="k">${ymLong(cur.ym)} 매출 · 투어 ${cur.days}일${cur.unpriced?` · <span style="color:var(--warn)">미입력 ${cur.unpriced}일</span>`:''}</div><div class="big">${wonMan(cur.sum)}<small>원</small></div>${dtxt?`<div class="d ${dcls}">${dtxt}</div>`:''}</div>
+          <div class="lg" id="chM-lg"></div>
         </div>
-        <div class="chart"><div class="tw">${ch.svg}</div><div class="tip" id="salesTip"></div></div>
-        <div class="coin-foot">아래 막대 = 월매출(거래량) · 선 위에 손 올리면 그날 손님·금액</div>
-      </div>`;})()}
+        <div class="lwc" id="chM"></div>`}
+    </div>
+    ${hasLW?`<div class="panel">
+      <h3>이번 달 vs 지난 달 <span class="sub">1일부터 오늘까지 누적 · 점선 = 지난 달 같은 날짜</span></h3>
+      <div class="cmp ${diff>0?'up':diff<0?'dn':'eq'}">${diff>0?`▲ 지난달 이맘때보다 <b>${wonMan(diff)}원</b> 앞서는 중`:diff<0?`▼ 지난달 이맘때보다 <b>${wonMan(-diff)}원</b> 뒤처지는 중`:'— 지난달 이맘때와 같음'} <span style="color:var(--muted);font-weight:400">(${cmp.curDays}일 기준)</span></div>
+      <div class="lg" id="chC-lg"></div>
+      <div class="lwc short" id="chC"></div>
+    </div>`:''}
+    <div class="panel">
+      <h3>확정 예정 매출 <span class="sub">「여행 확정」 카드 기준 · 달러는 ×${USD_KRW.toLocaleString()}원 가정</span></h3>
+      <div class="kpis" style="margin-bottom:12px">
+        <div class="kpi"><div class="v">${wonMan(up.in30)}<small>원</small></div><div class="k">앞으로 30일 안에 잡힌 돈</div></div>
+        <div class="kpi"><div class="v">${wonMan(up.total)}<small>원</small></div><div class="k">확정 전체 · ${up.list.length}팀</div></div>
+        ${up.byMonth.slice(0,2).map(m=>`<div class="kpi"><div class="v">${wonMan(m.sum)}<small>원</small></div><div class="k">${ymLong(m.ym)} 예정</div></div>`).join('')}
+      </div>
+      ${up.missing||up.noDate?`<div class="warnbox" style="margin-bottom:12px"><b>${up.missing?`금액 미입력 ${up.missing}팀`:''}${up.missing&&up.noDate?' · ':''}${up.noDate?`날짜 미입력 ${up.noDate}팀`:''}</b> — 줄을 누르면 카드가 열려요. 「확정 금액」 넣으면 바로 잡힘</div>`:''}
+      ${up.list.length?`<div class="tw"><table class="stbl"><thead><tr><th>손님</th><th>날짜</th><th class="num">일수</th><th class="num">인원</th><th class="num">확정 금액</th></tr></thead>
+      <tbody>${up.list.map(x=>`<tr class="up-row" onclick="openClient(${x.c.id})"><td><b>${escH(x.c.name||'(이름)')}</b>${x.c.stage==='traveling'?' <span style="font-size:10px;color:var(--ok)">여행 중</span>':''}</td><td>${x.start?x.start.slice(5).replace('-','/'):'<span style="color:var(--warn)">날짜 없음</span>'}${x.end&&x.end!==x.start?'~'+x.end.slice(5).replace('-','/'):''}</td><td class="num">${x.days||'—'}</td><td class="num">${x.c.pax||'—'}</td><td class="num">${x.amt!=null?won(x.amt)+((x.c.feeCur||'KRW')==='USD'?` <span style="color:var(--muted);font-size:11px">($${(+x.c.feeAmt).toLocaleString()})</span>`:''):'<span style="color:var(--warn)">입력 →</span>'}</td></tr>`).join('')}</tbody></table></div>`:'<div style="font-size:12px;color:var(--muted)">여행 확정 카드가 없어요</div>'}
+    </div>
     <div class="grid2">
       <div class="panel">
         <h3>손님별 <span class="sub">매출 순</span><span class="togl" onclick="salesAllCust=!salesAllCust;render()">${salesAllCust?'상위 10명만':`전체 ${st.custs.length}명`}</span></h3>
@@ -942,7 +938,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",itinUrl:"",itinGuideUrl:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",itinUrl:"",itinGuideUrl:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",feeAmt:"",feeCur:"KRW",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -1121,6 +1117,10 @@ function renderDrawer(){
         <div class="toggle ${depositOf(d)?'on':''}" id="d_deposit"></div>
       </div>
       <div class="field" style="margin-top:13px"><label>투어비 <span class="es">견적/잔금 메모</span></label><input type="text" id="d_tourFee" value="${(d.tourFee||'').replace(/"/g,'&quot;')}" placeholder="예: $190 6h"></div>
+      <div class="row2" style="margin-top:10px">
+        <div class="field"><label>확정 금액 <span class="es">매출 「확정 예정」에 잡힘</span></label><input type="number" id="d_feeAmt" inputmode="decimal" value="${d.feeAmt||''}" placeholder="예: 2890"></div>
+        <div class="field"><label>통화 <span class="es">달러면 ×1,380 환산</span></label><select id="d_feeCur">${["KRW","USD"].map(o=>`<option ${(d.feeCur||'KRW')===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      </div>
       <div class="field"><label>메모 <span class="es">Notas</span></label><textarea id="d_notes">${d.notes||''}</textarea></div>
     </div>
 
@@ -1268,7 +1268,7 @@ function syncDraftFromForm(){
   d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.wishLinks=g('d_wishLinks');d.payMethod=readSingle('d_payMethod');
   d.stage=document.querySelector('#d_stage .ch.on').dataset.v;
   d.depositPaid=document.getElementById('d_deposit').classList.contains('on');
-  d.tourFee=g('d_tourFee');d.notes=document.getElementById('d_notes').value.trim();
+  d.tourFee=g('d_tourFee');d.feeAmt=g('d_feeAmt');d.feeCur=g('d_feeCur')||'KRW';d.notes=document.getElementById('d_notes').value.trim();
 }
 function readChips(id){return [...document.getElementById(id).querySelectorAll('.ch.on')].map(c=>c.dataset.v);}
 function readSingle(id){const c=document.getElementById(id).querySelector('.ch.on');return c?c.dataset.v:"";}
@@ -1282,7 +1282,7 @@ function saveClient(){
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
     diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),tourDays:readTourDays(),maybeDays:readMaybeDays(),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
     stage:document.querySelector('#d_stage .ch.on').dataset.v,sub:(document.querySelector('#d_sub .ch.on')||{dataset:{}}).dataset.v||'',depositPaid:document.getElementById('d_deposit').classList.contains('on'),
-    tourFee:gv('d_tourFee'),notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}};
+    tourFee:gv('d_tourFee'),feeAmt:gv('d_feeAmt'),feeCur:gv('d_feeCur')||'KRW',notes:document.getElementById('d_notes').value.trim(),created:draft.created,review:"",source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}};
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
   else{clients.push(obj);}
   saveLocal();render();closeDrawer();pushClient(obj);toast('저장됨 · Guardado');
