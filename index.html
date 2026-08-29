@@ -178,6 +178,60 @@
 .waitb{display:flex;align-items:center;gap:6px;margin:4px 0 2px;padding:3px 7px;border-radius:6px;
   color:#fff;font-size:11px;font-weight:600;line-height:1.35}
 .waitb span{font-weight:400;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- 매출 대시보드 (구글시트 → 브라우저 직접 읽기) ---------- */
+.sales{display:flex;flex-direction:column;gap:14px;}
+.sales .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
+.sales .panel h3{font-family:"Space Grotesk",sans-serif;font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sales .panel h3 .sub{font-size:11px;color:var(--muted);font-weight:400;font-family:"Noto Sans KR",sans-serif;}
+.sales .hero{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;}
+.sales .hero .big{font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:700;font-size:44px;line-height:1;letter-spacing:-.5px;}
+.sales .hero .big small{font-size:18px;font-weight:600;color:var(--muted);margin-left:2px;}
+.sales .hero .k{font-size:12px;color:var(--muted);margin-bottom:6px;}
+.sales .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.sales .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
+.sales .kpi .v{font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:700;font-size:22px;line-height:1.1;}
+.sales .kpi .v small{font-size:13px;font-weight:600;color:var(--muted);margin-left:1px;}
+.sales .kpi .k{font-size:11px;color:var(--muted);margin-top:5px;}
+.sales .kpi .d{font-size:11px;margin-top:3px;font-weight:600;}
+.sales .kpi .d.up{color:var(--money);} .sales .kpi .d.dn{color:var(--warn);} .sales .kpi .d.eq{color:var(--muted);}
+.sales .chart{position:relative;}
+.sales .chart svg{display:block;overflow:visible;max-width:none;}
+.sales .chart .band:hover rect.bar{opacity:.78;}
+.sales .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .08s;z-index:5;}
+.sales .tip.on{opacity:1;}
+.sales .tip b{font-weight:700;}
+.sales .tw{overflow-x:auto;}
+.sales table.stbl{width:100%;border-collapse:collapse;border-spacing:0;font-size:13px;}
+.sales table.stbl th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 10px 6px;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap;}
+.sales table.stbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap;}
+.sales table.stbl td.num,.sales table.stbl th.num{text-align:right;font-variant-numeric:tabular-nums;}
+.sales table.stbl td.memo{white-space:normal;color:var(--muted);font-size:12px;max-width:320px;}
+.sales table.stbl tr:last-child td{border-bottom:none;}
+.sales table.stbl tr{border:none;margin:0;border-radius:0;display:table-row;}
+.sales,.sales .panel,.sales .grid2>.panel{min-width:0;}
+.sales .tw{max-width:100%;}
+.sales table.stbl tbody td{border-left:none;border-right:none;border-top:none;border-radius:0;display:table-cell;}
+.sales table.stbl tbody td:first-child{border-left:none;padding-top:8px;}
+.sales table.stbl tbody td:last-child{border-right:none;border-radius:0;}
+.sales table.stbl thead{display:table-header-group;}
+.sales table.stbl tbody{display:table-row-group;}
+.sales table.stbl{display:table;}
+.sales .warnbox{background:#FFF4E0;border:1px solid #F0D9A8;border-radius:12px;padding:12px 14px;font-size:13px;}
+.sales .warnbox b{color:#8a6d1e;}
+.sales .warnbox ul{margin:6px 0 0;padding-left:18px;}
+.sales .warnbox li{margin:2px 0;}
+.sales .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto;font-size:11px;color:var(--muted);}
+.sales .tools a{color:var(--accent);text-decoration:none;font-weight:600;}
+.sales .tools button{border:1px solid var(--line2);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:12px;color:var(--ink);}
+.sales .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;}
+.sales .togl{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;margin-left:auto;font-family:"Noto Sans KR",sans-serif;}
+@media(max-width:640px){
+  .sales .hero .big{font-size:34px;}
+  .sales .grid2{grid-template-columns:1fr;}
+  .sales .panel{padding:13px 13px;}
+  .sales table.stbl td.memo{max-width:180px;}
+}
 </style>
 </head>
 <body>
@@ -187,7 +241,7 @@
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
     <input id="search" type="text" placeholder="인스타 아이디 · 이름 · 국가 검색  (@handle)">
   </div>
-  <div class="viewtog"><button id="vk" class="on" onclick="setView('kanban')">칸반</button><button id="vl" onclick="setView('list')">목록</button><button id="vc" onclick="setView('calendar')">달력</button></div>
+  <div class="viewtog"><button id="vk" class="on" onclick="setView('kanban')">칸반</button><button id="vl" onclick="setView('list')">목록</button><button id="vc" onclick="setView('calendar')">달력</button><button id="vs" onclick="setView('sales')">📊 매출</button></div>
   <button class="btn ghost" onclick="loadRemote()" title="서버에서 새로고침">🔄</button>
   <span id="syncStatus" style="font-size:11px;color:var(--muted);white-space:nowrap;"></span>
   <button class="btn primary" onclick="openNew()">+ 손님</button>
@@ -291,7 +345,7 @@ Gyudong`;
 function waPhone(p){let s=String(p==null?'':p).split('/')[0].replace(/\(.*?\)/g,'');let d=s.replace(/[^0-9+]/g,'').replace(/^\+/,'').replace(/^00/,'');return d.replace(/[^0-9]/g,'');}
 function waZoom(phone,name){const num=waPhone(phone);if(!num){toast('와츠앱 번호를 먼저 입력하세요');return;}const first=String(name||'').trim().split(/\s+/)[0]||'';const msg=ZOOM_MSG.replace('{name}',first);window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');}
 function waZoomById(id){const c=clients.find(x=>x.id===id);if(c)waZoom(c.phone,c.name);}
-/* 손님에게 일정표(itinerario) 링크를 와츠앱으로 보내는 메시지 */
+/* 손님에게 일정표(itinerario) 링크를 와츠앱으로 보내는 메시지 — 혼자 다니는 날 */
 const ITIN_MSG=`Hola {name} 😊
 Aquí tienes tu itinerario, con los horarios, las direcciones en coreano para el taxi y el enlace de Naver Map de cada sitio:
 
@@ -299,16 +353,25 @@ Aquí tienes tu itinerario, con los horarios, las direcciones en coreano para el
 
 Lo puedes abrir desde el móvil y guardarlo como PDF con el botón de abajo. Si quieres cambiar cualquier cosa, dímelo y lo ajusto.
 Gyudong`;
-function waItin(phone,name,url){
+/* 나와 같이 다니는 날(가이드 동행) 일정표 메시지 */
+const ITIN_GUIDE_MSG=`Hola {name} 😊
+Este es el plan del día que vamos juntos: la hora y el punto de encuentro, y todo lo que veremos ese día.
+
+👉 {url}
+
+Ese día yo te acompaño, así que no tienes que preocuparte por el transporte ni por el idioma. Si quieres cambiar algo, dímelo y lo ajusto.
+Gyudong`;
+function waItin(phone,name,url,kind){
   const num=waPhone(phone);if(!num){toast('와츠앱 번호를 먼저 입력하세요');return;}
   const u=String(url||'').trim();
   if(!u){toast('일정표 링크를 먼저 넣으세요');return;}
   if(!/^https?:\/\//i.test(u)){toast('일정표 링크는 http로 시작해야 합니다');return;}
   const first=String(name||'').trim().split(/\s+/)[0]||'';
-  const msg=ITIN_MSG.replace('{name}',first).replace('{url}',u);
+  const msg=(kind==='guide'?ITIN_GUIDE_MSG:ITIN_MSG).replace('{name}',first).replace('{url}',u);
   window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');
 }
-function waItinById(id){const c=clients.find(x=>x.id===id);if(c)waItin(c.phone,c.name,c.itinUrl);}
+function waItinById(id){const c=clients.find(x=>x.id===id);if(c)waItin(c.phone,c.name,c.itinUrl,'solo');}
+function waItinGuideById(id){const c=clients.find(x=>x.id===id);if(c)waItin(c.phone,c.name,c.itinGuideUrl,'guide');}
 /* 가고 싶은 곳 링크들의 캡션(내용)을 로봇으로 읽어와 옆에 표시 */
 async function fetchLinkCaptions(){
   const ta=document.getElementById('d_wishLinks');if(!ta)return;
@@ -423,7 +486,12 @@ function renderStats(){
 function render(){
   renderStats();
   const wrap=document.getElementById('wrap');
+  document.getElementById('stats').style.display=(view==='sales')?'none':'';
   const list=clients.filter(matches);
+  if(view==="sales"){
+    wrap.innerHTML=salesHTML();
+    return;
+  }
   if(view==="kanban"){
     wrap.innerHTML=`<div class="kanban">${STAGES.map(s=>{
       const cs=list.filter(c=>c.stage===s.id);
@@ -491,7 +559,8 @@ function card(c){
       ${c.review?`<span class="badge-dep" style="background:#C0492F">⚠ 검토</span>`:''}
       ${depositOf(c)?`<span class="badge-dep">💵 $${DEPOSIT_AMT}</span>`:''}
       ${c.phone?`<button title="와츠앱으로 Zoom 링크 보내기" onclick="waZoomById(${c.id})" style="border:1px solid var(--line2);background:#fff;border-radius:7px;height:24px;padding:0 7px;cursor:pointer;font-size:12px">📱</button>`:''}
-      ${(c.phone&&c.itinUrl)?`<button title="와츠앱으로 일정표 보내기" onclick="waItinById(${c.id})" style="border:1px solid var(--accent);background:#fff;border-radius:7px;height:24px;padding:0 7px;cursor:pointer;font-size:12px">📄</button>`:''}
+      ${(c.phone&&c.itinGuideUrl)?`<button title="같이 가는 날 일정표 보내기" onclick="waItinGuideById(${c.id})" style="border:1px solid var(--accent);background:#fff;border-radius:7px;height:24px;padding:0 7px;cursor:pointer;font-size:12px">🤝</button>`:''}
+      ${(c.phone&&c.itinUrl)?`<button title="혼자 다니는 날 일정표 보내기" onclick="waItinById(${c.id})" style="border:1px solid var(--accent);background:#fff;border-radius:7px;height:24px;padding:0 7px;cursor:pointer;font-size:12px">📄</button>`:''}
       <span class="mv">
         <button onclick="move(${c.id},-1)" ${si===0?'disabled':''}>←</button>
         <button onclick="move(${c.id},1)" ${si===STAGES.length-1?'disabled':''}>→</button>
@@ -561,13 +630,210 @@ function calNav(d){if(!calRef){const t=new Date();calRef={y:t.getFullYear(),m:t.
 function calToday(){const t=new Date();calRef={y:t.getFullYear(),m:t.getMonth()};calSel=todayStr();render();}
 function calSelect(ds){calSel=ds;render();}
 
+
+/* ---------- 매출 대시보드 ----------
+   데이터 = 회장님 구글 시트(숫자·이름·날짜·가격·기억에 남는 문장) 한 줄 = 투어 하루.
+   시트는 「링크 있는 사람 보기」라 브라우저가 gviz CSV로 바로 읽습니다(서버 없음).
+   손님 묶기: 이름 끝 숫자(lisandra1, lisandra2…)를 떼고 소문자로 같으면 같은 손님. */
+const SALES_SHEET_ID="1D08PY0yrTRxONK87CijMdtquVkpZrZiQCqm8Kahen3Q";
+const SALES_URL=`https://docs.google.com/spreadsheets/d/${SALES_SHEET_ID}/gviz/tq?tqx=out:csv&gid=0`;
+const SALES_EDIT_URL=`https://docs.google.com/spreadsheets/d/${SALES_SHEET_ID}/edit?gid=0`;
+let salesRows=null,salesAt=null,salesErr='',salesLoading=false,salesTable=false,salesAllCust=false;
+try{const c=JSON.parse(localStorage.getItem('sales_cache')||'null');if(c&&Array.isArray(c.rows)){salesRows=c.rows;salesAt=c.at;}}catch(e){}
+
+function parseCSV(text){
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){
+      if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}
+      else cur+=ch;
+    }else{
+      if(ch==='"')q=true;
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}
+      else if(ch==='\r'){}
+      else cur+=ch;
+    }
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+function salesDate(s){
+  const m=String(s||'').replace(/[,\s]/g,'.').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if(!m)return '';
+  return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+}
+function salesKey(name){
+  return String(name||'').trim().toLowerCase().replace(/\s*\d+$/,'').trim()||'(이름 없음)';
+}
+function salesFromCSV(text){
+  return parseCSV(text).map(r=>({no:(r[0]||'').trim(),name:(r[1]||'').trim(),date:salesDate(r[2]),rawDate:(r[2]||'').trim(),
+      price:(String(r[3]||'').replace(/[^\d]/g,'')?parseInt(String(r[3]).replace(/[^\d]/g,''),10):null),memo:(r[4]||'').trim()}))
+    .filter(r=>r.no&&!/^숫자$/.test(r.no)&&(r.date||r.price!=null||r.name));
+}
+async function loadSales(){
+  if(salesLoading)return;
+  salesLoading=true;salesErr='';
+  if(view==='sales')render();
+  try{
+    const res=await fetch(SALES_URL+'&_='+Date.now(),{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const rows=salesFromCSV(await res.text());
+    if(!rows.length)throw new Error('시트에 읽을 줄이 없음');
+    salesRows=rows;salesAt=new Date().toISOString();
+    try{localStorage.setItem('sales_cache',JSON.stringify({rows,at:salesAt}));}catch(e){}
+  }catch(e){salesErr=String(e.message||e);}
+  salesLoading=false;
+  if(view==='sales')render();
+}
+function wonMan(n){ // 4,300,000 → 430만
+  if(n==null)return '—';
+  if(Math.abs(n)>=1e8)return (Math.round(n/1e7)/10).toLocaleString()+'억';
+  return Math.round(n/1e4).toLocaleString()+'만';
+}
+function won(n){return n==null?'—':n.toLocaleString()+'원';}
+function ymLabel(ym){const [y,m]=ym.split('-');return `${y.slice(2)}.${+m}`;}
+function ymLong(ym){const [y,m]=ym.split('-');return `${y}년 ${+m}월`;}
+function ymAdd(ym,k){const [y,m]=ym.split('-').map(Number);const d=new Date(y,m-1+k,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+
+function salesStats(rows){
+  const priced=rows.filter(r=>r.price!=null);
+  const total=priced.reduce((a,r)=>a+r.price,0);
+  const days=priced.length;
+  const byMonth={};const unpricedByMonth={};
+  rows.forEach(r=>{if(!r.date)return;const ym=r.date.slice(0,7);
+    if(r.price!=null){byMonth[ym]=(byMonth[ym]||0)+r.price;}else{unpricedByMonth[ym]=(unpricedByMonth[ym]||0)+1;}});
+  const byCust={};
+  rows.forEach(r=>{const k=salesKey(r.name);const c=byCust[k]||(byCust[k]={key:k,names:new Set(),days:0,unpriced:0,sum:0,first:'',last:'',memos:new Set()});
+    c.names.add(r.name);c.days++;if(r.price!=null)c.sum+=r.price;else c.unpriced++;
+    if(r.date){if(!c.first||r.date<c.first)c.first=r.date;if(!c.last||r.date>c.last)c.last=r.date;}
+    if(r.memo)c.memos.add(r.memo);});
+  const custs=Object.values(byCust).sort((a,b)=>b.sum-a.sum||b.days-a.days);
+  const months=Object.keys(byMonth).concat(Object.keys(unpricedByMonth)).sort();
+  const t=new Date();const thisYm=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}`;
+  const firstYm=months.length?months[0]:thisYm;
+  const seq=[];for(let ym=firstYm;ym<=thisYm;ym=ymAdd(ym,1)){seq.push({ym,sum:byMonth[ym]||0,days:rows.filter(r=>r.date&&r.date.slice(0,7)===ym&&r.price!=null).length,unpriced:unpricedByMonth[ym]||0});if(seq.length>36)break;}
+  const thisYear=String(t.getFullYear());
+  const yearTotal=priced.filter(r=>r.date&&r.date.startsWith(thisYear)).reduce((a,r)=>a+r.price,0);
+  const yearDays=priced.filter(r=>r.date&&r.date.startsWith(thisYear)).length;
+  const unpriced=rows.filter(r=>r.price==null);
+  const recheck=rows.filter(r=>/체크/.test(r.memo));
+  const badDate=rows.filter(r=>!r.date);
+  const repeat=custs.filter(c=>{ // 여행 두 번 이상: 날짜 사이에 20일 넘게 비면 다른 여행으로 봄
+    const ds=rows.filter(r=>salesKey(r.name)===c.key&&r.date).map(r=>r.date).sort();
+    let trips=ds.length?1:0;for(let i=1;i<ds.length;i++){if((new Date(ds[i])-new Date(ds[i-1]))/864e5>20)trips++;}c.trips=trips;return trips>1;}).length;
+  return {total,days,avg:days?Math.round(total/days):0,seq,thisYm,yearTotal,yearDays,thisYear,custs,unpriced,recheck,badDate,repeat};
+}
+
+function salesChartSVG(seq){
+  const wrapEl=document.getElementById('wrap');
+  const cw=wrapEl?Math.floor(wrapEl.clientWidth-(window.innerWidth<=640?26:36)-38):900; // wrap 패딩 + panel 패딩
+  const W=Math.max(cw,seq.length*44,320),H=210,padL=52,padR=14,padT=22,padB=32;
+  const max=Math.max(1,...seq.map(m=>m.sum));
+  // 깔끔한 눈금: 100만/200만/500만 단위
+  const nice=[1e5,2e5,5e5,1e6,2e6,5e6,1e7,2e7,5e7];let step=nice.find(s=>max/s<=5)||5e7;
+  const top=Math.ceil(max/step)*step;
+  const iw=W-padL-padR,ih=H-padT-padB;
+  const bw=Math.min(24,Math.floor(iw/seq.length*0.6));
+  const x=i=>padL+iw*(i+0.5)/seq.length;
+  const y=v=>padT+ih-(v/top)*ih;
+  let g='';
+  for(let v=0;v<=top;v+=step){g+=`<line x1="${padL}" x2="${W-padR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="${padL-8}" y="${y(v).toFixed(1)}" font-size="10" fill="var(--muted)" text-anchor="end" dominant-baseline="middle" style="font-variant-numeric:tabular-nums">${v?wonMan(v):'0'}</text>`;}
+  const maxI=seq.reduce((bi,m,i)=>m.sum>seq[bi].sum?i:bi,0);
+  let bars='';
+  seq.forEach((m,i)=>{
+    const cx=x(i),h=Math.max(0,y(0)-y(m.sum)),bx=cx-bw/2,by=y(m.sum);
+    const r=Math.min(4,h/2);
+    const path=h>0?`M${bx},${y(0)} V${by+r} Q${bx},${by} ${bx+r},${by} H${bx+bw-r} Q${bx+bw},${by} ${bx+bw},${by+r} V${y(0)} Z`:'';
+    const label=(i===maxI||i===seq.length-1)&&m.sum>0?`<text x="${cx}" y="${by-6}" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">${wonMan(m.sum)}</text>`:'';
+    const miss=m.unpriced?`<text x="${cx}" y="${y(0)+24}" font-size="9" fill="var(--warn)" text-anchor="middle">미입력 ${m.unpriced}</text>`:'';
+    bars+=`<g class="band" data-i="${i}" onmousemove="salesTip(event,${i})" onmouseleave="salesTip(null)" ontouchstart="salesTip(event,${i})">
+      <rect x="${(cx-iw/seq.length/2).toFixed(1)}" y="${padT}" width="${(iw/seq.length).toFixed(1)}" height="${ih+padB}" fill="transparent"/>
+      ${path?`<path class="bar" d="${path}" fill="${i===seq.length-1?'var(--accent)':'var(--money)'}"/>`:''}
+      ${label}${miss}
+      <text x="${cx}" y="${y(0)+13}" font-size="10" fill="${i===seq.length-1?'var(--ink)':'var(--muted)'}" font-weight="${i===seq.length-1?700:400}" text-anchor="middle">${ymLabel(m.ym)}</text>
+    </g>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${g}<line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line2)" stroke-width="1"/>${bars}</svg>`;
+}
+let _salesRz=null;window.addEventListener('resize',()=>{if(view!=='sales')return;clearTimeout(_salesRz);_salesRz=setTimeout(render,150);});
+function salesTip(ev,i){
+  const tip=document.getElementById('salesTip');if(!tip)return;
+  if(!ev){tip.classList.remove('on');return;}
+  const st=window._salesStats;const m=st.seq[i];
+  tip.innerHTML=`<b>${ymLong(m.ym)}</b> · ${won(m.sum)} · 투어 ${m.days}일${m.unpriced?` · <span style="color:#FFD27A">가격 미입력 ${m.unpriced}일</span>`:''}`;
+  const box=tip.parentElement.getBoundingClientRect();
+  const p=ev.touches?ev.touches[0]:ev;
+  tip.style.left=(p.clientX-box.left)+'px';tip.style.top=(p.clientY-box.top-8)+'px';
+  tip.classList.add('on');
+}
+function salesHTML(){
+  const rows=salesRows||[];
+  if(!rows.length){
+    return `<div class="sales"><div class="panel"><h3>📊 매출 대시보드</h3>
+      <div style="font-size:13px;color:var(--muted)">${salesLoading?'구글 시트에서 읽는 중…':salesErr?`읽기 실패: ${escH(salesErr)} — 시트가 「링크 있는 사람 보기」인지 확인`:'아직 데이터 없음'}</div>
+      <div style="margin-top:10px"><button class="btn ghost" onclick="loadSales()">🔄 다시 읽기</button> <a class="btn ghost" href="${SALES_EDIT_URL}" target="_blank" rel="noopener" style="text-decoration:none">시트 열기 ↗</a></div></div></div>`;
+  }
+  const st=salesStats(rows);window._salesStats=st;
+  const cur=st.seq[st.seq.length-1]||{sum:0,days:0,unpriced:0};
+  const prev=st.seq[st.seq.length-2]||{sum:0,days:0};
+  const delta=cur.sum-prev.sum;
+  const dcls=delta>0?'up':delta<0?'dn':'eq';
+  const dtxt=prev.sum||cur.sum?`${delta>0?'▲':delta<0?'▼':'—'} ${wonMan(Math.abs(delta))} vs ${ymLong(prev.ym||'')}${cur.unpriced?' (미입력 빼고)':''}`:'';
+  const last12=st.seq.slice(-12);
+  const at=salesAt?new Date(salesAt):null;
+  const atTxt=at?`${at.getMonth()+1}/${at.getDate()} ${String(at.getHours()).padStart(2,'0')}:${String(at.getMinutes()).padStart(2,'0')} 읽음`:'';
+  const custs=salesAllCust?st.custs:st.custs.slice(0,10);
+  const issues=[];
+  if(st.unpriced.length)issues.push(`<li><b>가격 미입력 ${st.unpriced.length}일</b> — ${st.unpriced.slice(0,3).map(r=>`${escH(r.name)} ${r.date||r.rawDate}`).join(', ')}${st.unpriced.length>3?` 외 ${st.unpriced.length-3}일`:''}. 합계에 안 들어감</li>`);
+  if(st.recheck.length)issues.push(`<li><b>「다시 체크」 표시 ${st.recheck.length}일</b> — ${escH(st.recheck[0].name)} ${st.recheck[0].date}~${st.recheck[st.recheck.length-1].date}</li>`);
+  if(st.badDate.length)issues.push(`<li><b>날짜 못 읽음 ${st.badDate.length}줄</b> — ${st.badDate.slice(0,3).map(r=>`${escH(r.no)} "${escH(r.rawDate)}"`).join(', ')}</li>`);
+  return `<div class="sales">
+    <div class="panel">
+      <h3>📊 매출 대시보드 <span class="sub">구글 시트 · 한 줄 = 투어 하루</span>
+        <span class="tools">${atTxt}${salesLoading?' · 읽는 중…':''}${salesErr?` · <span style="color:var(--warn)">갱신 실패(캐시 표시)</span>`:''}
+          <button onclick="loadSales()" title="시트 다시 읽기">🔄</button><a href="${SALES_EDIT_URL}" target="_blank" rel="noopener">시트 열기 ↗</a></span></h3>
+      <div class="hero">
+        <div><div class="k">${st.thisYear}년 매출</div><div class="big">${wonMan(st.yearTotal)}<small>원</small></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">투어 ${st.yearDays}일 · 누적 ${wonMan(st.total)}원 (${st.days}일)</div>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${wonMan(cur.sum)}<small>원</small></div><div class="k">이번 달 (${ymLong(st.thisYm)}) · 투어 ${cur.days}일${cur.unpriced?` · <span style="color:var(--warn)">미입력 ${cur.unpriced}일</span>`:''}</div>${dtxt?`<div class="d ${dcls}">${dtxt}</div>`:''}</div>
+      <div class="kpi"><div class="v">${wonMan(prev.sum)}<small>원</small></div><div class="k">지난 달 (${ymLong(prev.ym||st.thisYm)}) · 투어 ${prev.days}일</div></div>
+      <div class="kpi"><div class="v">${wonMan(st.avg)}<small>원</small></div><div class="k">하루 평균 단가 (가격 있는 ${st.days}일)</div></div>
+      <div class="kpi"><div class="v">${st.custs.length}<small>명</small></div><div class="k">손님(팀) 수 · 두 번 이상 온 손님 ${st.repeat}</div></div>
+    </div>
+    ${issues.length?`<div class="warnbox"><b>⚠️ 시트에서 손볼 것</b><ul>${issues.join('')}</ul></div>`:''}
+    <div class="panel">
+      <h3>월별 매출 <span class="sub">최근 ${last12.length}개월 · 막대 위 숫자 = 최고 달·이번 달</span><span class="togl" onclick="salesTable=!salesTable;render()">${salesTable?'그래프 보기':'표로 보기'}</span></h3>
+      ${salesTable?`<div class="tw"><table class="stbl"><thead><tr><th>달</th><th class="num">매출</th><th class="num">투어일</th><th class="num">하루 평균</th><th class="num">미입력</th></tr></thead><tbody>${st.seq.slice().reverse().map(m=>`<tr><td>${ymLong(m.ym)}</td><td class="num">${won(m.sum)}</td><td class="num">${m.days}</td><td class="num">${m.days?won(Math.round(m.sum/m.days)):'—'}</td><td class="num">${m.unpriced||''}</td></tr>`).join('')}</tbody></table></div>`
+      :`<div class="chart"><div class="tw">${salesChartSVG(last12)}</div><div class="tip" id="salesTip"></div></div>`}
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>손님별 <span class="sub">매출 순</span><span class="togl" onclick="salesAllCust=!salesAllCust;render()">${salesAllCust?'상위 10명만':`전체 ${st.custs.length}명`}</span></h3>
+        <div class="tw"><table class="stbl"><thead><tr><th>손님</th><th class="num">일수</th><th class="num">합계</th><th class="num">하루</th><th>기간</th><th>메모</th></tr></thead>
+        <tbody>${custs.map(c=>`<tr><td><b>${escH(c.key)}</b>${c.trips>1?` <span style="font-size:10px;color:var(--accent)">×${c.trips}회</span>`:''}</td><td class="num">${c.days}${c.unpriced?`<span style="color:var(--warn)">*</span>`:''}</td><td class="num">${won(c.sum)}</td><td class="num">${c.days-c.unpriced?wonMan(Math.round(c.sum/(c.days-c.unpriced))):'—'}</td><td style="color:var(--muted);font-size:12px">${c.first?c.first.slice(2).replace(/-/g,'.'):''}${c.last&&c.last!==c.first?'~'+c.last.slice(5).replace(/-/g,'.'):''}</td><td class="memo">${escH([...c.memos].join(' / '))}</td></tr>`).join('')}</tbody></table></div>
+        ${st.custs.some(c=>c.unpriced)?`<div style="font-size:11px;color:var(--muted);margin-top:6px">* 가격 미입력 날 포함</div>`:''}
+      </div>
+      <div class="panel">
+        <h3>최근 투어 <span class="sub">시트 마지막 12줄</span></h3>
+        <div class="tw"><table class="stbl"><thead><tr><th>날짜</th><th>손님</th><th class="num">가격</th><th>메모</th></tr></thead>
+        <tbody>${rows.slice(-12).reverse().map(r=>`<tr><td>${r.date?r.date.slice(2).replace(/-/g,'.'):escH(r.rawDate)}</td><td>${escH(r.name)}</td><td class="num">${r.price!=null?won(r.price):'<span style="color:var(--warn)">미입력</span>'}</td><td class="memo">${escH(r.memo)}</td></tr>`).join('')}</tbody></table></div>
+      </div>
+    </div>
+  </div>`;
+}
+
 /* ---------- actions ---------- */
-function setView(v){view=v;document.getElementById('vk').classList.toggle('on',v==='kanban');document.getElementById('vl').classList.toggle('on',v==='list');document.getElementById('vc').classList.toggle('on',v==='calendar');render();}
+function setView(v){view=v;document.getElementById('vk').classList.toggle('on',v==='kanban');document.getElementById('vl').classList.toggle('on',v==='list');document.getElementById('vc').classList.toggle('on',v==='calendar');document.getElementById('vs').classList.toggle('on',v==='sales');render();if(v==='sales'&&!salesRows)loadSales();}
 document.getElementById('search').oninput=e=>{search=e.target.value.trim();render();};
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",itinUrl:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",itinUrl:"",itinGuideUrl:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -669,9 +935,12 @@ function renderDrawer(){
         <div class="field"><label>✉️ 이메일</label><input type="text" id="d_email" value="${escH(d.email||'')}" placeholder="correo@..."></div>
       </div>
       <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waZoom(gv('d_phone'),gv('d_name'))">📱 와츠앱으로 Zoom 링크 보내기</button>
-      <div class="field" style="margin-top:13px"><label>📄 일정표 링크 <span class="es">Itinerario · 손님에게 보낼 페이지 주소</span></label><input type="text" id="d_itinUrl" value="${escH(d.itinUrl||'')}" placeholder="https://gyulo.github.io/tour-crm/itinerarios/..."></div>
-      ${d.itinUrl?`<a href="${escH(d.itinUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:12px;color:var(--accent);margin:-4px 0 8px">↗ 일정표 미리보기</a>`:''}
-      <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waItin(gv('d_phone'),gv('d_name'),gv('d_itinUrl'))">📄 와츠앱으로 일정표 보내기</button>
+      <div class="field" style="margin-top:13px"><label>🤝 같이 가는 날 일정표 <span class="es">Itinerario conmigo · 내가 동행하는 날</span></label><input type="text" id="d_itinGuideUrl" value="${escH(d.itinGuideUrl||'')}" placeholder="https://gyulo.github.io/tour-crm/itinerarios/..."></div>
+      ${d.itinGuideUrl?`<a href="${escH(d.itinGuideUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:12px;color:var(--accent);margin:-4px 0 8px">↗ 미리보기</a>`:''}
+      <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waItin(gv('d_phone'),gv('d_name'),gv('d_itinGuideUrl'),'guide')">🤝 같이 가는 날 일정표 보내기</button>
+      <div class="field" style="margin-top:13px"><label>📄 혼자 다니는 날 일정표 <span class="es">Itinerario solo · 손님 혼자 다니는 날</span></label><input type="text" id="d_itinUrl" value="${escH(d.itinUrl||'')}" placeholder="https://gyulo.github.io/tour-crm/itinerarios/..."></div>
+      ${d.itinUrl?`<a href="${escH(d.itinUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:12px;color:var(--accent);margin:-4px 0 8px">↗ 미리보기</a>`:''}
+      <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waItin(gv('d_phone'),gv('d_name'),gv('d_itinUrl'),'solo')">📄 혼자 다니는 날 일정표 보내기</button>
       <div class="row2" style="margin-top:13px">
         <div class="field"><label>유입 채널</label><select id="d_channel">${["","Instagram","TikTok","WhatsApp","추천","Google Form","기타"].map(o=>`<option ${d.channel===o?'selected':''}>${o}</option>`).join('')}</select></div>
         <div class="field"><label>예산 감각</label><select id="d_budget">${["","낮음","중간","높음"].map(o=>`<option ${d.budget===o?'selected':''}>${o}</option>`).join('')}</select></div>
@@ -877,7 +1146,7 @@ function applyParsed(p){
 function syncDraftFromForm(){
   if(!document.getElementById('d_stage'))return;
   const d=draft,g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  d.ticket=g('d_ticket');d.ig=g('d_ig');d.name=g('d_name');d.phone=g('d_phone');d.email=g('d_email');d.itinUrl=g('d_itinUrl');d.origin=g('d_origin');d.city=g('d_city');
+  d.ticket=g('d_ticket');d.ig=g('d_ig');d.name=g('d_name');d.phone=g('d_phone');d.email=g('d_email');d.itinUrl=g('d_itinUrl');d.itinGuideUrl=g('d_itinGuideUrl');d.origin=g('d_origin');d.city=g('d_city');
   d.channel=document.getElementById('d_channel').value;d.budget=document.getElementById('d_budget').value;
   d.season=g('d_season');d.days=g('d_days');d.tourDate=g('d_tourDate');d.pax=g('d_pax');
   d.group=readSingle('d_group');d.cities=readChips('d_cities');d.stay=readSingle('d_stay');
@@ -898,7 +1167,7 @@ function gv(id){return document.getElementById(id).value.trim();}
 function saveClient(){
   const ig=gv('d_ig'),name=gv('d_name');
   if(!ig&&!name){toast('인스타 아이디나 이름은 입력해 주세요');return;}
-  const obj={id:openId||draft.id||Date.now(),ticket:gv('d_ticket'),ig,name,phone:gv('d_phone'),email:gv('d_email'),itinUrl:gv('d_itinUrl'),origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
+  const obj={id:openId||draft.id||Date.now(),ticket:gv('d_ticket'),ig,name,phone:gv('d_phone'),email:gv('d_email'),itinUrl:gv('d_itinUrl'),itinGuideUrl:gv('d_itinGuideUrl'),origin:gv('d_origin'),city:gv('d_city'),channel:document.getElementById('d_channel').value,
     budget:document.getElementById('d_budget').value,season:gv('d_season'),days:gv('d_days'),tourDate:gv('d_tourDate'),pax:gv('d_pax'),
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
