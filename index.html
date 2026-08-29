@@ -197,7 +197,6 @@
 .sales .kpi .d.up{color:var(--money);} .sales .kpi .d.dn{color:var(--warn);} .sales .kpi .d.eq{color:var(--muted);}
 .sales .chart{position:relative;}
 .sales .chart svg{display:block;overflow:visible;max-width:none;}
-.sales .chart .band:hover rect.bar{opacity:.78;}
 .sales .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .08s;z-index:5;}
 .sales .tip.on{opacity:1;}
 .sales .tip b{font-weight:700;}
@@ -225,6 +224,25 @@
 .sales .tools a{color:var(--accent);text-decoration:none;font-weight:600;}
 .sales .tools button{border:1px solid var(--line2);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:12px;color:var(--ink);}
 .sales .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;}
+
+.sales .coin{background:#0B1220;border:1px solid #1E293B;border-radius:14px;padding:14px 16px 10px;color:#E5E7EB;box-shadow:var(--shadow);}
+.sales .coin-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+.sales .coin-name{font-family:"Space Grotesk",monospace;font-size:12px;letter-spacing:.06em;color:#94A3B8;font-weight:700;}
+.sales .coin-name span{font-family:"Noto Sans KR",sans-serif;font-weight:400;letter-spacing:0;margin-left:6px;}
+.sales .coin-price{font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:700;font-size:30px;line-height:1.15;color:#F8FAFC;}
+.sales .coin-price small{font-size:14px;color:#94A3B8;font-weight:600;margin-left:2px;}
+.sales .coin-chg{font-size:12.5px;font-weight:700;color:#94A3B8;}
+.sales .coin-chg.up{color:#22C55E;} .sales .coin-chg.dn{color:#F87171;}
+.sales .rng{margin-left:auto;display:flex;gap:4px;align-items:center;}
+.sales .rng button{border:1px solid #1E293B;background:#111A2E;color:#94A3B8;border-radius:7px;padding:5px 10px;font-family:"Space Grotesk",monospace;font-size:12px;font-weight:700;cursor:pointer;}
+.sales .rng button.on{background:#22C55E;color:#052E16;border-color:#22C55E;}
+.sales .rng .togl{color:#94A3B8;margin-left:6px;}
+.sales .coin .tip{background:#E5E7EB;color:#0B1220;}
+.sales .coin .tip b{color:#0B1220;}
+.sales .coin-foot{font-size:11px;color:#64748B;margin-top:4px;}
+.sales .coin svg{touch-action:pan-y;}
+@keyframes coinPulse{0%{r:5;opacity:.6}100%{r:14;opacity:0}}
+.coin-pulse{animation:coinPulse 1.8s ease-out infinite;}
 .sales .togl{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;margin-left:auto;font-family:"Noto Sans KR",sans-serif;}
 @media(max-width:640px){
   .sales .hero .big{font-size:34px;}
@@ -689,6 +707,7 @@ async function loadSales(){
 }
 function wonMan(n){ // 4,300,000 → 430만
   if(n==null)return '—';
+  if(n===0)return '0';
   if(Math.abs(n)>=1e8)return (Math.round(n/1e7)/10).toLocaleString()+'억';
   return Math.round(n/1e4).toLocaleString()+'만';
 }
@@ -726,47 +745,124 @@ function salesStats(rows){
   return {total,days,avg:days?Math.round(total/days):0,seq,thisYm,yearTotal,yearDays,thisYear,custs,unpriced,recheck,badDate,repeat};
 }
 
-function salesChartSVG(seq){
-  const wrapEl=document.getElementById('wrap');
-  const cw=wrapEl?Math.floor(wrapEl.clientWidth-(window.innerWidth<=640?26:36)-38):900; // wrap 패딩 + panel 패딩
-  const W=Math.max(cw,seq.length*44,320),H=210,padL=52,padR=14,padT=22,padB=32;
-  const max=Math.max(1,...seq.map(m=>m.sum));
-  // 깔끔한 눈금: 100만/200만/500만 단위
-  const nice=[1e5,2e5,5e5,1e6,2e6,5e6,1e7,2e7,5e7];let step=nice.find(s=>max/s<=5)||5e7;
-  const top=Math.ceil(max/step)*step;
-  const iw=W-padL-padR,ih=H-padT-padB;
-  const bw=Math.min(24,Math.floor(iw/seq.length*0.6));
-  const x=i=>padL+iw*(i+0.5)/seq.length;
-  const y=v=>padT+ih-(v/top)*ih;
-  let g='';
-  for(let v=0;v<=top;v+=step){g+=`<line x1="${padL}" x2="${W-padR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="${padL-8}" y="${y(v).toFixed(1)}" font-size="10" fill="var(--muted)" text-anchor="end" dominant-baseline="middle" style="font-variant-numeric:tabular-nums">${v?wonMan(v):'0'}</text>`;}
-  const maxI=seq.reduce((bi,m,i)=>m.sum>seq[bi].sum?i:bi,0);
-  let bars='';
-  seq.forEach((m,i)=>{
-    const cx=x(i),h=Math.max(0,y(0)-y(m.sum)),bx=cx-bw/2,by=y(m.sum);
-    const r=Math.min(4,h/2);
-    const path=h>0?`M${bx},${y(0)} V${by+r} Q${bx},${by} ${bx+r},${by} H${bx+bw-r} Q${bx+bw},${by} ${bx+bw},${by+r} V${y(0)} Z`:'';
-    const label=(i===maxI||i===seq.length-1)&&m.sum>0?`<text x="${cx}" y="${by-6}" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">${wonMan(m.sum)}</text>`:'';
-    const miss=m.unpriced?`<text x="${cx}" y="${y(0)+24}" font-size="9" fill="var(--warn)" text-anchor="middle">미입력 ${m.unpriced}</text>`:'';
-    bars+=`<g class="band" data-i="${i}" onmousemove="salesTip(event,${i})" onmouseleave="salesTip(null)" ontouchstart="salesTip(event,${i})">
-      <rect x="${(cx-iw/seq.length/2).toFixed(1)}" y="${padT}" width="${(iw/seq.length).toFixed(1)}" height="${ih+padB}" fill="transparent"/>
-      ${path?`<path class="bar" d="${path}" fill="${i===seq.length-1?'var(--accent)':'var(--money)'}"/>`:''}
-      ${label}${miss}
-      <text x="${cx}" y="${y(0)+13}" font-size="10" fill="${i===seq.length-1?'var(--ink)':'var(--muted)'}" font-weight="${i===seq.length-1?700:400}" text-anchor="middle">${ymLabel(m.ym)}</text>
-    </g>`;
-  });
-  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${g}<line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line2)" stroke-width="1"/>${bars}</svg>`;
-}
+/* 코인 차트: 누적 매출 = 시세선(계단), 월매출 = 거래량 막대. 회장님 요청 "비트코인처럼" (2026-08-29) */
+const SALES_RANGES=[{id:'1M',m:1},{id:'3M',m:3},{id:'6M',m:6},{id:'ALL',m:0,label:'전체'}];
+let salesRange='ALL';
 let _salesRz=null;window.addEventListener('resize',()=>{if(view!=='sales')return;clearTimeout(_salesRz);_salesRz=setTimeout(render,150);});
-function salesTip(ev,i){
-  const tip=document.getElementById('salesTip');if(!tip)return;
-  if(!ev){tip.classList.remove('on');return;}
-  const st=window._salesStats;const m=st.seq[i];
-  tip.innerHTML=`<b>${ymLong(m.ym)}</b> · ${won(m.sum)} · 투어 ${m.days}일${m.unpriced?` · <span style="color:#FFD27A">가격 미입력 ${m.unpriced}일</span>`:''}`;
-  const box=tip.parentElement.getBoundingClientRect();
-  const p=ev.touches?ev.touches[0]:ev;
-  tip.style.left=(p.clientX-box.left)+'px';tip.style.top=(p.clientY-box.top-8)+'px';
-  tip.classList.add('on');
+function salesSeries(rows){
+  const byDate={};
+  rows.filter(r=>r.price!=null&&r.date).forEach(r=>{const d=byDate[r.date]||(byDate[r.date]={date:r.date,day:0,names:[]});d.day+=r.price;if(!d.names.includes(r.name))d.names.push(r.name);});
+  const pts=Object.values(byDate).sort((a,b)=>a.date<b.date?-1:1);
+  let cum=0;pts.forEach(p=>{cum+=p.day;p.cum=cum;p.t=new Date(p.date+'T00:00:00').getTime();});
+  return pts;
+}
+function niceStep(range,target){const nice=[1e5,2e5,5e5,1e6,2e6,5e6,1e7,2e7,5e7,1e8];return nice.find(s=>range/s<=target)||1e8;}
+function salesCoinSVG(rows,st){
+  const pts=salesSeries(rows);
+  if(!pts.length)return {svg:'<div style="color:#94A3B8;font-size:12px;padding:20px 0">가격 있는 줄이 없음</div>',chg:0,pct:null,last:0,rangeLabel:''};
+  const wrapEl=document.getElementById('wrap');
+  const cw=wrapEl?Math.floor(wrapEl.clientWidth-(window.innerWidth<=640?26:36)-34):900;
+  const W=Math.max(cw,320),padL=8,padR=62,padT=20,ph=190,gap=16,vh=56,axb=26,H=padT+ph+gap+vh+axb;
+  const iw=W-padL-padR;
+  const today=new Date();today.setHours(0,0,0,0);const todayT=today.getTime();
+  const rg=SALES_RANGES.find(r=>r.id===salesRange)||SALES_RANGES[3];
+  let startT=rg.m?new Date(today.getFullYear(),today.getMonth()-rg.m,today.getDate()).getTime():pts[0].t;
+  if(startT<pts[0].t)startT=pts[0].t;
+  const before=pts.filter(p=>p.t<startT);const base=before.length?before[before.length-1]:null;
+  const inR=pts.filter(p=>p.t>=startT);
+  const ser=[];
+  if(base)ser.push({t:startT,cum:base.cum,synthetic:true});
+  inR.forEach(p=>ser.push(p));
+  const last=ser[ser.length-1];
+  const endT=Math.max(todayT,last.t);
+  if(endT>last.t)ser.push({t:endT,cum:last.cum,synthetic:true});
+  const span=Math.max(1,endT-startT);
+  const xs=t=>padL+(t-startT)/span*iw;
+  let ymin=Math.min(...ser.map(p=>p.cum)),ymax=Math.max(...ser.map(p=>p.cum));
+  if(ymax===ymin){ymax+=1e5;ymin=Math.max(0,ymin-1e5);}
+  const padY=(ymax-ymin)*0.08;ymin=Math.max(0,ymin-padY);ymax+=padY;
+  const ys=v=>padT+ph-(v-ymin)/(ymax-ymin)*ph;
+  const yStep=niceStep(ymax-ymin,5);
+  const lx=xs(last.t),ly=ys(last.cum);
+  // 격자 + 오른쪽 가격축 (현재가 태그와 겹치는 눈금 글자는 생략)
+  let grid='';
+  for(let v=Math.ceil(ymin/yStep)*yStep;v<=ymax;v+=yStep){const yy=ys(v),y=yy.toFixed(1);grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}" stroke="#1E293B" stroke-width="1"/>`+(Math.abs(yy-ly)>12?`<text x="${W-padR+8}" y="${y}" font-size="10" fill="#94A3B8" dominant-baseline="middle" style="font-variant-numeric:tabular-nums">${wonMan(v)}</text>`:'');}
+  // 시간축 눈금
+  const days=span/864e5;let ticks=[];
+  if(days<=45){for(let t=startT+7*864e5;t<=endT;t+=7*864e5)ticks.push({t,l:`${new Date(t).getMonth()+1}/${new Date(t).getDate()}`});}
+  else{const d0=new Date(startT);let d=new Date(d0.getFullYear(),d0.getMonth()+1,1);const minPx=days>400?70:52;let lastX=-1e9;
+    while(d.getTime()<=endT){const x=xs(d.getTime());if(x-lastX>=minPx){ticks.push({t:d.getTime(),l:`${String(d.getFullYear()).slice(2)}.${d.getMonth()+1}`});lastX=x;}d=new Date(d.getFullYear(),d.getMonth()+1,1);}}
+  const yAx=padT+ph+gap+vh;
+  ticks=ticks.filter(k=>xs(k.t)>=padL+16&&xs(k.t)<=W-padR-16);
+  let xax=ticks.map(k=>`<line x1="${xs(k.t).toFixed(1)}" x2="${xs(k.t).toFixed(1)}" y1="${padT}" y2="${yAx}" stroke="#1E293B" stroke-width="1"/><text x="${xs(k.t).toFixed(1)}" y="${yAx+16}" font-size="10" fill="#94A3B8" text-anchor="middle">${k.l}</text>`).join('');
+  // 시세선(계단) + 면
+  let d=`M${xs(ser[0].t).toFixed(1)},${ys(ser[0].cum).toFixed(1)}`;
+  for(let i=1;i<ser.length;i++){d+=` H${xs(ser[i].t).toFixed(1)} V${ys(ser[i].cum).toFixed(1)}`;}
+  const area=d+` V${(padT+ph).toFixed(1)} H${xs(ser[0].t).toFixed(1)} Z`;
+  // 거래량(월매출)
+  const byMonth={};st.seq.forEach(m=>byMonth[m.ym]=m.sum);
+  let vol='';const vmax=Math.max(1,...st.seq.filter(m=>{const [y,mo]=m.ym.split('-').map(Number);return new Date(y,mo,0).getTime()>=startT;}).map(m=>m.sum));
+  const s0=new Date(startT);let md=new Date(s0.getFullYear(),s0.getMonth(),1);
+  while(md.getTime()<=endT){
+    const me=new Date(md.getFullYear(),md.getMonth()+1,1);
+    const ym=`${md.getFullYear()}-${String(md.getMonth()+1).padStart(2,'0')}`;const v=byMonth[ym]||0;
+    const x0=Math.max(xs(Math.max(md.getTime(),startT)),padL),x1=Math.min(xs(Math.min(me.getTime(),endT)),W-padR);
+    const cx=(x0+x1)/2,bw=Math.max(3,Math.min(24,(x1-x0)*0.5));
+    const h=v/vmax*vh,by=padT+ph+gap+vh-h;
+    if(v>0)vol+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="#22C55E" fill-opacity=".38"><title>${ymLong(ym)} ${won(v)}</title></rect>`;
+    md=me;
+  }
+  // 상태 저장(십자선용)
+  window._salesChart={pts:inR,xs:{startT,span,padL,iw},ys:{ymin,ymax,padT,ph},W,H,padR,yAx};
+  const svg=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" id="coinSvg" onmousemove="salesXhair(event)" onmouseleave="salesXhair(null)" ontouchstart="salesXhair(event)" ontouchmove="salesXhair(event)" ontouchend="salesXhair(null)">
+    <defs><linearGradient id="coinFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22C55E" stop-opacity=".28"/><stop offset="1" stop-color="#22C55E" stop-opacity=".02"/></linearGradient></defs>
+    ${grid}${xax}
+    <line x1="${padL}" x2="${W-padR}" y1="${padT+ph+gap+vh}" y2="${padT+ph+gap+vh}" stroke="#334155" stroke-width="1"/>
+    ${vol}
+    <path d="${area}" fill="url(#coinFill)"/>
+    <path d="${d}" fill="none" stroke="#22C55E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="${padL}" x2="${W-padR}" y1="${ly.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="#22C55E" stroke-opacity=".35" stroke-width="1"/>
+    <g><rect x="${W-padR+3}" y="${(ly-9).toFixed(1)}" width="${padR-5}" height="18" rx="4" fill="#22C55E"/><text x="${W-padR+3+(padR-5)/2}" y="${ly.toFixed(1)}" font-size="10.5" font-weight="700" fill="#052E16" text-anchor="middle" dominant-baseline="middle">${wonMan(last.cum)}</text></g>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="9" fill="#22C55E" fill-opacity=".25" class="coin-pulse"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4" fill="#22C55E" stroke="#0B1220" stroke-width="2"/>
+    <g id="xh" style="display:none">
+      <line id="xh-v" y1="${padT}" y2="${yAx}" stroke="#94A3B8" stroke-width="1" stroke-opacity=".7"/>
+      <line id="xh-h" x1="${padL}" x2="${W-padR}" stroke="#94A3B8" stroke-width="1" stroke-opacity=".7"/>
+      <circle id="xh-dot" r="5" fill="#E5E7EB" stroke="#0B1220" stroke-width="2"/>
+      <rect id="xh-yr" x="${W-padR+3}" width="${padR-5}" height="18" rx="4" fill="#E5E7EB"/><text id="xh-yt" x="${W-padR+3+(padR-5)/2}" font-size="10.5" font-weight="700" fill="#0B1220" text-anchor="middle" dominant-baseline="middle"></text>
+      <rect id="xh-xr" y="${yAx+4}" width="44" height="17" rx="4" fill="#E5E7EB"/><text id="xh-xt" y="${yAx+12.5}" font-size="10" font-weight="700" fill="#0B1220" text-anchor="middle" dominant-baseline="middle"></text>
+    </g>
+    <rect x="${padL}" y="${padT}" width="${iw}" height="${yAx-padT}" fill="transparent"/>
+  </svg>`;
+  const chg=last.cum-(base?base.cum:0);
+  const pct=base&&base.cum>0?chg/base.cum*100:null;
+  const rangeLabel=rg.m?`최근 ${rg.m}개월`:'전체 기간';
+  return {svg,chg,pct,last:last.cum,rangeLabel,n:inR.length,ser};
+}
+function salesXhair(ev){
+  const g=document.getElementById('xh'),tip=document.getElementById('salesTip'),svg=document.getElementById('coinSvg');
+  if(!g||!svg)return;
+  if(!ev){g.style.display='none';if(tip)tip.classList.remove('on');return;}
+  const C=window._salesChart;if(!C||!C.pts.length)return;
+  const p0=ev.touches?ev.touches[0]:ev;
+  const box=svg.getBoundingClientRect();
+  const x=(p0.clientX-box.left)*(C.W/box.width);
+  const t=C.xs.startT+(x-C.xs.padL)/C.xs.iw*C.xs.span;
+  let best=C.pts[0];for(const p of C.pts){if(Math.abs(p.t-t)<Math.abs(best.t-t))best=p;}
+  const px=C.xs.padL+(best.t-C.xs.startT)/C.xs.span*C.xs.iw,py=C.ys.padT+C.ys.ph-(best.cum-C.ys.ymin)/(C.ys.ymax-C.ys.ymin)*C.ys.ph;
+  g.style.display='';
+  const S=(id,k,v)=>document.getElementById(id).setAttribute(k,v);
+  S('xh-v','x1',px);S('xh-v','x2',px);S('xh-h','y1',py);S('xh-h','y2',py);
+  S('xh-dot','cx',px);S('xh-dot','cy',py);
+  S('xh-yr','y',py-9);S('xh-yt','y',py);document.getElementById('xh-yt').textContent=wonMan(best.cum);
+  const xr=Math.min(Math.max(px-22,C.xs.padL),C.W-C.padR-44);S('xh-xr','x',xr);S('xh-xt','x',xr+22);document.getElementById('xh-xt').textContent=best.date.slice(2).replace(/-/g,'.');
+  if(tip){
+    tip.innerHTML=`<b>${best.date.slice(5).replace('-','/')}</b> ${escH(best.names.join(', '))}<br>그날 <b>+${wonMan(best.day)}</b> · 누적 ${wonMan(best.cum)}원`;
+    const host=tip.parentElement.getBoundingClientRect();
+    const sx=px*(box.width/C.W)+(box.left-host.left),sy=py*(box.height/C.H)+(box.top-host.top);
+    tip.style.left=Math.min(Math.max(sx,90),host.width-90)+'px';tip.style.top=(sy-10)+'px';tip.classList.add('on');
+  }
+  if(ev.touches&&ev.cancelable)ev.preventDefault();
 }
 function salesHTML(){
   const rows=salesRows||[];
@@ -806,11 +902,24 @@ function salesHTML(){
       <div class="kpi"><div class="v">${st.custs.length}<small>명</small></div><div class="k">손님(팀) 수 · 두 번 이상 온 손님 ${st.repeat}</div></div>
     </div>
     ${issues.length?`<div class="warnbox"><b>⚠️ 시트에서 손볼 것</b><ul>${issues.join('')}</ul></div>`:''}
-    <div class="panel">
-      <h3>월별 매출 <span class="sub">최근 ${last12.length}개월 · 막대 위 숫자 = 최고 달·이번 달</span><span class="togl" onclick="salesTable=!salesTable;render()">${salesTable?'그래프 보기':'표로 보기'}</span></h3>
-      ${salesTable?`<div class="tw"><table class="stbl"><thead><tr><th>달</th><th class="num">매출</th><th class="num">투어일</th><th class="num">하루 평균</th><th class="num">미입력</th></tr></thead><tbody>${st.seq.slice().reverse().map(m=>`<tr><td>${ymLong(m.ym)}</td><td class="num">${won(m.sum)}</td><td class="num">${m.days}</td><td class="num">${m.days?won(Math.round(m.sum/m.days)):'—'}</td><td class="num">${m.unpriced||''}</td></tr>`).join('')}</tbody></table></div>`
-      :`<div class="chart"><div class="tw">${salesChartSVG(last12)}</div><div class="tip" id="salesTip"></div></div>`}
-    </div>
+    ${(()=>{const ch=salesTable?null:salesCoinSVG(rows,st);
+      const chgTxt=ch?(ch.chg>0?`▲ +${wonMan(ch.chg)}`:ch.chg<0?`▼ ${wonMan(ch.chg)}`:'— 0')+(ch.pct!=null?` (${ch.pct>=0?'+':''}${ch.pct.toFixed(1)}%)`:'')+` · ${ch.rangeLabel}${ch.n?` · 투어일 ${ch.n}`:''}`:'';
+      const rng=SALES_RANGES.map(r=>`<button class="${salesRange===r.id?'on':''}" onclick="salesRange='${r.id}';render()">${r.label||r.id}</button>`).join('');
+      return salesTable
+      ?`<div class="panel"><h3>월별 매출 <span class="sub">표</span><span class="togl" onclick="salesTable=!salesTable;render()">차트 보기</span></h3>
+        <div class="tw"><table class="stbl"><thead><tr><th>달</th><th class="num">매출</th><th class="num">투어일</th><th class="num">하루 평균</th><th class="num">미입력</th></tr></thead><tbody>${st.seq.slice().reverse().map(m=>`<tr><td>${ymLong(m.ym)}</td><td class="num">${won(m.sum)}</td><td class="num">${m.days}</td><td class="num">${m.days?won(Math.round(m.sum/m.days)):'—'}</td><td class="num">${m.unpriced||''}</td></tr>`).join('')}</tbody></table></div></div>`
+      :`<div class="coin">
+        <div class="coin-head">
+          <div>
+            <div class="coin-name">GYUDONG / KRW <span>누적 매출 · 계단 = 투어 하루</span></div>
+            <div class="coin-price">${wonMan(ch.last)}<small>원</small></div>
+            <div class="coin-chg ${ch.chg>0?'up':ch.chg<0?'dn':''}">${chgTxt}</div>
+          </div>
+          <div class="rng">${rng}<span class="togl" onclick="salesTable=!salesTable;render()">표</span></div>
+        </div>
+        <div class="chart"><div class="tw">${ch.svg}</div><div class="tip" id="salesTip"></div></div>
+        <div class="coin-foot">아래 막대 = 월매출(거래량) · 선 위에 손 올리면 그날 손님·금액</div>
+      </div>`;})()}
     <div class="grid2">
       <div class="panel">
         <h3>손님별 <span class="sub">매출 순</span><span class="togl" onclick="salesAllCust=!salesAllCust;render()">${salesAllCust?'상위 10명만':`전체 ${st.custs.length}명`}</span></h3>
