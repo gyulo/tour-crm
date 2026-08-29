@@ -227,17 +227,15 @@
 .sales .lwc tbody{display:table-row-group!important;}
 .sales .lwc tr{display:table-row!important;border:none!important;margin:0!important;border-radius:0!important;}
 .sales .lwc td{display:table-cell!important;padding:0!important;border:none!important;border-radius:0!important;font-size:inherit;}
-.sales .lwc.short{height:210px;}
 .sales .stripe-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
 .sales .stripe-head .k{font-size:12px;color:var(--muted);}
 .sales .stripe-head .big{font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:700;font-size:30px;line-height:1.1;}
 .sales .stripe-head .big small{font-size:14px;color:var(--muted);font-weight:600;margin-left:2px;}
 .sales .stripe-head .d{font-size:12.5px;font-weight:600;margin-top:3px;}
-.sales .stripe-head .d.up,.sales .cmp.up{color:var(--money);} .sales .stripe-head .d.dn,.sales .cmp.dn{color:var(--warn);} .sales .stripe-head .d.eq,.sales .cmp.eq{color:var(--muted);}
+.sales .stripe-head .d.up{color:var(--money);} .sales .stripe-head .d.dn{color:var(--warn);} .sales .stripe-head .d.eq{color:var(--muted);}
 .sales .lg{font-size:12px;color:var(--muted);min-height:18px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .sales .lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
 .sales .lg b{color:var(--ink);}
-.sales .cmp{font-size:13.5px;font-weight:700;margin:0 0 4px;}
 .sales .up-row{cursor:pointer;} .sales .up-row:hover td{background:#F7F6FF;}
 .sales .togl{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;margin-left:auto;font-family:"Noto Sans KR",sans-serif;}
 @media(max-width:640px){
@@ -768,21 +766,6 @@ function lwcBase(el,extra){
   return LW.createChart(el,o);
 }
 function salesAddDays(s,n){const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-/* 이번 달 vs 지난 달: 1일부터 누적, 둘 다 이번 달 날짜 위에 올려 겹침 */
-function salesCompare(){
-  const rows=salesRows||[];
-  const t=new Date();const y=t.getFullYear(),m=t.getMonth();
-  const curYm=`${y}-${String(m+1).padStart(2,'0')}`;
-  const pd=new Date(y,m-1,1);const prevYm=`${pd.getFullYear()}-${String(pd.getMonth()+1).padStart(2,'0')}`;
-  const curDays=t.getDate(),prevLen=new Date(pd.getFullYear(),pd.getMonth()+1,0).getDate(),curLen=new Date(y,m+1,0).getDate();
-  const dayMap=ym=>{const o={};rows.forEach(r=>{if(r.price!=null&&r.date&&r.date.slice(0,7)===ym){const d=+r.date.slice(8,10);o[d]=(o[d]||0)+r.price;}});return o;};
-  const cm=dayMap(curYm),pm=dayMap(prevYm);
-  const cur=[],prev=[];let a=0,b=0;
-  for(let d=1;d<=curDays;d++){a+=cm[d]||0;cur.push({time:`${curYm}-${String(d).padStart(2,'0')}`,value:a});}
-  for(let d=1;d<=Math.min(prevLen,curLen);d++){b+=pm[d]||0;prev.push({time:`${curYm}-${String(d).padStart(2,'0')}`,value:b});}
-  let prevSame=0;for(let d=1;d<=Math.min(curDays,prevLen);d++)prevSame+=pm[d]||0;
-  return {cur,prev,curNow:a,prevSame,prevTotal:b,curLabel:`${m+1}월`,prevLabel:`${pd.getMonth()+1}월`,curDays};
-}
 /* 확정 예정 매출: 여행 확정(+여행 중) 카드의 확정 금액 */
 function salesUpcoming(){
   const today=todayStr();
@@ -829,24 +812,6 @@ function salesMountCharts(){
       lg.innerHTML=`<b>${o.y}년 ${o.m}월</b> · ${v?won(v.value):(f?'예정 '+won(f.value):'—')}${b?` · 투어 ${b.value}일`:''}`;});
     _lwc.push(ch);
   }
-  // ② 이번 달 vs 지난 달
-  const elC=document.getElementById('chC');
-  if(elC){
-    const cmp=salesCompare();
-    const ch=lwcBase(elC,{localization:{timeFormatter:t=>`${lwcTime(t).d}일`},timeScale:{tickMarkFormatter:t=>`${lwcTime(t).d}일`}});
-    const prev=ch.addLineSeries({color:LWC_PREV,lineWidth:2,lineStyle:LW.LineStyle.Dashed,priceLineVisible:false,lastValueVisible:false,crosshairMarkerRadius:4,crosshairMarkerBorderColor:'#fff',crosshairMarkerBackgroundColor:LWC_PREV});
-    prev.setData(cmp.prev);
-    const cur=ch.addLineSeries({color:LWC_UP,lineWidth:2,priceLineVisible:false,lastValueVisible:true,crosshairMarkerRadius:5,crosshairMarkerBorderColor:'#fff',crosshairMarkerBackgroundColor:LWC_UP});
-    cur.setData(cmp.cur);
-    ch.priceScale('right').applyOptions({scaleMargins:{top:0.12,bottom:0.08}});
-    ch.timeScale().fitContent();
-    const lg=document.getElementById('chC-lg');
-    const idle=()=>{if(lg)lg.innerHTML=`<i style="background:${LWC_UP}"></i>${cmp.curLabel} <b>${wonMan(cmp.curNow)}</b> &nbsp; <i style="background:${LWC_PREV}"></i>${cmp.prevLabel} 같은 날 <b>${wonMan(cmp.prevSame)}</b> · ${cmp.prevLabel} 전체 ${wonMan(cmp.prevTotal)}`;};
-    idle();
-    ch.subscribeCrosshairMove(p=>{if(!lg)return;if(!p.time){idle();return;}const d=lwcTime(p.time).d;const a=p.seriesData.get(cur),b=p.seriesData.get(prev);
-      lg.innerHTML=`<b>${d}일까지</b> &nbsp; <i style="background:${LWC_UP}"></i>${cmp.curLabel} <b>${a?wonMan(a.value):'—'}</b> &nbsp; <i style="background:${LWC_PREV}"></i>${cmp.prevLabel} <b>${b?wonMan(b.value):'—'}</b>`;});
-    _lwc.push(ch);
-  }
 }
 function salesHTML(){
   const rows=salesRows||[];
@@ -866,7 +831,7 @@ function salesHTML(){
   const atTxt=at?`${at.getMonth()+1}/${at.getDate()} ${String(at.getHours()).padStart(2,'0')}:${String(at.getMinutes()).padStart(2,'0')} 읽음`:'';
   const custs=salesAllCust?st.custs:st.custs.slice(0,10);
   const best=st.seq.reduce((b,m)=>m.sum>b.sum?m:b,st.seq[0]);
-  const up=salesUpcoming();const cmp=salesCompare();const diff=cmp.curNow-cmp.prevSame;
+  const up=salesUpcoming();
   const hasLW=!!window.LightweightCharts;
   const issues=[];
   if(st.unpriced.length)issues.push(`<li><b>가격 미입력 ${st.unpriced.length}일</b> — ${st.unpriced.slice(0,3).map(r=>`${escH(r.name)} ${r.date||r.rawDate}`).join(', ')}${st.unpriced.length>3?` 외 ${st.unpriced.length-3}일`:''}. 합계에 안 들어감</li>`);
@@ -899,12 +864,6 @@ function salesHTML(){
         </div>
         <div class="lwc" id="chM"></div>`}
     </div>
-    ${hasLW?`<div class="panel">
-      <h3>이번 달 vs 지난 달 <span class="sub">1일부터 오늘까지 누적 · 점선 = 지난 달 같은 날짜</span></h3>
-      <div class="cmp ${diff>0?'up':diff<0?'dn':'eq'}">${diff>0?`▲ 지난달 이맘때보다 <b>${wonMan(diff)}원</b> 앞서는 중`:diff<0?`▼ 지난달 이맘때보다 <b>${wonMan(-diff)}원</b> 뒤처지는 중`:'— 지난달 이맘때와 같음'} <span style="color:var(--muted);font-weight:400">(${cmp.curDays}일 기준)</span></div>
-      <div class="lg" id="chC-lg"></div>
-      <div class="lwc short" id="chC"></div>
-    </div>`:''}
     <div class="panel">
       <h3>확정 예정 매출 <span class="sub">「여행 확정」 카드 기준 · 달러는 ×${USD_KRW.toLocaleString()}원 가정</span></h3>
       <div class="kpis" style="margin-bottom:12px">
