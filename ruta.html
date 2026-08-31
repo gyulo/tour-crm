@@ -109,6 +109,7 @@ function render(){
     col.innerHTML='<h2 draggable="true" title="헤더를 끌어 다른 날짜에 놓으면 통째로 맞바꿈"><span>'+esc(dayLabel(i))+'</span>'
       +'<span class="dn'+(nm?"":" empty")+'" title="눌러서 지역/테마 적기">'+(nm?"· "+esc(nm):"· 지역?")+'</span>'
       +'<button class="swp" title="다른 날짜와 통째로 바꾸기">⇄</button>'
+      +'<button class="swp mk3" title="이 날 일정표 파일 제작 — 클로드 명령 복사">📄</button>'
       +'<small>'+(((board[i]||[]).length)||"")+'</small></h2>';
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)col.appendChild(mkBlk(b));}
     for(const ln of String(fees[i]||fees[String(i)]||"").split("\n"))col.appendChild(mkFee(ln));
@@ -208,6 +209,12 @@ function hookCol(col){
     if(swapSel===null){swapSel=dnum;setStatus("D"+dnum+" 선택됨 — 바꿀 날짜의 ⇄ 를 누르세요 (같은 걸 다시 누르면 취소)");render();}
     else if(swapSel===dnum){swapSel=null;setStatus("바꾸기 취소");render();}
     else{const a=swapSel;swapSel=null;swapDays(a,dnum);}});
+  const m3=h2.querySelector(".mk3");
+  if(m3)m3.addEventListener("click",ev=>{ev.stopPropagation();
+    const txt="/viaje-ruta3 "+((card&&card.name)||"")+" D"+dnum;
+    const done=()=>setStatus("복사됨: "+txt+" — 클로드 터미널에 붙여넣으면 일정표 파일이 나옵니다");
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done).catch(done);
+    else done();});
   const dn=h2.querySelector(".dn");
   if(dn)dn.addEventListener("click",ev=>{ev.stopPropagation();
     const i=parseInt(col.dataset.day,10);
