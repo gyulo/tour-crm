@@ -182,7 +182,7 @@ function hookCol(col){
   if(dn)dn.addEventListener("click",ev=>{ev.stopPropagation();
     const i=parseInt(col.dataset.day,10);
     const v=prompt("D"+i+" 의 지역/테마",names[i]||names[String(i)]||"");
-    if(v!==null){names[i]=v.trim();delete names[String(i)];render();queueSave();}});}
+    if(v!==null){const s=v.trim();if(s)names[i]=s;else delete names[i];render();queueSave();}});}
 function moveTo(id,day,idx){
   if(!id)return;
   for(const k in board)board[k]=board[k].filter(x=>x!==id);
