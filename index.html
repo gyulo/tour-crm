@@ -1038,7 +1038,7 @@ function renderDrawer(){
         <div class="field"><label>✉️ 이메일</label><input type="text" id="d_email" value="${escH(d.email||'')}" placeholder="correo@..."></div>
       </div>
       <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waZoom(gv('d_phone'),gv('d_name'))">📱 와츠앱으로 Zoom 링크 보내기</button>
-      <div class="field" style="margin-top:13px"><label>🤝 같이 가는 날 일정표 <span class="es">Itinerario conmigo · 내가 동행하는 날</span></label><input type="text" id="d_itinGuideUrl" value="${escH(d.itinGuideUrl||'')}" placeholder="https://gyulo.github.io/tour-crm/itinerarios/..."></div>
+      <div class="field" style="margin-top:13px"><label>🤝 같이 가는 날 일정표 <span class="es">Itinerario conmigo · 내가 동행하는 날</span> <button type="button" onclick="copyRuta(event,3)" style="margin-left:6px;padding:2px 10px;font-size:11.5px;font-weight:700;border:1px solid var(--line2,#ccc);border-radius:999px;background:transparent;cursor:pointer">📋 /viaje-ruta3 복사</button></label><input type="text" id="d_itinGuideUrl" value="${escH(d.itinGuideUrl||'')}" placeholder="https://gyulo.github.io/tour-crm/itinerarios/..."></div>
       ${d.itinGuideUrl?`<a href="${escH(d.itinGuideUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:12px;color:var(--accent);margin:-4px 0 8px">↗ 미리보기</a>`:''}
       <button type="button" class="btn primary" style="width:100%;padding:11px;margin-top:2px" onclick="waItin(gv('d_phone'),gv('d_name'),gv('d_itinGuideUrl'),'guide')">🤝 같이 가는 날 일정표 보내기</button>
       <div class="field" style="margin-top:13px"><label>📄 혼자 다니는 날 일정표 <span class="es">Itinerario solo · 손님 혼자 다니는 날</span></label><input type="text" id="d_itinUrl" value="${escH(d.itinUrl||'')}" placeholder="https://gyulo.github.io/tour-crm/itinerarios/..."></div>
@@ -1291,10 +1291,10 @@ function saveClient(){
 }
 function delClient(){if(!confirm('이 손님을 삭제할까요?'))return;const id=openId;clients=clients.filter(c=>c.id!==id);saveLocal();render();closeDrawer();pushDelete(id);toast('삭제됨');}
 
-function copyRuta(ev){ // 「/viaje-ruta 이름」을 클립보드로 — 클로드 터미널에 바로 붙여넣기용
+function copyRuta(ev,step){ // 「/viaje-ruta<N> 이름」을 클립보드로 — 클로드 터미널에 바로 붙여넣기용 (step 생략=1)
   if(ev)ev.preventDefault();
   const nm=((document.getElementById('d_name')||{}).value||(window.draft&&draft.name)||'').trim();
-  const txt='/viaje-ruta1 '+nm;
+  const txt='/viaje-ruta'+(step||1)+' '+nm;
   const done=()=>toast('복사됨: '+txt);
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>{fallbackCopy(txt);done();});}
   else{fallbackCopy(txt);done();}
