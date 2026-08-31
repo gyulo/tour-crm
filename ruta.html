@@ -112,7 +112,8 @@ function mkBlk(b){
   d.innerHTML='<div class="t">'+esc(b.label)+'<small>'+esc(b.cat)+'</small></div>'
     +'<button class="mm'+(memos[b.id]?" has":"")+'" title="'+esc(memos[b.id]||"메모 쓰기")+'">📝</button>'
     +(b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>':"");
-  d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);});
+  d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);startEdgeScroll();});
+  d.addEventListener("dragend",stopEdgeScroll);
   d.addEventListener("click",()=>{selId=(selId===b.id?null:b.id);render();});
   d.querySelector(".mm").addEventListener("click",ev=>{ev.stopPropagation();
     const v=prompt("📝 "+b.label,memos[b.id]||"");
@@ -125,6 +126,20 @@ function dropIndex(col,y,dragId){ // 마우스 높이 기준 끼워넣을 자리
   let i=0;
   for(const e of els){const r=e.getBoundingClientRect();if(y>r.top+r.height/2)i++;else break;}
   return i;}
+let dragX=null,dragY=null,scrollTimer=null;
+function startEdgeScroll(){ // 드래그 중 화면 가장자리에 닿으면 보드가 옆으로 굴러간다
+  const bd=document.getElementById("board");
+  stopEdgeScroll();
+  scrollTimer=setInterval(()=>{
+    if(dragX===null)return;
+    const w=window.innerWidth;
+    if(dragX>w-90)bd.scrollLeft+=Math.min(45,(dragX-(w-90))/2+14);
+    else if(dragX<90)bd.scrollLeft-=Math.min(45,(90-dragX)/2+14);
+  },40);}
+function stopEdgeScroll(){clearInterval(scrollTimer);scrollTimer=null;dragX=null;}
+document.addEventListener("dragover",e=>{dragX=e.clientX;dragY=e.clientY;});
+document.addEventListener("dragend",stopEdgeScroll);
+document.addEventListener("drop",stopEdgeScroll);
 function hookCol(col){
   col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("over");});
   col.addEventListener("dragleave",()=>col.classList.remove("over"));
@@ -135,7 +150,7 @@ function hookCol(col){
     moveTo(data,day,day>0?dropIndex(col,e.clientY,data):undefined);});
   const h2=col.querySelector("h2");
   const dnum=parseInt(col.dataset.day,10);
-  if(dnum>0)h2.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain","day:"+dnum);});
+  if(dnum>0){h2.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain","day:"+dnum);startEdgeScroll();});h2.addEventListener("dragend",stopEdgeScroll);}
   h2.addEventListener("click",()=>{if(selId){moveTo(selId,dnum);selId=null;}});
   const sw=h2.querySelector(".swp");
   if(sw)sw.addEventListener("click",ev=>{ev.stopPropagation();
