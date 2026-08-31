@@ -47,7 +47,7 @@
   <button onclick="location.reload()">↻ 새로고침</button>
   <span id="feeTotal"></span>
 </div>
-<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · 캐러셀 블록엔 <b>⧉</b> = 복사(장소 여러 개일 때 — 이름 바꿔서 하나 더), 복사본은 <b>✕</b>로 삭제 · 날짜 칸 맨 아래 = <b>💰 추가 요금</b>(숫자를 원 단위로 적으면 위에 합계가 뜸) · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · 캐러셀 블록엔 <b>⧉</b> = 복사(장소 여러 개일 때 — 이름 바꿔서 하나 더), 복사본은 <b>✕</b>로 삭제 · 날짜 칸 맨 아래 = <b>💰 추가 요금</b>(숫자를 원 단위로 적으면 위에 합계가 뜸, <b>엔터</b> = 한 칸 더·빈 칸 백스페이스 = 칸 삭제) · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
 <div id="memoPane"><textarea id="bmemo" placeholder="보드 전체 메모 — 호텔, 예약, 값 얘기 등" oninput="boardMemo=this.value;queueSave()"></textarea></div>
 <div id="board"></div>
 <script>
@@ -111,16 +111,27 @@ function render(){
       +'<button class="swp" title="다른 날짜와 통째로 바꾸기">⇄</button>'
       +'<small>'+(((board[i]||[]).length)||"")+'</small></h2>';
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)col.appendChild(mkBlk(b));}
-    const fee=document.createElement("input");fee.className="fee";
-    fee.value=fees[i]||fees[String(i)]||"";
-    fee.placeholder="💰 추가 요금 (예: 50000 케이블카)";
-    fee.addEventListener("input",function(){const d=parseInt(this.closest(".col").dataset.day,10);
-      if(this.value.trim()){fees[d]=this.value;}else{delete fees[d];delete fees[String(d)];}
-      updFeeTotal();queueSave();});
-    col.appendChild(fee);
+    for(const ln of String(fees[i]||fees[String(i)]||"").split("\n"))col.appendChild(mkFee(ln));
     hookCol(col);el.appendChild(col);}
   updFeeTotal();
 }
+function mkFee(val){ // 요금 한 줄 = 입력칸 하나. 엔터 = 밑에 한 칸 더, 빈 칸에서 백스페이스 = 칸 지우기
+  const fee=document.createElement("input");fee.className="fee";fee.value=val;
+  fee.placeholder="💰 추가 요금 (예: 50000 케이블카)";
+  fee.addEventListener("input",function(){feeUpd(this.closest(".col"));});
+  fee.addEventListener("keydown",function(e){
+    if(e.key==="Enter"){e.preventDefault();const nf=mkFee("");this.after(nf);nf.focus();}
+    else if(e.key==="Backspace"&&this.value===""&&this.closest(".col").querySelectorAll(".fee").length>1){
+      e.preventDefault();const col=this.closest(".col");
+      const prev=this.previousElementSibling;this.remove();
+      if(prev&&prev.classList.contains("fee"))prev.focus();
+      feeUpd(col);}});
+  return fee;}
+function feeUpd(col){
+  const d=parseInt(col.dataset.day,10);
+  const lines=[...col.querySelectorAll(".fee")].map(x=>x.value).filter(s=>s.trim());
+  if(lines.length)fees[d]=lines.join("\n");else{delete fees[d];delete fees[String(d)];}
+  updFeeTotal();queueSave();}
 function feeSum(){ // 요금칸의 1,000 이상 숫자만 돈으로 세서 합산 (개수·시간 같은 작은 숫자는 무시)
   let t=0;
   for(const k in fees){for(const m of (String(fees[k]).match(/\d[\d,]*/g)||[])){
@@ -262,7 +273,8 @@ function copyText(){
     const nm=names[i]||names[String(i)]||"";
     out+="\n"+dayLabel(i)+(nm?" · "+nm:"")+"\n";
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b){out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";if(memos[id])out+="      📝 "+memos[id]+"\n";}}
-    const fv=fees[i]||fees[String(i)];if(fv)out+="  💰 추가 요금: "+fv+"\n";}
+    const fv=fees[i]||fees[String(i)];
+    if(fv)for(const ln of String(fv).split("\n"))out+="  💰 추가 요금: "+ln+"\n";}
   const ft=feeSum();if(ft)out+="\n💰 추가요금 합계 ₩"+ft.toLocaleString()+"\n";
   const left=blocks.filter(b=>!Object.values(board).some(a=>a.includes(b.id)));
   if(left.length)out+="\n미배정\n"+left.map(b=>"  · "+b.label).join("\n");
