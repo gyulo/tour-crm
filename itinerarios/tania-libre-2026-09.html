@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Tania · Días libres 9–13 sep</title>
+<style>
+/* DESIGN.md (Airbnb tokens) — colors/typography/rounded/spacing/components */
+:root{
+  --primary:#ff385c; --primary-active:#e00b41; --ink:#222222; --body:#3f3f3f;
+  --muted:#6a6a6a; --muted-soft:#929292; --hairline:#dddddd; --hairline-soft:#ebebeb;
+  --canvas:#ffffff; --surface-soft:#f7f7f7; --surface-strong:#f2f2f2; --on-primary:#ffffff;
+  --r-xs:4px; --r-sm:8px; --r-md:14px; --r-lg:20px; --r-full:9999px;
+  --sp-xs:4px; --sp-sm:8px; --sp-md:12px; --sp-base:16px; --sp-lg:24px; --sp-xl:32px; --sp-xxl:48px;
+  --font:'Airbnb Cereal VF',Circular,-apple-system,system-ui,Roboto,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--font);background:var(--canvas);color:var(--body);
+  font-size:16px;line-height:1.5}
+.wrap{max-width:680px;margin:0 auto;padding:var(--sp-lg) var(--sp-base) var(--sp-xxl)}
+/* header */
+.kicker{font-size:12px;font-weight:700;line-height:1.33;color:var(--primary);
+  text-transform:uppercase;letter-spacing:.32px}
+h1{font-size:28px;font-weight:700;line-height:1.43;color:var(--ink);margin-top:var(--sp-xs)}
+.sub{font-size:14px;font-weight:400;line-height:1.43;color:var(--muted);margin-top:var(--sp-xs)}
+/* sticky day nav — pill tabs */
+nav{position:sticky;top:0;background:var(--canvas);padding:var(--sp-md) 0;
+  display:flex;gap:var(--sp-sm);overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border-bottom:1px solid var(--hairline-soft);z-index:5;margin-top:var(--sp-base)}
+nav a{flex:0 0 auto;font-size:14px;font-weight:500;line-height:1.29;text-decoration:none;
+  color:var(--ink);background:var(--surface-strong);border-radius:var(--r-full);padding:10px 20px}
+nav a.hoy{background:var(--primary);color:var(--on-primary)}
+/* day section */
+section{margin-top:var(--sp-xl)}
+.dia-head{display:flex;align-items:baseline;gap:var(--sp-md)}
+.dia-num{font-size:20px;font-weight:600;line-height:1.2;letter-spacing:-.18px;color:var(--ink)}
+.dia-zona{font-size:14px;font-weight:500;line-height:1.29;color:var(--muted)}
+.dia-nota{font-size:13px;font-weight:400;line-height:1.23;color:var(--muted);
+  background:var(--surface-soft);border-radius:var(--r-sm);padding:var(--sp-sm) var(--sp-md);
+  margin-top:var(--sp-md)}
+/* place card */
+.card{border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--canvas);
+  padding:var(--sp-base);margin-top:var(--sp-md)}
+.card h3{font-size:16px;font-weight:600;line-height:1.25;color:var(--ink)}
+.momento{font-size:11px;font-weight:600;line-height:1.18;color:var(--primary);
+  text-transform:uppercase;letter-spacing:.32px}
+.card p{font-size:14px;font-weight:400;line-height:1.43;color:var(--body);margin-top:var(--sp-xs)}
+.badge{display:inline-block;font-size:11px;font-weight:600;line-height:1.18;
+  border:1px solid var(--hairline);border-radius:var(--r-xs);padding:3px 7px;
+  color:var(--ink);background:var(--surface-soft);margin-left:var(--sp-sm);vertical-align:middle}
+.badge.rojo{border-color:var(--primary);color:var(--primary);background:#fff}
+/* korean name + copy (para el taxi) */
+.kr{display:flex;align-items:center;gap:var(--sp-sm);margin-top:var(--sp-md);
+  background:var(--surface-soft);border-radius:var(--r-sm);padding:var(--sp-sm) var(--sp-md)}
+.kr b{font-size:14px;font-weight:500;color:var(--ink);flex:1;word-break:keep-all}
+.kr button{font-size:14px;font-weight:500;line-height:1.29;font-family:var(--font);
+  border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);
+  border-radius:var(--r-full);padding:7px 16px;cursor:pointer}
+.kr button.ok{background:var(--ink);color:var(--on-primary);border-color:var(--ink)}
+/* action row */
+.acciones{display:flex;gap:var(--sp-sm);margin-top:var(--sp-md);flex-wrap:wrap}
+.acciones a{font-size:14px;font-weight:500;line-height:1.29;text-decoration:none;
+  background:var(--primary);color:var(--on-primary);border-radius:var(--r-sm);
+  padding:11px 18px}
+.acciones a.sec{background:var(--canvas);color:var(--ink);border:1px solid var(--ink);padding:10px 17px}
+/* footer */
+footer{margin-top:var(--sp-xxl);border-top:1px solid var(--hairline-soft);
+  padding-top:var(--sp-lg);font-size:14px;line-height:1.43;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Corea · días libres</div>
+  <h1>Tania</h1>
+  <div class="sub">9 – 13 de septiembre de 2026 · el día 8 andamos juntos, estos días vas por tu cuenta ㅎㅎ<br>
+  El nombre en coreano se lo enseñas al taxista o lo pegas en el mapa.</div>
+
+  <nav>
+    <a href="#d9">Mié 9</a><a href="#d10">Jue 10</a><a href="#d11">Vie 11 · Busan</a>
+    <a href="#d12">Sáb 12 · Busan</a><a href="#d13">Dom 13</a>
+  </nav>
+
+  <!-- ───────── Mié 9 sep ───────── -->
+  <section id="d9">
+    <div class="dia-head"><span class="dia-num">Miércoles 9</span><span class="dia-zona">Gyeongbokgung · Insadong — todo caminando</span></div>
+
+    <div class="card"><span class="momento">Mañana</span>
+      <h3>Palacio Gyeongbokgung</h3>
+      <p>El palacio real más grande. Con hanbok puesto la entrada es gratis y las fotos salen increíbles.</p>
+      <div class="kr"><b>경복궁</b><button onclick="cp(this,'경복궁')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EA%B2%BD%EB%B3%B5%EA%B6%81" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Mediodía</span>
+      <h3>Museo de Historia de Seúl</h3>
+      <p>Entrada gratis, con aire acondicionado ㅎㅎ Está a 10 min caminando del palacio.</p>
+      <div class="kr"><b>서울역사박물관</b><button onclick="cp(this,'서울역사박물관')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%EC%97%AD%EC%82%AC%EB%B0%95%EB%AC%BC%EA%B4%80" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde</span>
+      <h3>Arroyo Cheonggyecheon</h3>
+      <p>Paseo junto al arroyo en pleno centro. Bajas, caminas un rato y descansas los pies en el agua.</p>
+      <div class="kr"><b>청계천</b><button onclick="cp(this,'청계천')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%B2%AD%EA%B3%84%EC%B2%9C" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde · noche</span>
+      <h3>Insadong</h3>
+      <p>Calle de artesanías y tés tradicionales — souvenirs bonitos que no son de aeropuerto ㅎㅎ</p>
+      <div class="kr"><b>인사동</b><button onclick="cp(this,'인사동')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%9D%B8%EC%82%AC%EB%8F%99" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+  </section>
+
+  <!-- ───────── Jue 10 sep ───────── -->
+  <section id="d10">
+    <div class="dia-head"><span class="dia-num">Jueves 10</span><span class="dia-zona">Jamsil · Yeouido</span></div>
+
+    <div class="card"><span class="momento">Mañana</span>
+      <h3>Seoul Sky — Lotte World Tower <span class="badge rojo">🔒 reserva tu hora</span></h3>
+      <p>Mirador en el piso 117–123, el más alto de Corea. Compra la entrada online antes para no hacer fila.</p>
+      <div class="kr"><b>롯데월드타워 서울스카이</b><button onclick="cp(this,'롯데월드타워 서울스카이')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%EC%8A%A4%EC%B9%B4%EC%9D%B4" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde</span>
+      <h3>Han River Bus</h3>
+      <p>El barco público por el río Han — cruzas la ciudad por el agua en vez del metro.</p>
+      <div class="kr"><b>한강버스</b><button onclick="cp(this,'한강버스')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%ED%95%9C%EA%B0%95%EB%B2%84%EC%8A%A4" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde · noche</span>
+      <h3>The Hyundai Seoul</h3>
+      <p>El mall más bonito de Seúl (Yeouido) — jardín interior, comida rica abajo.</p>
+      <div class="kr"><b>더현대 서울</b><button onclick="cp(this,'더현대 서울')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EB%8D%94%ED%98%84%EB%8C%80%20%EC%84%9C%EC%9A%B8" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+  </section>
+
+  <!-- ───────── Vie 11 sep · Busan ───────── -->
+  <section id="d11">
+    <div class="dia-head"><span class="dia-num">Viernes 11</span><span class="dia-zona">Busan día 1 — Songdo · Gamcheon</span></div>
+    <div class="dia-nota">🚄 KTX Seúl → Busan ~2h30. Compra el boleto con anticipación (app Korail o te ayudo yo).</div>
+
+    <div class="card"><span class="momento">Mediodía</span>
+      <h3>Teleférico marino de Songdo</h3>
+      <p>Cabinas sobre el mar, algunas con piso de cristal ㅎㅎ</p>
+      <div class="kr"><b>송도해상케이블카</b><button onclick="cp(this,'송도해상케이블카')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%86%A1%EB%8F%84%ED%95%B4%EC%83%81%EC%BC%80%EC%9D%B4%EB%B8%94%EC%B9%B4" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde</span>
+      <h3>Puente de nubes Yonggung</h3>
+      <p>Pasarela colgante sobre el mar, al lado de Songdo — se hace en media hora.</p>
+      <div class="kr"><b>송도용궁구름다리</b><button onclick="cp(this,'송도용궁구름다리')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%86%A1%EB%8F%84%EC%9A%A9%EA%B6%81%EA%B5%AC%EB%A6%84%EB%8B%A4%EB%A6%AC" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde · atardecer</span>
+      <h3>Gamcheon Culture Village</h3>
+      <p>El pueblito de colores en la montaña — casitas pintadas, el Principito mirando al mar. Para fotos, el mejor de Busan.</p>
+      <div class="kr"><b>감천문화마을</b><button onclick="cp(this,'감천문화마을')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EA%B0%90%EC%B2%9C%EB%AC%B8%ED%99%94%EB%A7%88%EC%9D%84" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+  </section>
+
+  <!-- ───────── Sáb 12 sep · Busan ───────── -->
+  <section id="d12">
+    <div class="dia-head"><span class="dia-num">Sábado 12</span><span class="dia-zona">Busan día 2 — Haeundae · Gwangalli</span></div>
+
+    <div class="card"><span class="momento">Mañana</span>
+      <h3>Playa Haeundae</h3>
+      <p>La playa más famosa de Corea. Caminas la orilla y desayunas viendo el mar.</p>
+      <div class="kr"><b>해운대해수욕장</b><button onclick="cp(this,'해운대해수욕장')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%ED%95%B4%EC%9A%B4%EB%8C%80%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Mañana</span>
+      <h3>Sky Capsule — Blue Line <span class="badge rojo">🔒 mejor temprano</span></h3>
+      <p>Las capsulitas de colores por la costa (las del reel famoso). El sábado se llena — ve temprano o reserva online.</p>
+      <div class="kr"><b>해운대 블루라인파크</b><button onclick="cp(this,'해운대 블루라인파크')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%ED%95%B4%EC%9A%B4%EB%8C%80%20%EB%B8%94%EB%A3%A8%EB%9D%BC%EC%9D%B8%ED%8C%8C%ED%81%AC" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Mediodía</span>
+      <h3>Skywalk de Cheongsapo</h3>
+      <p>Mirador de cristal sobre el mar — bajando de la Sky Capsule, queda ahí mismo.</p>
+      <div class="kr"><b>청사포 스카이워크</b><button onclick="cp(this,'청사포 스카이워크')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%B2%AD%EC%82%AC%ED%8F%AC%EC%8A%A4%EC%B9%B4%EC%9D%B4%EC%9B%8C%ED%81%AC" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde</span>
+      <h3>Templo Haedong Yonggungsa</h3>
+      <p>El templo sobre las rocas del mar (Gijang) — casi todos los templos están en montaña, este no.</p>
+      <div class="kr"><b>해동용궁사</b><button onclick="cp(this,'해동용궁사')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%ED%95%B4%EB%8F%99%EC%9A%A9%EA%B6%81%EC%82%AC" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Noche</span>
+      <h3>Show de drones en Gwangalli <span class="badge">sábado 20:00</span></h3>
+      <p>Cientos de drones sobre el puente Gwangan — es cada sábado y justo te toca ㅎㅎ Llega antes y agarra lugar en la arena. Confirma la hora ese día (a veces cambia por clima).</p>
+      <div class="kr"><b>광안리해수욕장</b><button onclick="cp(this,'광안리해수욕장')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EA%B4%91%EC%95%88%EB%A6%AC%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+  </section>
+
+  <!-- ───────── Dom 13 sep ───────── -->
+  <section id="d13">
+    <div class="dia-head"><span class="dia-num">Domingo 13</span><span class="dia-zona">Changdeokgung · Hongdae</span></div>
+
+    <div class="card"><span class="momento">Mañana</span>
+      <h3>Palacio Changdeokgung + Jardín Secreto <span class="badge rojo">🔒 reservar antes</span></h3>
+      <p>Patrimonio UNESCO. El Jardín Secreto (Huwon) solo se entra con reserva de horario — se agota, hay que apartarlo online con días de anticipación. Si quieres yo lo reservo.</p>
+      <div class="kr"><b>창덕궁</b><button onclick="cp(this,'창덕궁')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%EC%B0%BD%EB%8D%95%EA%B6%81" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+
+    <div class="card"><span class="momento">Tarde</span>
+      <h3>Clase de cocina coreana <span class="badge">❓ lugar por confirmar</span></h3>
+      <p>Te confirmo el lugar y la hora — en cuanto esté te mando el link.</p>
+    </div>
+
+    <div class="card"><span class="momento">Noche</span>
+      <h3>Hongdae</h3>
+      <p>La zona joven — música en la calle, tiendas, neones. Perfecta última noche ㅎㅎ</p>
+      <div class="kr"><b>홍대입구</b><button onclick="cp(this,'홍대입구')">Copiar</button></div>
+      <div class="acciones"><a href="https://map.naver.com/p/search/%ED%99%8D%EB%8C%80%EC%9E%85%EA%B5%AC" target="_blank" rel="noopener">Naver Map</a></div>
+    </div>
+  </section>
+
+  <footer>
+    Cualquier duda me escribes al WhatsApp y te contesto ㅎㅎ<br>
+    — tu guía en Corea
+  </footer>
+</div>
+
+<script>
+function cp(btn, txt){
+  var done = function(){
+    btn.textContent = 'Copiado ✓'; btn.classList.add('ok');
+    setTimeout(function(){ btn.textContent = 'Copiar'; btn.classList.remove('ok'); }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done, function(){ fb(txt); done(); });
+  } else { fb(txt); done(); }
+}
+function fb(t){
+  var ta = document.createElement('textarea'); ta.value = t;
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(e){}
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
