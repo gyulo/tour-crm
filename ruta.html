@@ -42,6 +42,7 @@
 <div class="bar">
   <button onclick="saveBoard(true)">💾 저장</button>
   <button onclick="copyText()">📋 텍스트로 복사</button>
+  <button onclick="copyDone()" title="배치 완성 — 클로드가 날짜별 PDF 합쳐 일정표 보내기 칸까지 채움">✅ 완성 → 일정표</button>
   <button onclick="toggleMemo()">🗒 메모</button>
   <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
   <button onclick="location.reload()">↻ 새로고침</button>
@@ -273,6 +274,11 @@ async function saveBoard(manual){
     card=fresh;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
   }catch(e){setStatus("저장 실패(오프라인?)");}}
 
+function copyDone(){ // 「/viaje-ruta4 이름」 복사 — 클로드가 PDF 합치기→일정표 칸 등록→전송 승인까지
+  const txt="/viaje-ruta4 "+((card&&card.name)||"");
+  const done=()=>setStatus("복사됨: "+txt+" — 클로드 터미널에 붙여넣으세요");
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done).catch(done);
+  else done();}
 function copyText(){
   let out=(card&&card.name||"")+" 루타\n";
   if(boardMemo)out+="🗒 "+boardMemo+"\n";
