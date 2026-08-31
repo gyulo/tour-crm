@@ -1,0 +1,159 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>루타 보드</title>
+<style>
+  :root{--bg:#f6f3ec;--card:#fff;--ink:#2c2620;--muted:#8a7f70;--line:#e5ddd0;--sel:#ff9f43}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;padding:14px}
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  h1{font-size:18px}
+  #status{font-size:12px;color:var(--muted)}
+  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .bar button,.bar input{font:inherit;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
+  .bar input{width:58px;text-align:center}
+  #board{display:flex;gap:10px;overflow-x:auto;align-items:flex-start;padding-bottom:20px}
+  .col{flex:0 0 232px;background:#efe9dd;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:120px}
+  .col.pool{flex:0 0 262px;background:#e9e3d6}
+  .col h2{font-size:13px;padding:4px 6px 8px;cursor:pointer;user-select:none;display:flex;justify-content:space-between}
+  .col h2 small{color:var(--muted);font-weight:400}
+  .col.over{outline:2px dashed var(--sel);outline-offset:-4px}
+  .blk{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c,#bbb);border-radius:10px;
+       padding:7px 9px;margin-bottom:6px;cursor:grab;display:flex;gap:6px;align-items:flex-start;font-size:13px}
+  .blk.sel{outline:2px solid var(--sel)}
+  .blk .t{flex:1;min-width:0;word-break:break-word}
+  .blk small{display:block;color:var(--muted);font-size:11px}
+  .blk a{text-decoration:none;flex:none;font-size:14px}
+  .cat{font-size:11px;color:var(--muted);margin:8px 4px 3px;font-weight:700}
+  #hint{font-size:12px;color:var(--muted);margin-bottom:10px}
+</style></head><body>
+<header><h1>🧩 루타 보드 — <span id="who">…</span></h1><span id="status">불러오는 중…</span></header>
+<div class="bar">
+  <button onclick="saveBoard(true)">💾 저장</button>
+  <button onclick="copyText()">📋 텍스트로 복사</button>
+  <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
+  <button onclick="location.reload()">↻ 새로고침</button>
+</div>
+<div id="hint">블록을 <b>끌어서</b> 날짜 칸에 놓거나, 블록을 <b>탭 → 날짜 제목 탭</b>으로 옮깁니다. 🔗는 릴 열기. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="board"></div>
+<script>
+const API="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
+const TKEY="seoulTourCRM_token";
+const qs=new URLSearchParams(location.search);
+const CARD_ID=qs.get("card");
+let card=null, blocks=[], board={}, nDays=10, selId=null, saveTimer=null;
+
+const CAT_HUE={"☕":"#c98f4e","🍗":"#d96c4f","🎤":"#9a6ddb","🏞":"#4f9e6b","🚗":"#5b8fd4","🛍":"#d45f9e","🖤":"#555","📝":"#555","⭐":"#d4a017","❓":"#999"};
+function tok(){let t="";try{t=localStorage.getItem(TKEY)||"";}catch(e){}
+  if(!t){t=prompt("동기화 비밀번호");if(t){try{localStorage.setItem(TKEY,t);}catch(e){}}}
+  return t||"";}
+function setStatus(m){document.getElementById("status").textContent=m;}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");}
+
+function isHeader(line){ // URL 없는 줄 중 이모지로 시작하면 섹션 제목 (한글 시작이면 링크 없는 장소 블록)
+  if(/https?:\/\//.test(line))return false;
+  const cp=line.codePointAt(0);
+  return (cp>=0x1F300&&cp<=0x1FAFF)||(cp>=0x2600&&cp<=0x27BF)||cp===0x2B50||cp===0x2764;}
+function slug(s){let h=0;for(const ch of s){h=(h*31+ch.codePointAt(0))>>>0;}return "b"+h.toString(36);}
+function parseBlocks(text){
+  const out=[];let cat="📝";let skip=false;
+  for(let raw of String(text||"").split("\n")){
+    const line=raw.trim();if(!line)continue;
+    if(isHeader(line)){cat=line;skip=line.startsWith("❌");continue;}
+    if(skip)continue;
+    const m=line.match(/https?:\/\/[^\s]+/);
+    const url=m?m[0]:"";
+    let label=line.replace(/https?:\/\/[^\s]+/,"").trim().replace(/[·—-]\s*$/,"").trim()||url;
+    const ig=url.match(/instagram\.com\/(?:reel|p)\/([A-Za-z0-9_-]+)/);
+    out.push({id:ig?("ig:"+ig[1]):slug(label),label,url,cat});
+  }
+  return out;}
+
+function dayLabel(i){ // i=1..N, hireStart 기준 날짜·요일
+  const hs=card&&card.hireStart&&/^\d{4}-\d{2}-\d{2}/.test(card.hireStart)?new Date(card.hireStart+"T00:00:00"):null;
+  if(!hs)return "D"+i;
+  const d=new Date(hs);d.setDate(d.getDate()+i-1);
+  return "D"+i+" "+(d.getMonth()+1)+"/"+d.getDate()+" ("+"일월화수목금토"[d.getDay()]+")";}
+
+function render(){
+  const el=document.getElementById("board");el.innerHTML="";
+  const placed=new Set();Object.values(board).forEach(a=>a.forEach(id=>placed.add(id)));
+  const pool=document.createElement("div");pool.className="col pool";pool.dataset.day="0";
+  pool.innerHTML='<h2>🗂 미배정 <small id="poolN"></small></h2>';
+  let lastCat=null,cnt=0;
+  for(const b of blocks){
+    if(placed.has(b.id))continue;cnt++;
+    if(b.cat!==lastCat){lastCat=b.cat;const c=document.createElement("div");c.className="cat";c.textContent=b.cat;pool.appendChild(c);}
+    pool.appendChild(mkBlk(b));}
+  pool.querySelector("#poolN").textContent=cnt+"개";
+  hookCol(pool);el.appendChild(pool);
+  for(let i=1;i<=nDays;i++){
+    const col=document.createElement("div");col.className="col";col.dataset.day=String(i);
+    col.innerHTML="<h2>"+esc(dayLabel(i))+"<small>"+((board[i]||[]).length||"")+"</small></h2>";
+    for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)col.appendChild(mkBlk(b));}
+    hookCol(col);el.appendChild(col);}
+}
+function mkBlk(b){
+  const d=document.createElement("div");d.className="blk"+(selId===b.id?" sel":"");d.draggable=true;d.dataset.id=b.id;
+  d.style.setProperty("--c",CAT_HUE[[...b.cat][0]]||"#bbb");
+  d.innerHTML='<div class="t">'+esc(b.label)+'<small>'+esc(b.cat)+'</small></div>'+
+    (b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>':"");
+  d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);});
+  d.addEventListener("click",()=>{selId=(selId===b.id?null:b.id);render();});
+  return d;}
+function hookCol(col){
+  col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("over");});
+  col.addEventListener("dragleave",()=>col.classList.remove("over"));
+  col.addEventListener("drop",e=>{e.preventDefault();col.classList.remove("over");
+    moveTo(e.dataTransfer.getData("text/plain"),parseInt(col.dataset.day,10));});
+  col.querySelector("h2").addEventListener("click",()=>{if(selId){moveTo(selId,parseInt(col.dataset.day,10));selId=null;}});}
+function moveTo(id,day){
+  if(!id)return;
+  for(const k in board)board[k]=board[k].filter(x=>x!==id);
+  if(day>0){(board[day]=board[day]||[]).push(id);}
+  render();clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveBoard(false),1500);}
+function setDays(n){nDays=Math.max(1,Math.min(30,parseInt(n,10)||10));render();}
+
+async function load(){
+  const t=tok();if(!t){setStatus("비번 없음");return;}
+  const rows=await (await fetch(API+"?key="+encodeURIComponent(t))).json();
+  const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
+  card=list.find(c=>String(c.id)===String(CARD_ID));
+  if(!card){setStatus("카드 못 찾음: "+CARD_ID);return;}
+  document.getElementById("who").textContent=card.name||CARD_ID;
+  document.title="루타 보드 — "+(card.name||CARD_ID);
+  blocks=parseBlocks(card.wishLinks);
+  const rb=card.rutaBoard||{};board=rb.days||{};
+  nDays=rb.nDays|| (function(){ // hireStart~flightOut 일수 추정
+    try{const a=new Date(card.hireStart+"T00:00:00");const m=(card.flightOut||"").match(/\d{4}-\d{2}-\d{2}/);
+        const b=m?new Date(m[0]+"T00:00:00"):null;
+        if(a&&b&&b>a)return Math.min(30,Math.round((b-a)/864e5)+1);}catch(e){}
+    return 10;})();
+  document.getElementById("ndays").value=nDays;
+  setStatus("블록 "+blocks.length+"개 · "+(rb.savedAt?("저장본 "+rb.savedAt.slice(5,16)):"새 보드"));
+  render();}
+
+async function saveBoard(manual){
+  const t=tok();if(!t||!card)return;
+  setStatus("저장 중…");
+  try{ // 최신 카드 위에 rutaBoard 만 얹어서 통째 저장 (다른 칸 되감기 방지)
+    const rows=await (await fetch(API+"?key="+encodeURIComponent(t))).json();
+    const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
+    const fresh=list.find(c=>String(c.id)===String(CARD_ID))||card;
+    fresh.rutaBoard={v:1,nDays,days:board,savedAt:new Date().toISOString()};
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({token:t,client:fresh})});
+    card=fresh;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
+  }catch(e){setStatus("저장 실패(오프라인?)");}}
+
+function copyText(){
+  let out=(card&&card.name||"")+" 루타\n";
+  for(let i=1;i<=nDays;i++){
+    out+="\n"+dayLabel(i)+"\n";
+    for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";}}
+  const left=blocks.filter(b=>!Object.values(board).some(a=>a.includes(b.id)));
+  if(left.length)out+="\n미배정\n"+left.map(b=>"  · "+b.label).join("\n");
+  navigator.clipboard&&navigator.clipboard.writeText(out).then(()=>setStatus("텍스트 복사됨 ✓"))
+    ||setStatus("복사 실패");}
+
+load();
+</script></body></html>
