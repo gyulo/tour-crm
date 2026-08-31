@@ -19,6 +19,8 @@
   .col h2 .dn{color:#b07a2e;font-weight:800;cursor:text}
   .col h2 .dn.empty{color:#c9bda9;font-weight:400}
   .col.over{outline:2px dashed var(--sel);outline-offset:-4px}
+  .col.swapsel{outline:3px solid #5b8fd4;outline-offset:-4px}
+  .col h2 .swp{border:1px solid var(--line);background:var(--card);border-radius:8px;font-size:12px;padding:1px 7px;cursor:pointer;line-height:1.4}
   .blk{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c,#bbb);border-radius:10px;
        padding:7px 9px;margin-bottom:6px;cursor:grab;display:flex;gap:6px;align-items:flex-start;font-size:13px}
   .blk.sel{outline:2px solid var(--sel)}
@@ -35,14 +37,14 @@
   <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
   <button onclick="location.reload()">↻ 새로고침</button>
 </div>
-<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b>를 누르면 그 날의 지역/테마를 적을 수 있어요. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 옮기면 1.5초 뒤 자동 저장.</div>
 <div id="board"></div>
 <script>
 const API="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const TKEY="seoulTourCRM_token";
 const qs=new URLSearchParams(location.search);
 const CARD_ID=qs.get("card");
-let card=null, blocks=[], board={}, names={}, nDays=10, selId=null, saveTimer=null;
+let card=null, blocks=[], board={}, names={}, nDays=10, selId=null, saveTimer=null, swapSel=null;
 
 const CAT_HUE={"☕":"#c98f4e","🍗":"#d96c4f","🎤":"#9a6ddb","🏞":"#4f9e6b","🚗":"#5b8fd4","🛍":"#d45f9e","🖤":"#555","📝":"#555","⭐":"#d4a017","❓":"#999"};
 function tok(){let t="";try{t=localStorage.getItem(TKEY)||"";}catch(e){}
@@ -89,10 +91,11 @@ function render(){
   pool.querySelector("#poolN").textContent=cnt+"개";
   hookCol(pool);el.appendChild(pool);
   for(let i=1;i<=nDays;i++){
-    const col=document.createElement("div");col.className="col";col.dataset.day=String(i);
+    const col=document.createElement("div");col.className="col"+(swapSel===i?" swapsel":"");col.dataset.day=String(i);
     const nm=names[i]||names[String(i)]||"";
-    col.innerHTML='<h2><span>'+esc(dayLabel(i))+'</span>'
+    col.innerHTML='<h2 draggable="true" title="헤더를 끌어 다른 날짜에 놓으면 통째로 맞바꿈"><span>'+esc(dayLabel(i))+'</span>'
       +'<span class="dn'+(nm?"":" empty")+'" title="눌러서 지역/테마 적기">'+(nm?"· "+esc(nm):"· 지역?")+'</span>'
+      +'<button class="swp" title="다른 날짜와 통째로 바꾸기">⇄</button>'
       +'<small>'+(((board[i]||[]).length)||"")+'</small></h2>';
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)col.appendChild(mkBlk(b));}
     hookCol(col);el.appendChild(col);}
@@ -114,11 +117,19 @@ function hookCol(col){
   col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("over");});
   col.addEventListener("dragleave",()=>col.classList.remove("over"));
   col.addEventListener("drop",e=>{e.preventDefault();col.classList.remove("over");
-    const id=e.dataTransfer.getData("text/plain");
+    const data=e.dataTransfer.getData("text/plain");
     const day=parseInt(col.dataset.day,10);
-    moveTo(id,day,day>0?dropIndex(col,e.clientY,id):undefined);});
+    if(data.startsWith("day:")){const src=parseInt(data.slice(4),10);if(day>0&&src>0&&src!==day)swapDays(src,day);return;}
+    moveTo(data,day,day>0?dropIndex(col,e.clientY,data):undefined);});
   const h2=col.querySelector("h2");
-  h2.addEventListener("click",()=>{if(selId){moveTo(selId,parseInt(col.dataset.day,10));selId=null;}});
+  const dnum=parseInt(col.dataset.day,10);
+  if(dnum>0)h2.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain","day:"+dnum);});
+  h2.addEventListener("click",()=>{if(selId){moveTo(selId,dnum);selId=null;}});
+  const sw=h2.querySelector(".swp");
+  if(sw)sw.addEventListener("click",ev=>{ev.stopPropagation();
+    if(swapSel===null){swapSel=dnum;setStatus("D"+dnum+" 선택됨 — 바꿀 날짜의 ⇄ 를 누르세요 (같은 걸 다시 누르면 취소)");render();}
+    else if(swapSel===dnum){swapSel=null;setStatus("바꾸기 취소");render();}
+    else{const a=swapSel;swapSel=null;swapDays(a,dnum);}});
   const dn=h2.querySelector(".dn");
   if(dn)dn.addEventListener("click",ev=>{ev.stopPropagation();
     const i=parseInt(col.dataset.day,10);
@@ -130,6 +141,12 @@ function moveTo(id,day,idx){
   if(day>0){const a=(board[day]=board[day]||[]);
     if(idx===undefined||idx>=a.length)a.push(id);else a.splice(idx,0,id);}
   render();queueSave();}
+function swapDays(a,b){ // 그 날의 블록 전체 + 지역 라벨을 통째로 맞바꾼다
+  const ta=board[a]||[],tb=board[b]||[];board[a]=tb;board[b]=ta;
+  const na=names[a],nb=names[b];
+  if(nb===undefined)delete names[a];else names[a]=nb;
+  if(na===undefined)delete names[b];else names[b]=na;
+  setStatus("D"+a+" ⇄ D"+b+" 바꿈");render();queueSave();}
 function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveBoard(false),1500);}
 function setDays(n){nDays=Math.max(1,Math.min(30,parseInt(n,10)||10));render();queueSave();}
 
