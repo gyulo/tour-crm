@@ -14,8 +14,10 @@
   #board{display:flex;gap:10px;overflow-x:auto;align-items:flex-start;padding-bottom:20px}
   .col{flex:0 0 232px;background:#efe9dd;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:120px}
   .col.pool{flex:0 0 262px;background:#e9e3d6}
-  .col h2{font-size:13px;padding:4px 6px 8px;cursor:pointer;user-select:none;display:flex;justify-content:space-between}
-  .col h2 small{color:var(--muted);font-weight:400}
+  .col h2{font-size:13px;padding:4px 6px 8px;cursor:pointer;user-select:none;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+  .col h2 small{color:var(--muted);font-weight:400;margin-left:auto}
+  .col h2 .dn{color:#b07a2e;font-weight:800;cursor:text}
+  .col h2 .dn.empty{color:#c9bda9;font-weight:400}
   .col.over{outline:2px dashed var(--sel);outline-offset:-4px}
   .blk{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c,#bbb);border-radius:10px;
        padding:7px 9px;margin-bottom:6px;cursor:grab;display:flex;gap:6px;align-items:flex-start;font-size:13px}
@@ -33,14 +35,14 @@
   <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
   <button onclick="location.reload()">↻ 새로고침</button>
 </div>
-<div id="hint">블록을 <b>끌어서</b> 날짜 칸에 놓거나, 블록을 <b>탭 → 날짜 제목 탭</b>으로 옮깁니다. 🔗는 릴 열기. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b>를 누르면 그 날의 지역/테마를 적을 수 있어요. 옮기면 1.5초 뒤 자동 저장.</div>
 <div id="board"></div>
 <script>
 const API="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const TKEY="seoulTourCRM_token";
 const qs=new URLSearchParams(location.search);
 const CARD_ID=qs.get("card");
-let card=null, blocks=[], board={}, nDays=10, selId=null, saveTimer=null;
+let card=null, blocks=[], board={}, names={}, nDays=10, selId=null, saveTimer=null;
 
 const CAT_HUE={"☕":"#c98f4e","🍗":"#d96c4f","🎤":"#9a6ddb","🏞":"#4f9e6b","🚗":"#5b8fd4","🛍":"#d45f9e","🖤":"#555","📝":"#555","⭐":"#d4a017","❓":"#999"};
 function tok(){let t="";try{t=localStorage.getItem(TKEY)||"";}catch(e){}
@@ -78,7 +80,7 @@ function render(){
   const el=document.getElementById("board");el.innerHTML="";
   const placed=new Set();Object.values(board).forEach(a=>a.forEach(id=>placed.add(id)));
   const pool=document.createElement("div");pool.className="col pool";pool.dataset.day="0";
-  pool.innerHTML='<h2>🗂 미배정 <small id="poolN"></small></h2>';
+  pool.innerHTML='<h2><span>🗂 미배정</span><small id="poolN"></small></h2>';
   let lastCat=null,cnt=0;
   for(const b of blocks){
     if(placed.has(b.id))continue;cnt++;
@@ -88,7 +90,10 @@ function render(){
   hookCol(pool);el.appendChild(pool);
   for(let i=1;i<=nDays;i++){
     const col=document.createElement("div");col.className="col";col.dataset.day=String(i);
-    col.innerHTML="<h2>"+esc(dayLabel(i))+"<small>"+((board[i]||[]).length||"")+"</small></h2>";
+    const nm=names[i]||names[String(i)]||"";
+    col.innerHTML='<h2><span>'+esc(dayLabel(i))+'</span>'
+      +'<span class="dn'+(nm?"":" empty")+'" title="눌러서 지역/테마 적기">'+(nm?"· "+esc(nm):"· 지역?")+'</span>'
+      +'<small>'+(((board[i]||[]).length)||"")+'</small></h2>';
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)col.appendChild(mkBlk(b));}
     hookCol(col);el.appendChild(col);}
 }
@@ -100,18 +105,33 @@ function mkBlk(b){
   d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);});
   d.addEventListener("click",()=>{selId=(selId===b.id?null:b.id);render();});
   return d;}
+function dropIndex(col,y,dragId){ // 마우스 높이 기준 끼워넣을 자리 — 블록 중간선 아래면 다음 칸
+  const els=[...col.querySelectorAll(".blk")].filter(e=>e.dataset.id!==dragId);
+  let i=0;
+  for(const e of els){const r=e.getBoundingClientRect();if(y>r.top+r.height/2)i++;else break;}
+  return i;}
 function hookCol(col){
   col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("over");});
   col.addEventListener("dragleave",()=>col.classList.remove("over"));
   col.addEventListener("drop",e=>{e.preventDefault();col.classList.remove("over");
-    moveTo(e.dataTransfer.getData("text/plain"),parseInt(col.dataset.day,10));});
-  col.querySelector("h2").addEventListener("click",()=>{if(selId){moveTo(selId,parseInt(col.dataset.day,10));selId=null;}});}
-function moveTo(id,day){
+    const id=e.dataTransfer.getData("text/plain");
+    const day=parseInt(col.dataset.day,10);
+    moveTo(id,day,day>0?dropIndex(col,e.clientY,id):undefined);});
+  const h2=col.querySelector("h2");
+  h2.addEventListener("click",()=>{if(selId){moveTo(selId,parseInt(col.dataset.day,10));selId=null;}});
+  const dn=h2.querySelector(".dn");
+  if(dn)dn.addEventListener("click",ev=>{ev.stopPropagation();
+    const i=parseInt(col.dataset.day,10);
+    const v=prompt("D"+i+" 의 지역/테마",names[i]||names[String(i)]||"");
+    if(v!==null){names[i]=v.trim();delete names[String(i)];render();queueSave();}});}
+function moveTo(id,day,idx){
   if(!id)return;
   for(const k in board)board[k]=board[k].filter(x=>x!==id);
-  if(day>0){(board[day]=board[day]||[]).push(id);}
-  render();clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveBoard(false),1500);}
-function setDays(n){nDays=Math.max(1,Math.min(30,parseInt(n,10)||10));render();}
+  if(day>0){const a=(board[day]=board[day]||[]);
+    if(idx===undefined||idx>=a.length)a.push(id);else a.splice(idx,0,id);}
+  render();queueSave();}
+function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveBoard(false),1500);}
+function setDays(n){nDays=Math.max(1,Math.min(30,parseInt(n,10)||10));render();queueSave();}
 
 async function load(){
   const t=tok();if(!t){setStatus("비번 없음");return;}
@@ -122,7 +142,7 @@ async function load(){
   document.getElementById("who").textContent=card.name||CARD_ID;
   document.title="루타 보드 — "+(card.name||CARD_ID);
   blocks=parseBlocks(card.wishLinks);
-  const rb=card.rutaBoard||{};board=rb.days||{};
+  const rb=card.rutaBoard||{};board=rb.days||{};names=rb.names||{};
   nDays=rb.nDays|| (function(){ // hireStart~flightOut 일수 추정
     try{const a=new Date(card.hireStart+"T00:00:00");const m=(card.flightOut||"").match(/\d{4}-\d{2}-\d{2}/);
         const b=m?new Date(m[0]+"T00:00:00"):null;
@@ -139,7 +159,7 @@ async function saveBoard(manual){
     const rows=await (await fetch(API+"?key="+encodeURIComponent(t))).json();
     const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
     const fresh=list.find(c=>String(c.id)===String(CARD_ID))||card;
-    fresh.rutaBoard={v:1,nDays,days:board,savedAt:new Date().toISOString()};
+    fresh.rutaBoard={v:1,nDays,days:board,names,savedAt:new Date().toISOString()};
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify({token:t,client:fresh})});
     card=fresh;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
@@ -148,7 +168,8 @@ async function saveBoard(manual){
 function copyText(){
   let out=(card&&card.name||"")+" 루타\n";
   for(let i=1;i<=nDays;i++){
-    out+="\n"+dayLabel(i)+"\n";
+    const nm=names[i]||names[String(i)]||"";
+    out+="\n"+dayLabel(i)+(nm?" · "+nm:"")+"\n";
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";}}
   const left=blocks.filter(b=>!Object.values(board).some(a=>a.includes(b.id)));
   if(left.length)out+="\n미배정\n"+left.map(b=>"  · "+b.label).join("\n");
