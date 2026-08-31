@@ -38,7 +38,7 @@
   .cat{font-size:11px;color:var(--muted);margin:8px 4px 3px;font-weight:700}
   #hint{font-size:12px;color:var(--muted);margin-bottom:10px}
 </style></head><body>
-<header><h1>🧩 루타 보드 — <span id="who">…</span></h1><span id="status">불러오는 중…</span></header>
+<header><h1>🧩 루타 보드 — <span id="who">…</span></h1><span id="status">불러오는 중…</span><span id="vv" style="font-size:11px;color:#c9bda9"></span></header>
 <div class="bar">
   <button onclick="saveBoard(true)">💾 저장</button>
   <button onclick="copyText()">📋 텍스트로 복사</button>
@@ -281,5 +281,7 @@ function copyText(){
   navigator.clipboard&&navigator.clipboard.writeText(out).then(()=>setStatus("텍스트 복사됨 ✓"))
     ||setStatus("복사 실패");}
 
+try{const lm=new Date(document.lastModified); // 지금 열린 파일이 어느 판인지 — 캐시로 옛 버전 잡고 있으면 이 시간이 옛날로 뜸
+  document.getElementById("vv").textContent="판 "+(lm.getMonth()+1)+"/"+lm.getDate()+" "+lm.toTimeString().slice(0,5);}catch(e){}
 load();
 </script></body></html>
