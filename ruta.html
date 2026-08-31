@@ -43,7 +43,7 @@
   <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
   <button onclick="location.reload()">↻ 새로고침</button>
 </div>
-<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · <b>⧉</b> = 블록 복사(캐러셀에 장소 여러 개일 때 — 이름 바꿔서 하나 더), 복사본은 <b>✕</b>로 삭제 · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · 캐러셀 블록엔 <b>⧉</b> = 복사(장소 여러 개일 때 — 이름 바꿔서 하나 더), 복사본은 <b>✕</b>로 삭제 · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
 <div id="memoPane"><textarea id="bmemo" placeholder="보드 전체 메모 — 호텔, 예약, 값 얘기 등" oninput="boardMemo=this.value;queueSave()"></textarea></div>
 <div id="board"></div>
 <script>
@@ -114,7 +114,7 @@ function mkBlk(b){
   d.style.setProperty("--c",CAT_HUE[[...b.cat][0]]||"#bbb");
   d.innerHTML='<div class="t">'+esc(b.label)+'<small>'+esc(b.cat)+'</small></div>'
     +'<button class="mm'+(memos[b.id]?" has":"")+'" title="'+esc(memos[b.id]||"메모 쓰기")+'">📝</button>'
-    +'<button class="cp" title="블록 복사 (캐러셀에 장소 여러 개일 때)">⧉</button>'
+    +(/instagram\.com\/p\//.test(b.url)?'<button class="cp" title="블록 복사 (캐러셀에 장소 여러 개일 때)">⧉</button>':"")
     +(b.x?'<button class="xx" title="복사본 삭제">✕</button>':"")
     +(b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>':"");
   d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);startEdgeScroll();});
@@ -125,7 +125,8 @@ function mkBlk(b){
     if(v===null)return;
     if(v.trim())memos[b.id]=v.trim();else delete memos[b.id];
     render();queueSave();});
-  d.querySelector(".cp").addEventListener("click",ev=>{ev.stopPropagation();copyBlk(b);});
+  const cp=d.querySelector(".cp");
+  if(cp)cp.addEventListener("click",ev=>{ev.stopPropagation();copyBlk(b);});
   const xx=d.querySelector(".xx");
   if(xx)xx.addEventListener("click",ev=>{ev.stopPropagation();delExtra(b.id);});
   return d;}
