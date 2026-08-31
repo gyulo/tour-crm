@@ -32,6 +32,9 @@
   .blk .xx{opacity:.55;color:#c0392b}
   #memoPane{display:none;margin-bottom:10px}
   #memoPane textarea{width:100%;min-height:70px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .col .fee{width:100%;font:inherit;font-size:12px;padding:5px 8px;border:1px dashed var(--line);border-radius:8px;background:#fffdf7;margin-top:2px}
+  .col .fee::placeholder{color:#c9bda9}
+  #feeTotal{font-size:12px;color:#b07a2e;font-weight:700}
   .cat{font-size:11px;color:var(--muted);margin:8px 4px 3px;font-weight:700}
   #hint{font-size:12px;color:var(--muted);margin-bottom:10px}
 </style></head><body>
@@ -42,8 +45,9 @@
   <button onclick="toggleMemo()">🗒 메모</button>
   <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
   <button onclick="location.reload()">↻ 새로고침</button>
+  <span id="feeTotal"></span>
 </div>
-<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · 캐러셀 블록엔 <b>⧉</b> = 복사(장소 여러 개일 때 — 이름 바꿔서 하나 더), 복사본은 <b>✕</b>로 삭제 · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · 캐러셀 블록엔 <b>⧉</b> = 복사(장소 여러 개일 때 — 이름 바꿔서 하나 더), 복사본은 <b>✕</b>로 삭제 · 날짜 칸 맨 아래 = <b>💰 추가 요금</b>(숫자를 원 단위로 적으면 위에 합계가 뜸) · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
 <div id="memoPane"><textarea id="bmemo" placeholder="보드 전체 메모 — 호텔, 예약, 값 얘기 등" oninput="boardMemo=this.value;queueSave()"></textarea></div>
 <div id="board"></div>
 <script>
@@ -51,7 +55,7 @@ const API="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on
 const TKEY="seoulTourCRM_token";
 const qs=new URLSearchParams(location.search);
 const CARD_ID=qs.get("card");
-let card=null, blocks=[], extras=[], board={}, names={}, memos={}, boardMemo="", nDays=10, selId=null, saveTimer=null, swapSel=null;
+let card=null, blocks=[], extras=[], board={}, names={}, memos={}, fees={}, boardMemo="", nDays=10, selId=null, saveTimer=null, swapSel=null;
 
 const CAT_HUE={"☕":"#c98f4e","🍗":"#d96c4f","🎤":"#9a6ddb","🏞":"#4f9e6b","🚗":"#5b8fd4","🛍":"#d45f9e","🖤":"#555","📝":"#555","⭐":"#d4a017","❓":"#999"};
 function tok(){let t="";try{t=localStorage.getItem(TKEY)||"";}catch(e){}
@@ -107,8 +111,23 @@ function render(){
       +'<button class="swp" title="다른 날짜와 통째로 바꾸기">⇄</button>'
       +'<small>'+(((board[i]||[]).length)||"")+'</small></h2>';
     for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)col.appendChild(mkBlk(b));}
+    const fee=document.createElement("input");fee.className="fee";
+    fee.value=fees[i]||fees[String(i)]||"";
+    fee.placeholder="💰 추가 요금 (예: 50000 케이블카)";
+    fee.addEventListener("input",function(){const d=parseInt(this.closest(".col").dataset.day,10);
+      if(this.value.trim()){fees[d]=this.value;}else{delete fees[d];delete fees[String(d)];}
+      updFeeTotal();queueSave();});
+    col.appendChild(fee);
     hookCol(col);el.appendChild(col);}
+  updFeeTotal();
 }
+function feeSum(){ // 요금칸의 1,000 이상 숫자만 돈으로 세서 합산 (개수·시간 같은 작은 숫자는 무시)
+  let t=0;
+  for(const k in fees){for(const m of (String(fees[k]).match(/\d[\d,]*/g)||[])){
+    const n=parseInt(m.replace(/,/g,""),10);if(n>=1000)t+=n;}}
+  return t;}
+function updFeeTotal(){const t=feeSum();
+  document.getElementById("feeTotal").textContent=t?("💰 추가요금 합계 ₩"+t.toLocaleString()):"";}
 function mkBlk(b){
   const d=document.createElement("div");d.className="blk"+(selId===b.id?" sel":"");d.draggable=true;d.dataset.id=b.id;
   d.style.setProperty("--c",CAT_HUE[[...b.cat][0]]||"#bbb");
@@ -189,11 +208,15 @@ function moveTo(id,day,idx){
   if(day>0){const a=(board[day]=board[day]||[]);
     if(idx===undefined||idx>=a.length)a.push(id);else a.splice(idx,0,id);}
   render();queueSave();}
-function swapDays(a,b){ // 그 날의 블록 전체 + 지역 라벨을 통째로 맞바꾼다
+function swapDays(a,b){ // 그 날의 블록 전체 + 지역 라벨 + 추가 요금을 통째로 맞바꾼다
   const ta=board[a]||[],tb=board[b]||[];board[a]=tb;board[b]=ta;
   const na=names[a],nb=names[b];
   if(nb===undefined)delete names[a];else names[a]=nb;
   if(na===undefined)delete names[b];else names[b]=na;
+  const fa=fees[a]!==undefined?fees[a]:fees[String(a)], fb=fees[b]!==undefined?fees[b]:fees[String(b)];
+  delete fees[a];delete fees[String(a)];delete fees[b];delete fees[String(b)];
+  if(fb!==undefined)fees[a]=fb;
+  if(fa!==undefined)fees[b]=fa;
   setStatus("D"+a+" ⇄ D"+b+" 바꿈");render();queueSave();}
 function toggleMemo(){const p=document.getElementById("memoPane");p.style.display=p.style.display==="block"?"none":"block";}
 function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveBoard(false),1500);}
@@ -207,7 +230,7 @@ async function load(){
   if(!card){setStatus("카드 못 찾음: "+CARD_ID);return;}
   document.getElementById("who").textContent=card.name||CARD_ID;
   document.title="루타 보드 — "+(card.name||CARD_ID);
-  const rb=card.rutaBoard||{};board=rb.days||{};names=rb.names||{};memos=rb.memos||{};boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
+  const rb=card.rutaBoard||{};board=rb.days||{};names=rb.names||{};memos=rb.memos||{};fees=rb.fees||{};boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
   extras=Array.isArray(rb.extras)?rb.extras:[];
   blocks=parseBlocks(card.wishLinks).concat(extras);
   nDays=rb.nDays|| (function(){ // hireStart~flightOut 일수 추정
@@ -226,7 +249,7 @@ async function saveBoard(manual){
     const rows=await (await fetch(API+"?key="+encodeURIComponent(t))).json();
     const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
     const fresh=list.find(c=>String(c.id)===String(CARD_ID))||card;
-    fresh.rutaBoard={v:1,nDays,days:board,names,memos,extras,memo:boardMemo,savedAt:new Date().toISOString()};
+    fresh.rutaBoard={v:1,nDays,days:board,names,memos,extras,fees,memo:boardMemo,savedAt:new Date().toISOString()};
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify({token:t,client:fresh})});
     card=fresh;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
@@ -238,7 +261,9 @@ function copyText(){
   for(let i=1;i<=nDays;i++){
     const nm=names[i]||names[String(i)]||"";
     out+="\n"+dayLabel(i)+(nm?" · "+nm:"")+"\n";
-    for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b){out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";if(memos[id])out+="      📝 "+memos[id]+"\n";}}}
+    for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b){out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";if(memos[id])out+="      📝 "+memos[id]+"\n";}}
+    const fv=fees[i]||fees[String(i)];if(fv)out+="  💰 추가 요금: "+fv+"\n";}
+  const ft=feeSum();if(ft)out+="\n💰 추가요금 합계 ₩"+ft.toLocaleString()+"\n";
   const left=blocks.filter(b=>!Object.values(board).some(a=>a.includes(b.id)));
   if(left.length)out+="\n미배정\n"+left.map(b=>"  · "+b.label).join("\n");
   navigator.clipboard&&navigator.clipboard.writeText(out).then(()=>setStatus("텍스트 복사됨 ✓"))
