@@ -27,6 +27,10 @@
   .blk .t{flex:1;min-width:0;word-break:break-word}
   .blk small{display:block;color:var(--muted);font-size:11px}
   .blk a{text-decoration:none;flex:none;font-size:14px}
+  .blk .mm{border:none;background:none;cursor:pointer;font-size:13px;flex:none;opacity:.3;padding:0}
+  .blk .mm.has{opacity:1}
+  #memoPane{display:none;margin-bottom:10px}
+  #memoPane textarea{width:100%;min-height:70px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
   .cat{font-size:11px;color:var(--muted);margin:8px 4px 3px;font-weight:700}
   #hint{font-size:12px;color:var(--muted);margin-bottom:10px}
 </style></head><body>
@@ -34,17 +38,19 @@
 <div class="bar">
   <button onclick="saveBoard(true)">💾 저장</button>
   <button onclick="copyText()">📋 텍스트로 복사</button>
+  <button onclick="toggleMemo()">🗒 메모</button>
   <label>일수 <input type="number" id="ndays" min="1" max="30" onchange="setDays(this.value)"></label>
   <button onclick="location.reload()">↻ 새로고침</button>
 </div>
-<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="hint">블록을 끌어 <b>원하는 위치 사이에</b> 놓으면 그 자리에 끼워집니다. 폰은 블록 탭 → 날짜 제목 탭. <b>주황 지역 글자</b> = 그 날 지역/테마 적기 · <b>⇄</b> 두 번(또는 날짜 헤더 끌기) = 두 날짜 통째로 맞바꾸기. 블록의 <b>📝</b> = 메모(평소엔 숨김, 누르면 보기·수정) · 위 <b>🗒 메모</b> = 보드 전체 메모. 옮기면 1.5초 뒤 자동 저장.</div>
+<div id="memoPane"><textarea id="bmemo" placeholder="보드 전체 메모 — 호텔, 예약, 값 얘기 등" oninput="boardMemo=this.value;queueSave()"></textarea></div>
 <div id="board"></div>
 <script>
 const API="https://nyfojw4huuhkwzphmxkdvisrji0argmb.lambda-url.ap-northeast-2.on.aws/";
 const TKEY="seoulTourCRM_token";
 const qs=new URLSearchParams(location.search);
 const CARD_ID=qs.get("card");
-let card=null, blocks=[], board={}, names={}, nDays=10, selId=null, saveTimer=null, swapSel=null;
+let card=null, blocks=[], board={}, names={}, memos={}, boardMemo="", nDays=10, selId=null, saveTimer=null, swapSel=null;
 
 const CAT_HUE={"☕":"#c98f4e","🍗":"#d96c4f","🎤":"#9a6ddb","🏞":"#4f9e6b","🚗":"#5b8fd4","🛍":"#d45f9e","🖤":"#555","📝":"#555","⭐":"#d4a017","❓":"#999"};
 function tok(){let t="";try{t=localStorage.getItem(TKEY)||"";}catch(e){}
@@ -103,10 +109,16 @@ function render(){
 function mkBlk(b){
   const d=document.createElement("div");d.className="blk"+(selId===b.id?" sel":"");d.draggable=true;d.dataset.id=b.id;
   d.style.setProperty("--c",CAT_HUE[[...b.cat][0]]||"#bbb");
-  d.innerHTML='<div class="t">'+esc(b.label)+'<small>'+esc(b.cat)+'</small></div>'+
-    (b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>':"");
+  d.innerHTML='<div class="t">'+esc(b.label)+'<small>'+esc(b.cat)+'</small></div>'
+    +'<button class="mm'+(memos[b.id]?" has":"")+'" title="'+esc(memos[b.id]||"메모 쓰기")+'">📝</button>'
+    +(b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>':"");
   d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);});
   d.addEventListener("click",()=>{selId=(selId===b.id?null:b.id);render();});
+  d.querySelector(".mm").addEventListener("click",ev=>{ev.stopPropagation();
+    const v=prompt("📝 "+b.label,memos[b.id]||"");
+    if(v===null)return;
+    if(v.trim())memos[b.id]=v.trim();else delete memos[b.id];
+    render();queueSave();});
   return d;}
 function dropIndex(col,y,dragId){ // 마우스 높이 기준 끼워넣을 자리 — 블록 중간선 아래면 다음 칸
   const els=[...col.querySelectorAll(".blk")].filter(e=>e.dataset.id!==dragId);
@@ -147,6 +159,7 @@ function swapDays(a,b){ // 그 날의 블록 전체 + 지역 라벨을 통째로
   if(nb===undefined)delete names[a];else names[a]=nb;
   if(na===undefined)delete names[b];else names[b]=na;
   setStatus("D"+a+" ⇄ D"+b+" 바꿈");render();queueSave();}
+function toggleMemo(){const p=document.getElementById("memoPane");p.style.display=p.style.display==="block"?"none":"block";}
 function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveBoard(false),1500);}
 function setDays(n){nDays=Math.max(1,Math.min(30,parseInt(n,10)||10));render();queueSave();}
 
@@ -159,7 +172,7 @@ async function load(){
   document.getElementById("who").textContent=card.name||CARD_ID;
   document.title="루타 보드 — "+(card.name||CARD_ID);
   blocks=parseBlocks(card.wishLinks);
-  const rb=card.rutaBoard||{};board=rb.days||{};names=rb.names||{};
+  const rb=card.rutaBoard||{};board=rb.days||{};names=rb.names||{};memos=rb.memos||{};boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
   nDays=rb.nDays|| (function(){ // hireStart~flightOut 일수 추정
     try{const a=new Date(card.hireStart+"T00:00:00");const m=(card.flightOut||"").match(/\d{4}-\d{2}-\d{2}/);
         const b=m?new Date(m[0]+"T00:00:00"):null;
@@ -176,7 +189,7 @@ async function saveBoard(manual){
     const rows=await (await fetch(API+"?key="+encodeURIComponent(t))).json();
     const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
     const fresh=list.find(c=>String(c.id)===String(CARD_ID))||card;
-    fresh.rutaBoard={v:1,nDays,days:board,names,savedAt:new Date().toISOString()};
+    fresh.rutaBoard={v:1,nDays,days:board,names,memos,memo:boardMemo,savedAt:new Date().toISOString()};
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify({token:t,client:fresh})});
     card=fresh;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
@@ -184,10 +197,11 @@ async function saveBoard(manual){
 
 function copyText(){
   let out=(card&&card.name||"")+" 루타\n";
+  if(boardMemo)out+="🗒 "+boardMemo+"\n";
   for(let i=1;i<=nDays;i++){
     const nm=names[i]||names[String(i)]||"";
     out+="\n"+dayLabel(i)+(nm?" · "+nm:"")+"\n";
-    for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b)out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";}}
+    for(const id of (board[i]||[])){const b=blocks.find(x=>x.id===id);if(b){out+="  · "+b.label+(b.url?" "+b.url:"")+"\n";if(memos[id])out+="      📝 "+memos[id]+"\n";}}}
   const left=blocks.filter(b=>!Object.values(board).some(a=>a.includes(b.id)));
   if(left.length)out+="\n미배정\n"+left.map(b=>"  · "+b.label).join("\n");
   navigator.clipboard&&navigator.clipboard.writeText(out).then(()=>setStatus("텍스트 복사됨 ✓"))
