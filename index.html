@@ -1041,7 +1041,7 @@ function renderDrawer(){
       <div class="field"><label>🍽 음식</label><input type="text" id="d_food" value="${(d.food||'').replace(/"/g,'&quot;')}"></div>
       <div class="field"><label>관광 ↔ 현지인</label><div class="scale" id="d_local">${LOCAL_OPTS.map(o=>`<button data-v="${o}" class="${d.local===o?'on':''}">${o}</button>`).join('')}</div></div>
       <div class="field"><label>👘 한복 체험 <span class="es">Hanbok</span></label><div class="chips" id="d_hanbok">${["입어요","안 입어요","미정"].map(o=>`<span class="ch ${d.hanbok===o?'on':''}" data-single data-v="${o}">${o}</span>`).join('')}</div></div>
-      <div class="field"><label>📍 가고 싶은 곳 · 링크 모음 <span class="es">손님이 보낸 장소 링크 (한 줄에 하나)</span></label>
+      <div class="field"><label>📍 가고 싶은 곳 · 링크 모음 <span class="es">손님이 보낸 장소 링크 (한 줄에 하나) · 모으기·동네묶기는 클로드에 <b>/viaje-ruta</b></span></label>
         <textarea id="d_wishLinks" placeholder="손님이 보낸 링크를 붙여넣으세요 (한 줄에 하나). 예:&#10;성수동 카페 https://instagram.com/...&#10;https://maps.google.com/...&#10;홍대 맛집 https://youtube.com/...">${escH(d.wishLinks||'')}</textarea>
         <button type="button" class="btn ghost" id="linkInfoBtn" style="width:100%;padding:9px;margin:8px 0 2px" onclick="fetchLinkCaptions()">🔎 링크 내용(캡션) 읽어오기</button>
         <div id="d_wishPreview">${renderWishLinks(d.wishLinks,d.linkCaptions)}</div>
