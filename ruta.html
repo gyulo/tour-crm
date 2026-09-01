@@ -27,7 +27,7 @@
   .blk .t{flex:1;min-width:0;word-break:break-word}
   .blk small{display:block;color:var(--muted);font-size:11px}
   .blk a{text-decoration:none;flex:none;font-size:14px}
-  .blk .mm,.blk .cp,.blk .xx{border:none;background:none;cursor:pointer;font-size:13px;flex:none;opacity:.3;padding:0}
+  .blk .mm,.blk .cp,.blk .xx,.blk .lc{border:none;background:none;cursor:pointer;font-size:13px;flex:none;opacity:.3;padding:0}
   .blk .mm.has{opacity:1}
   .blk .xx{opacity:.55;color:#c0392b}
   #memoPane{display:none;margin-bottom:10px}
@@ -148,6 +148,7 @@ function mkBlk(b){
     +'<button class="mm'+(memos[b.id]?" has":"")+'" title="'+esc(memos[b.id]||"메모 쓰기")+'">📝</button>'
     +(/instagram\.com\/p\//.test(b.url)?'<button class="cp" title="블록 복사 (캐러셀에 장소 여러 개일 때)">⧉</button>':"")
     +(b.x?'<button class="xx" title="복사본 삭제">✕</button>':"")
+    +(b.url?'<button class="lc" title="링크 복사">📋</button>':"")
     +(b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗</a>':"");
   d.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",b.id);startEdgeScroll();});
   d.addEventListener("dragend",stopEdgeScroll);
@@ -159,6 +160,11 @@ function mkBlk(b){
     render();queueSave();});
   const cp=d.querySelector(".cp");
   if(cp)cp.addEventListener("click",ev=>{ev.stopPropagation();copyBlk(b);});
+  const lc=d.querySelector(".lc");
+  if(lc)lc.addEventListener("click",ev=>{ev.stopPropagation(); // 링크 복사 — 실패하면 prompt 로 보여주고 손으로 복사
+    (navigator.clipboard?navigator.clipboard.writeText(b.url):Promise.reject())
+      .then(()=>{lc.textContent="✅";setTimeout(()=>{lc.textContent="📋";},900);})
+      .catch(()=>{prompt("링크 복사 (Ctrl+C)",b.url);});});
   const xx=d.querySelector(".xx");
   if(xx)xx.addEventListener("click",ev=>{ev.stopPropagation();delExtra(b.id);});
   return d;}
