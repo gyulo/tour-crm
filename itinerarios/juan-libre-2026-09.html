@@ -274,26 +274,14 @@
   <header class="hero">
     <span class="eyebrow">7 – 10 de septiembre · Seúl</span>
     <h1>Tus días en Seúl</h1>
-    <p class="sub">El miércoles 9 vamos juntos. Los demás días, por tu cuenta.</p>
-    <p class="brand">Itinerario de Juan · Corea en Español · Gyudong</p>
+    <p class="sub">El miércoles 9 vamos juntos.</p>
+    <p class="brand">Juan · Corea en Español · Gyudong</p>
   </header>
 
-  <div class="facts"><div class="fact"><div class="k">Hotel</div><div class="v">Daewoo Inn · City Hall</div></div><div class="fact"><div class="k">Tour juntos</div><div class="v">Miércoles 9 · 8 horas</div></div><div class="fact"><div class="k">Salida a Busan</div><div class="v">Viernes 11 · KTX 08:35</div></div></div>
-    <section class="brief">
-    <h2>Antes de salir</h2>
-      <ul>
-        <li><b>Ver en Naver Map</b> = mapa y horario. <b>Cómo llegar</b> = ruta desde la parada anterior.</li>
-        <li>Al taxista, enséñale la dirección en coreano.</li>
-      </ul>
-  </section>
-
-  <div id="body"></div>
+  <div class="facts"><div class="fact"><div class="k">Hotel</div><div class="v">Daewoo Inn</div></div><div class="fact"><div class="k">Juntos</div><div class="v">Miércoles 9</div></div><div class="fact"><div class="k">Busan</div><div class="v">Viernes 11 · KTX 08:35</div></div></div>
+    <div id="body"></div>
 
   <footer class="foot">
-    <h2>Información útil</h2>
-      <ul>
-        <li>Cualquier cosa, WhatsApp. Nos vemos el miércoles.</li>
-      </ul>
     
     <a class="cta ghost" href="#" onclick="window.print();return false;">Guardar como PDF</a>
   </footer>
@@ -309,13 +297,13 @@
    from: {px,py,name,sid} → punto de partida del enlace "Cómo llegar" (p. ej. el hotel al empezar el día)
 */
 var STOPS = [
-  { zone: "Lunes 7 · Llegada — el oeste, sin prisa", zoneNote: "Llegas a las 6:00." },
+  { zone: "Lunes 7" },
   {
     kind: "stop",
     key: true,
     time: "06:00 – 09:30",
-    title: "Del aeropuerto a tu hotel",
-    desc: "AREX Exprés hasta Estación de Seúl, luego taxi 5–10 min. Check-in a las 15:00; deja la maleta antes. <a href='https://somi-journey-game.s3.ap-northeast-2.amazonaws.com/viaje/index.html' target='_blank' rel='noopener'>Guía en vídeo del aeropuerto ▶</a>",
+    title: "Aeropuerto → Hotel Daewoo Inn",
+    desc: "<a href='https://somi-journey-game.s3.ap-northeast-2.amazonaws.com/viaje/index.html' target='_blank' rel='noopener'>Guía en vídeo del aeropuerto ▶</a>",
     kaddr: "서울 중구 세종대로14길 22-2",
     sid: "1764390880",
     name: "대우모텔",
@@ -327,8 +315,8 @@ var STOPS = [
     kind: "stop",
     key: true,
     time: "11:00 – 13:00",
-    title: "Cafe Pokpo (카페폭포) · la cascada de Hongje",
-    desc: "10:00–21:00. <a href='https://www.instagram.com/reel/Da7FyeIyrwi/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    title: "Cafe Pokpo (카페폭포)",
+    desc: "<a href='https://www.instagram.com/reel/Da7FyeIyrwi/' target='_blank' rel='noopener'>Tu reel ▶</a>",
     kaddr: "서울 서대문구 연희로 262-24",
     sid: "1472283292",
     name: "카페폭포",
@@ -341,8 +329,8 @@ var STOPS = [
     kind: "stop",
     key: true,
     time: "14:00 – 17:00",
-    title: "Mangwon-dong (망원동) · la tienda de gatos",
-    desc: "El nombre de la tienda está en tu reel; el mercado es el punto de partida. <a href='https://www.instagram.com/reel/Db3CHa1qc_S/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    title: "Mangwon-dong (망원동)",
+    desc: "<a href='https://www.instagram.com/reel/Db3CHa1qc_S/' target='_blank' rel='noopener'>Tu reel ▶</a>",
     kaddr: "서울 마포구 포은로6길 27",
     sid: "13305251",
     name: "망원시장",
@@ -352,9 +340,8 @@ var STOPS = [
   },
   {
     kind: "stop",
-    time: "18:30 en adelante",
-    title: "Cena en Myeongdong (명동)",
-    desc: "A 7 min a pie del hotel. Puestos de comida desde las 17:00.",
+    time: "18:30",
+    title: "Myeongdong (명동) · cena",
     kaddr: "서울 중구 명동2가 명동거리",
     sid: "18694135",
     name: "명동거리",
@@ -363,13 +350,12 @@ var STOPS = [
     mode: "walk",
     from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
   },
-  { zone: "Martes 8 · K-pop y Seongsu", zoneNote: "JYP · SM · Seoul Forest · Seongsu" },
+  { zone: "Martes 8" },
   {
     kind: "stop",
     key: true,
     time: "10:00 – 11:00",
-    title: "JYP Entertainment (JYP Center)",
-    desc: "Se ve por fuera. Metro línea 5, Dunchon-dong (둔촌동) + 15 min a pie.",
+    title: "JYP Entertainment",
     kaddr: "서울 강동구 강동대로 205",
     sid: "12104486",
     name: "JYP",
@@ -382,8 +368,8 @@ var STOPS = [
     kind: "stop",
     key: true,
     time: "12:00 – 13:00",
-    title: "KWANGYA@SEOUL (광야서울) · SM Entertainment",
-    desc: "11:30–22:00, cierra 14:50–17:00. <a href='https://www.instagram.com/p/DakTa5mkmlN/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    title: "KWANGYA@SEOUL (광야서울)",
+    desc: "11:30–22:00 · cierra 14:50–17:00 · <a href='https://www.instagram.com/p/DakTa5mkmlN/' target='_blank' rel='noopener'>Tu reel ▶</a>",
     kaddr: "서울 성동구 왕십리로 83-21",
     sid: "1126015112",
     name: "KWANGYA SEOUL",
@@ -395,8 +381,8 @@ var STOPS = [
     kind: "stop",
     key: true,
     time: "13:00 – 15:30",
-    title: "Seoul Forest (서울숲) · Exposición Internacional de Jardines",
-    desc: "Gratis, 12:00–19:00, hasta el 27 oct. El jardín Pokémon terminó el 21 de junio. <a href='https://www.instagram.com/reel/DZAY0JxgzyW/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    title: "Seoul Forest (서울숲)",
+    desc: "<a href='https://www.instagram.com/reel/DZAY0JxgzyW/' target='_blank' rel='noopener'>Tu reel ▶</a>",
     kaddr: "서울 성동구 뚝섬로 273",
     sid: "11636039",
     name: "서울숲",
@@ -407,8 +393,7 @@ var STOPS = [
   {
     kind: "stop",
     time: "15:30 – 18:30",
-    title: "Seongsu · calle de los cafés (성수동 카페거리)",
-    desc: "Daelim Changgo (대림창고) para empezar. Medicube (메디큐브 성수) para lo de tu hermana.",
+    title: "Seongsu (성수) · Daelim Changgo",
     kaddr: "서울 성동구 성수이로 78",
     sid: "37910590",
     name: "성수동대림창고갤러리",
@@ -416,22 +401,21 @@ var STOPS = [
     py: 37.541704,
     mode: "walk",
   },
-  { zone: "Miércoles 9 · Nuestro día juntos", zoneNote: "8 horas con Gyudong" },
+  { zone: "Miércoles 9 · juntos" },
   {
     kind: "stop",
     key: true,
-    time: "Todo el día",
-    title: "Gyeongbokgung · Museo Folclórico · Bukchon · Ikseon-dong · Namsangol",
-    desc: "Tu plan del miércoles, lo hacemos juntos. <b>Hora y punto de encuentro, por WhatsApp.</b>",
+    time: "8 horas",
+    title: "Gyeongbokgung · Bukchon · Ikseon-dong · Namsangol",
+    desc: "Hora y punto de encuentro: por WhatsApp.",
     noRoute: true,
   },
-  { zone: "Jueves 10 · La muralla, Dongdaemun y el río", zoneNote: "Tu plan del jueves" },
+  { zone: "Jueves 10" },
   {
     kind: "stop",
     key: true,
     time: "09:30 – 11:00",
-    title: "Muralla de Seúl · tramo Naksan (낙산공원)",
-    desc: "Sube desde Hyehwa (혜화, línea 4) y baja por la muralla hacia Dongdaemun.",
+    title: "Muralla Naksan (낙산공원)",
     kaddr: "서울 종로구 낙산길 41",
     sid: "13299765",
     name: "낙산공원",
@@ -443,8 +427,7 @@ var STOPS = [
   {
     kind: "stop",
     time: "11:15 – 12:45",
-    title: "DDP · Dongdaemun Design Plaza",
-    desc: "10:00–20:00. Entrar es gratis.",
+    title: "DDP",
     kaddr: "서울 중구 을지로 281",
     sid: "18063223",
     name: "동대문디자인플라자",
@@ -456,8 +439,7 @@ var STOPS = [
     kind: "stop",
     key: true,
     time: "13:00 – 14:30",
-    title: "Mercado Gwangjang (광장시장) · almuerzo",
-    desc: "Calle de comida 9:00–23:00. Bindaetteok (빈대떡) y mayak gimbap (마약김밥). Efectivo.",
+    title: "Mercado Gwangjang (광장시장)",
     kaddr: "서울 종로구 창경궁로 88",
     sid: "21075936",
     name: "광장시장",
@@ -467,9 +449,8 @@ var STOPS = [
   },
   {
     kind: "stop",
-    time: "15:00 – 18:30",
-    title: "Tarde libre · arroyo Cheonggyecheon y descanso",
-    desc: "Camina el arroyo hacia el oeste, 30 min hasta el hotel. Deja la maleta lista.",
+    time: "15:00",
+    title: "Cheonggyecheon (청계천) → hotel",
     kaddr: "서울 중구 태평로1가 1",
     sid: "13543936",
     name: "청계광장",
@@ -480,9 +461,8 @@ var STOPS = [
   {
     kind: "stop",
     key: true,
-    time: "19:30 – 21:15",
-    title: "Puente Banpo · Fuente Arcoíris de Luna (달빛무지개분수)",
-    desc: "Pases a las 20:00, 20:30 y 21:00 (se suspende con lluvia). Metro hasta Express Bus Terminal (고속터미널) + 15 min a pie.",
+    time: "20:00 · 20:30 · 21:00",
+    title: "Puente Banpo · Fuente Arcoíris",
     kaddr: "서울 서초구 신반포로11길 40",
     sid: "13543876",
     name: "반포대교달빛무지개분수",
@@ -494,8 +474,7 @@ var STOPS = [
   {
     kind: "move",
     time: "Viernes 11 · 08:35",
-    title: "KTX a Busan desde Estación de Seúl",
-    desc: "Sale 08:35, llega 11:04. Billete en KakaoTalk. Sal del hotel a las 07:40.",
+    title: "KTX → Busan · Estación de Seúl",
     sid: "11630456",
     name: "서울역 (고속철도)",
     px: 126.970702,
