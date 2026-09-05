@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<!--
+  Itinerario personalizado — Claudia Patricia Herrera (familia, 5 pax)
+  Martes 28 de julio de 2026 · Seongsu + Itaewon
+  Basado en el mapa guardado de Naver: https://naver.me/GkIeDejF
+  Los enlaces se generan desde el array STOPS (abajo) — para editar, cambia solo ese array.
+
+  Diseño: Airbnb DESIGN.md (getdesign.md/airbnb)
+    Rausch #ff385c · ink #222 · hairline #ddd · lienzo blanco
+    radios 8 / 14 / full · un solo nivel de sombra · base de espaciado 4px
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juan · Seúl 7–10 sep</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* colors */
+      --primary: #ff385c;
+      --primary-active: #e00b41;
+      --ink: #222222;
+      --body: #3f3f3f;
+      --muted: #6a6a6a;
+      --muted-soft: #929292;
+      --hairline: #dddddd;
+      --hairline-soft: #ebebeb;
+      --border-strong: #c1c1c1;
+      --canvas: #ffffff;
+      --surface-soft: #f7f7f7;
+      --surface-strong: #f2f2f2;
+      --on-primary: #ffffff;
+
+      /* radii */
+      --r-xs: 4px; --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 32px; --r-full: 9999px;
+
+      /* spacing (base 4px) */
+      --s-xxs: 2px; --s-xs: 4px; --s-sm: 8px; --s-md: 12px;
+      --s-base: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px; --s-section: 64px;
+
+      /* single shadow tier */
+      --shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
+
+      --font: Inter, 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont,
+              system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--canvas);
+      color: var(--body);
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--s-lg) var(--s-xxl); }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+    .hero { padding: var(--s-xl) 0 var(--s-lg); }
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; line-height: 1.18;
+      color: var(--on-primary); background: var(--primary);
+      border-radius: var(--r-full); padding: 5px 12px;
+      margin-bottom: var(--s-base);
+    }
+    h1 {
+      font-size: 28px; font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.5px; color: var(--ink);
+    }
+    .hero .sub {
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      color: var(--muted); margin-top: var(--s-sm);
+    }
+    .hero .brand {
+      font-size: 13px; font-weight: 400; line-height: 1.23;
+      color: var(--muted-soft); margin-top: var(--s-md);
+    }
+
+    /* ── Facts row ────────────────────────────────────────── */
+    .facts {
+      display: flex; flex-wrap: wrap;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: var(--s-lg);
+    }
+    .fact { flex: 1 1 33%; padding: var(--s-base) 0; }
+    .fact + .fact { border-left: 1px solid var(--hairline-soft); padding-left: var(--s-base); }
+    .fact .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .fact .v {
+      font-size: 16px; font-weight: 600; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs);
+    }
+
+    /* ── Briefing ─────────────────────────────────────────── */
+    .brief {
+      background: var(--surface-soft);
+      border-radius: var(--r-md);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-xl);
+    }
+    .brief h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .brief ul { list-style: none; }
+    .brief li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .brief li + li { margin-top: var(--s-sm); }
+    .brief li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--primary);
+    }
+    .brief b { color: var(--ink); font-weight: 600; }
+
+    /* ── Zone heading ─────────────────────────────────────── */
+    .zone {
+      padding-top: var(--s-xl); margin-bottom: var(--s-base);
+    }
+    .zone h2 {
+      font-size: 22px; font-weight: 500; line-height: 1.18;
+      letter-spacing: -0.44px; color: var(--ink);
+    }
+    .zone p {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--muted); margin-top: var(--s-xs);
+    }
+
+    /* ── Stop card ────────────────────────────────────────── */
+    .stop {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--canvas);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-base);
+      transition: box-shadow .2s ease;
+    }
+    .stop:hover { box-shadow: var(--shadow); }
+
+    .stop-top { display: flex; align-items: flex-start; gap: var(--s-md); }
+    .num {
+      flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--r-full);
+      background: var(--surface-strong); color: var(--ink);
+      font-size: 12px; font-weight: 700; line-height: 32px; text-align: center;
+    }
+    .stop.key .num { background: var(--primary); color: var(--on-primary); }
+
+    .when {
+      font-size: 12px; font-weight: 700; line-height: 1.33;
+      color: var(--primary);
+    }
+    .stop h3 {
+      font-size: 20px; font-weight: 600; line-height: 1.2;
+      letter-spacing: -0.18px; color: var(--ink); margin-top: var(--s-xxs);
+    }
+    .why {
+      display: inline-block; margin-top: var(--s-sm);
+      border: 1px solid var(--hairline); border-radius: var(--r-full);
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 600; line-height: 1.18; color: var(--ink);
+    }
+    .desc {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--body); margin-top: var(--s-md);
+    }
+    .desc b { color: var(--ink); font-weight: 600; }
+    .desc a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .desc a:active { color: var(--primary-active); }
+
+    /* ── Korean address ───────────────────────────────────── */
+    .kaddr {
+      margin-top: var(--s-base);
+      background: var(--surface-soft);
+      border-radius: var(--r-sm);
+      padding: var(--s-md) var(--s-base);
+    }
+    .kaddr .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .kaddr .v {
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs); word-break: keep-all;
+    }
+    .copy {
+      margin-top: var(--s-sm);
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--border-strong); border-radius: var(--r-full);
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      padding: 6px 14px; cursor: pointer;
+    }
+    .copy:active { background: var(--surface-strong); }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .actions { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-top: var(--s-base); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.29;
+      border-radius: var(--r-full); padding: 10px 20px; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: var(--on-primary); }
+    .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--border-strong); }
+    .btn-secondary:active { background: var(--surface-strong); }
+
+    /* ── Transfer row ─────────────────────────────────────── */
+    .move {
+      display: flex; align-items: flex-start; gap: var(--s-md);
+      padding: var(--s-base) var(--s-lg);
+      margin-bottom: var(--s-base);
+      border-left: 2px dashed var(--hairline);
+    }
+    .move .when { color: var(--muted-soft); }
+    .move h3 { font-size: 16px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
+    .move .desc { font-size: 14px; color: var(--muted); margin-top: var(--s-xs); }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    .foot { border-top: 1px solid var(--hairline); margin-top: var(--s-xl); padding-top: var(--s-lg); }
+    .foot h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .foot ul { list-style: none; }
+    .foot li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .foot li + li { margin-top: var(--s-sm); }
+    .foot li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--hairline);
+    }
+    .foot b { color: var(--ink); font-weight: 600; }
+
+    .cta {
+      display: block; text-align: center; text-decoration: none;
+      background: var(--primary); color: var(--on-primary);
+      border-radius: var(--r-sm); padding: 14px 24px; min-height: 48px;
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      margin-top: var(--s-lg);
+    }
+    .cta:active { background: var(--primary-active); }
+    .cta.ghost {
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--ink); margin-top: var(--s-md);
+    }
+    .cta.ghost:active { background: var(--surface-strong); }
+
+    /* ── Print ────────────────────────────────────────────── */
+    @media print {
+      .cta.ghost, .copy { display: none; }
+      .stop { break-inside: avoid; box-shadow: none; }
+      .num, .eyebrow, .btn-primary, .cta { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .btn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: 10px; word-break: break-all; }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 var(--s-base) var(--s-xl); }
+      h1 { font-size: 24px; }
+      .zone h2 { font-size: 20px; }
+      .stop { padding: var(--s-base); }
+      .fact { flex: 1 1 100%; }
+      .fact + .fact { border-left: 0; border-top: 1px solid var(--hairline-soft); padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">7 – 10 de septiembre · Seúl</span>
+    <h1>Tus días en Seúl</h1>
+    <p class="sub">Lunes, martes y jueves vas por tu cuenta; el <b>miércoles 9</b> lo hacemos juntos. Cada día empieza y termina en tu hotel.</p>
+    <p class="brand">Itinerario de Juan · Corea en Español · Gyudong</p>
+  </header>
+
+  <div class="facts"><div class="fact"><div class="k">Hotel</div><div class="v">Daewoo Inn · City Hall</div></div><div class="fact"><div class="k">Tour juntos</div><div class="v">Miércoles 9 · 8 horas</div></div><div class="fact"><div class="k">Salida a Busan</div><div class="v">Viernes 11 · KTX 08:35</div></div></div>
+    <section class="brief">
+    <h2>Antes de salir</h2>
+      <ul>
+        <li>Toca <b>“Ver en Naver Map”</b> en cada parada: ahí ves el horario de hoy, fotos y reseñas. Google Maps casi no funciona en Corea; Naver sí.</li>
+        <li><b>“Cómo llegar”</b> te abre la ruta en metro o bus. En la primera parada de cada día la ruta sale <b>desde tu hotel</b>.</li>
+        <li>En el taxi <b>no hace falta hablar</b>: enséñale al conductor el <b>recuadro gris con la dirección en coreano</b>.</li>
+        <li>Metro y bus se pagan con la tarjeta <b>T-money</b>; se recarga solo con efectivo.</li>
+        <li>El lunes es suave a propósito: llegas de madrugada con jet lag. Lo que no te dé tiempo cabe el jueves por la tarde, que va libre.</li>
+      </ul>
+  </section>
+
+  <div id="body"></div>
+
+  <footer class="foot">
+    <h2>Información útil</h2>
+      <ul>
+        <li><b>Metro:</b> con la T-money entras y sales tocando. Las líneas van por colores y números; el último tren sale entre las 23:30 y las 00:00.</li>
+        <li><b>Taxi:</b> se para en la calle o en las paradas. Enseña el recuadro gris de la dirección y listo. Aceptan tarjeta.</li>
+        <li><b>Sin picante:</b> di <b>“안 맵게 해주세요”</b> (an mep-ge he-ju-se-yo) o enseña esta línea.</li>
+        <li><b>Efectivo:</b> en Gwangjang y en los puestos de Myeongdong va mejor el efectivo; en tiendas y cafés, tarjeta sin problema.</li>
+        <li>Cualquier cosa, escríbeme por WhatsApp y lo resolvemos al momento. Nos vemos el miércoles.</li>
+      </ul>
+    
+    <a class="cta ghost" href="#" onclick="window.print();return false;">Guardar como PDF</a>
+  </footer>
+
+</div>
+
+<script>
+/* ── Datos del día. Para editar el itinerario, cambia solo este array. ────────
+   px/py y sid vienen del mapa guardado de Naver (no inventar sid).
+   kind: 'stop' (parada) | 'move' (traslado)
+   mode: 'walk' | 'transit'  → modo del enlace "Cómo llegar" desde la parada anterior
+   noRoute: true → esta parada no genera enlace de ruta (ya lo lleva el traslado previo)
+   from: {px,py,name,sid} → punto de partida del enlace "Cómo llegar" (p. ej. el hotel al empezar el día)
+*/
+var STOPS = [
+  { zone: "Lunes 7 · Llegada — el oeste, sin prisa", zoneNote: "Aterrizas a las 6:00. Dejas la maleta y sales tranquilo." },
+  {
+    kind: "stop",
+    key: true,
+    time: "06:00 – 09:30",
+    title: "Del aeropuerto a tu hotel",
+    why: "AREX Exprés → Estación de Seúl → City Hall",
+    desc: "En la Terminal 2 sigue los carteles <b>AREX</b> y toma el tren <b>Exprés (naranja/amarillo)</b>: unos 50 minutos sin paradas hasta <b>Estación de Seúl</b>. Desde ahí, con la maleta, lo fácil es un <b>taxi de 5–10 minutos</b> (enséñale la dirección de abajo) o el metro línea 1, una parada hasta <b>City Hall (시청)</b>. El check-in suele ser a las 15:00: deja la maleta en recepción y sal.<br><br>Tu guía en vídeo del aeropuerto paso a paso: <a href='https://somi-journey-game.s3.ap-northeast-2.amazonaws.com/viaje/index.html' target='_blank' rel='noopener'>Corea Sin Miedo ▶</a>. En Naver el hotel aparece como <b>대우모텔</b> — es la misma dirección.",
+    kaddr: "서울 중구 세종대로14길 22-2",
+    sid: "1764390880",
+    name: "대우모텔",
+    px: 126.977912,
+    py: 37.562723,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "11:00 – 13:00",
+    title: "Cafe Pokpo (카페폭포) · la cascada de Hongje",
+    why: "El café frente a la cascada — tu reel",
+    desc: "El café de tu reel: una terraza justo frente a la <b>cascada artificial de Hongje</b>, en el arroyo Hongjecheon. Lo lleva el distrito, así que el café es barato para lo bonito que es. Abre <b>todos los días de 10:00 a 21:00</b>; la cascada funciona de 8:00 a 21:00. Pide algo, siéntate arriba y descansa del vuelo. <a href='https://www.instagram.com/reel/Da7FyeIyrwi/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    kaddr: "서울 서대문구 연희로 262-24",
+    sid: "1472283292",
+    name: "카페폭포",
+    px: 126.937076,
+    py: 37.581476,
+    mode: "transit",
+    from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "14:00 – 17:00",
+    title: "Mangwon-dong (망원동) · la tienda de gatos",
+    why: "Barrio tranquilo · mercado · gatos",
+    desc: "El barrio de la tienda de cosas de gatos de tu reel. Es una zona tranquila de calles pequeñas, cafés y tiendas alrededor del <b>mercado de Mangwon (망원시장)</b>, un mercado tradicional de comida callejera (pollo frito dulce, croquetas, tteok). <b>Abre tu reel para ver el nombre exacto de la tienda</b> y pégalo en Naver; el mercado te sirve de punto de partida. <a href='https://www.instagram.com/reel/Db3CHa1qc_S/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    kaddr: "서울 마포구 포은로6길 27",
+    sid: "13305251",
+    name: "망원시장",
+    px: 126.906069,
+    py: 37.556551,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "18:30 en adelante",
+    title: "Cena en Myeongdong (명동)",
+    why: "A 7 minutos a pie del hotel · primera noche fácil",
+    desc: "Myeongdong está a un paseo de tu hotel. Desde las 17:00 se llenan las calles de <b>puestos de comida</b> (brochetas, tteokbokki, dulces) y hay restaurantes por todos lados. Come, da una vuelta y a dormir temprano: el martes es día largo. Las compras de álbumes y skincare las dejamos para tu vuelta a Seúl, para no cargar bolsas por Corea.",
+    kaddr: "서울 중구 명동2가 명동거리",
+    sid: "18694135",
+    name: "명동거리",
+    px: 126.984677,
+    py: 37.562948,
+    mode: "walk",
+    from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
+  },
+  { zone: "Martes 8 · K-pop y Seongsu", zoneNote: "JYP por la mañana, luego la tienda de SM, Seoul Forest y los cafés de Seongsu" },
+  {
+    kind: "stop",
+    key: true,
+    time: "10:00 – 11:00",
+    title: "JYP Entertainment (JYP Center)",
+    why: "La agencia de TWICE · foto en la entrada",
+    desc: "La sede de <b>JYP</b>, la agencia de <b>TWICE y Dahyun</b>. Es un edificio de oficinas: se ve por fuera y la foto es en la entrada; a veces hay fans esperando. Queda al este de la ciudad, por eso va primero: metro <b>línea 5 hasta Dunchon-dong (둔촌동)</b> y 15 minutos a pie, o taxi de unos 30 minutos desde el hotel.",
+    kaddr: "서울 강동구 강동대로 205",
+    sid: "12104486",
+    name: "JYP",
+    px: 127.129147,
+    py: 37.524157,
+    mode: "transit",
+    from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "12:00 – 13:00",
+    title: "KWANGYA@SEOUL (광야서울) · SM Entertainment",
+    why: "Tienda oficial de SM — aespa, NCT, Red Velvet",
+    desc: "La tienda oficial de <b>SM Entertainment</b>, en el sótano de su propio edificio, al lado de la estación Seoul Forest. Álbumes, photocards, ropa y espacios para fotos con los conceptos de sus grupos. <b>Ojo con el horario: abre 11:30–22:00 pero cierra de 14:50 a 17:00</b>, por eso te lo pongo antes de comer. Es uno de los cuatro lugares K-pop de tu reel. <a href='https://www.instagram.com/p/DakTa5mkmlN/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    kaddr: "서울 성동구 왕십리로 83-21",
+    sid: "1126015112",
+    name: "KWANGYA SEOUL",
+    px: 127.044221,
+    py: 37.544148,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "13:00 – 15:30",
+    title: "Seoul Forest (서울숲) · Exposición Internacional de Jardines",
+    why: "167 jardines · gratis · hasta el 27 de octubre",
+    desc: "El parque de tu reel, a 10 minutos a pie de KWANGYA. Este año acoge la <b>Exposición Internacional de Jardines de Seúl</b>: 167 jardines repartidos por el parque y el barrio de Seongsu, <b>entrada gratis</b> y sin reserva; los jardines se atienden de 12:00 a 19:00. <b>Te lo digo con honestidad: el jardín Pokémon del reel terminó el 21 de junio</b>; los demás jardines siguen ahí. Para comer, hay cafés y restaurantes alrededor del parque y en Seongsu. <a href='https://www.instagram.com/reel/DZAY0JxgzyW/' target='_blank' rel='noopener'>Tu reel ▶</a>",
+    kaddr: "서울 성동구 뚝섬로 273",
+    sid: "11636039",
+    name: "서울숲",
+    px: 127.038566,
+    py: 37.541964,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    time: "15:30 – 18:30",
+    title: "Seongsu · calle de los cafés (성수동 카페거리)",
+    why: "Fábricas viejas convertidas en cafés y tiendas",
+    desc: "El barrio de moda de Seúl: antiguas fábricas y almacenes que ahora son cafés, galerías y tiendas. Un clásico para empezar es <b>Daelim Changgo (대림창고)</b>, café dentro de un almacén de ladrillo. Para el encargo de tu hermana, aquí está la tienda de <b>Medicube (메디큐브 성수)</b>, una de las marcas coreanas de skincare más conocidas. Vuelta al hotel en metro línea 2 desde Seongsu (성수) hasta City Hall (시청), unos 25 minutos.",
+    kaddr: "서울 성동구 성수이로 78",
+    sid: "37910590",
+    name: "성수동대림창고갤러리",
+    px: 127.056395,
+    py: 37.541704,
+    mode: "walk",
+  },
+  { zone: "Miércoles 9 · Nuestro día juntos", zoneNote: "8 horas con Gyudong — palacios y barrios tradicionales" },
+  {
+    kind: "stop",
+    key: true,
+    time: "Todo el día",
+    title: "Gyeongbokgung · Museo Folclórico · Bukchon · Ikseon-dong · Namsangol",
+    why: "Tu plan del PDF, lo hacemos juntos",
+    desc: "Hacemos tu plan del miércoles: el palacio <b>Gyeongbokgung</b> con el <b>Museo Nacional Folclórico</b>, las casas tradicionales de <b>Bukchon</b>, los callejones de <b>Ikseon-dong</b> y la aldea hanok de <b>Namsangol</b>. Yo me encargo de tiempos, entradas y comida ese día. <b>La hora y el punto de encuentro te los confirmo por WhatsApp.</b>",
+    noRoute: true,
+  },
+  { zone: "Jueves 10 · La muralla, Dongdaemun y el río", zoneNote: "Tu plan del jueves, en orden y con los horarios comprobados" },
+  {
+    kind: "stop",
+    key: true,
+    time: "09:30 – 11:00",
+    title: "Muralla de Seúl · tramo Naksan (낙산공원)",
+    why: "Paseo por la muralla con vistas · gratis",
+    desc: "La antigua muralla de la ciudad (<b>Hanyangdoseong</b>) en su tramo más bonito y fácil: el parque <b>Naksan</b>, con vistas a toda la ciudad. Ve temprano, que a esa hora aún no aprieta el calor. Sube desde la estación <b>Hyehwa (혜화, línea 4)</b>, unos 20 minutos cuesta arriba, y luego <b>baja siguiendo la muralla hacia Dongdaemun</b>: pasas por el barrio de murales de <b>Ihwa (이화마을)</b> y llegas a la puerta Heunginjimun.",
+    kaddr: "서울 종로구 낙산길 41",
+    sid: "13299765",
+    name: "낙산공원",
+    px: 127.007587,
+    py: 37.580477,
+    mode: "transit",
+    from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
+  },
+  {
+    kind: "stop",
+    time: "11:15 – 12:45",
+    title: "DDP · Dongdaemun Design Plaza",
+    why: "El edificio de Zaha Hadid · exposiciones de diseño",
+    desc: "La nave plateada de curvas de <b>Zaha Hadid</b>, a 20–25 minutos a pie bajando desde la muralla. Abre <b>10:00–20:00</b>; entrar y recorrerlo es gratis, algunas exposiciones se pagan. Abajo hay un mercado de diseño y tiendas. Está conectado con la estación Dongdaemun History &amp; Culture Park.",
+    kaddr: "서울 중구 을지로 281",
+    sid: "18063223",
+    name: "동대문디자인플라자",
+    px: 127.009932,
+    py: 37.567546,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "13:00 – 14:30",
+    title: "Mercado Gwangjang (광장시장) · almuerzo",
+    why: "Mercado centenario · bindaetteok y gimbap",
+    desc: "El mercado de comida más famoso de Seúl, a 10–15 minutos a pie del DDP. La <b>calle de comida abre todos los días de 9:00 a 23:00</b>. Te sientas en un puesto y pides señalando: <b>bindaetteok (빈대떡)</b>, tortita de frijol mungo frita, y <b>mayak gimbap (마약김밥)</b>, los rollitos pequeños. Si te animas, <b>yukhoe (육회)</b>, carne cruda aliñada. Lleva algo de efectivo, en los puestos va mejor.",
+    kaddr: "서울 종로구 창경궁로 88",
+    sid: "21075936",
+    name: "광장시장",
+    px: 126.999069,
+    py: 37.570166,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    time: "15:00 – 18:30",
+    title: "Tarde libre · arroyo Cheonggyecheon y descanso",
+    why: "Camina el arroyo hasta el hotel · prepara la maleta",
+    desc: "Desde el mercado, baja al arroyo <b>Cheonggyecheon</b> y camina hacia el oeste: son unos 30–35 minutos hasta <b>Cheonggye Plaza (청계광장)</b>, que queda a 10 minutos de tu hotel. Sombra, agua y bancos. Aprovecha para descansar y <b>dejar la maleta lista</b>: mañana sales temprano a Busan.",
+    kaddr: "서울 중구 태평로1가 1",
+    sid: "13543936",
+    name: "청계광장",
+    px: 126.977712,
+    py: 37.569166,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "19:30 – 21:15",
+    title: "Puente Banpo · Fuente Arcoíris de Luna (달빛무지개분수)",
+    why: "Agua y luces desde el puente · 20:00, 20:30, 21:00",
+    desc: "Cierre de tus días en Seúl: chorros de agua con luces de colores que caen desde el <b>puente Banpo</b> sobre el río Han. Entre semana hay pases a las <b>20:00, 20:30 y 21:00</b>, de 15–20 minutos cada uno (pueden suspenderse por lluvia o viento). Llega hacia las 19:30 al <b>parque Banpo Hangang</b>, compra algo en la tienda 24 h y siéntate en el césped frente al puente, como hacen los coreanos. En metro: hasta <b>Express Bus Terminal (고속터미널)</b> y 15 minutos a pie siguiendo los carteles 반포한강공원.",
+    kaddr: "서울 서초구 신반포로11길 40",
+    sid: "13543876",
+    name: "반포대교달빛무지개분수",
+    px: 126.998433,
+    py: 37.512659,
+    mode: "transit",
+    from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
+  },
+  {
+    kind: "move",
+    time: "Viernes 11 · 08:35",
+    title: "KTX a Busan desde Estación de Seúl",
+    desc: "Tu tren sale a las <b>08:35</b> y llega a Busan a las 11:04. El billete ya lo tienes en KakaoTalk. Sal del hotel a las <b>07:40</b>: en taxi son 10 minutos, o metro línea 1 una parada. El andén aparece en las pantallas unos 15 minutos antes.",
+    sid: "11630456",
+    name: "서울역 (고속철도)",
+    px: 126.970702,
+    py: 37.554073,
+    mode: "transit",
+    from: {"px": 126.977912, "py": 37.562723, "name": "대우모텔", "sid": "1764390880"},
+  },
+];
+
+/* ── Render ──────────────────────────────────────────────────────────────── */
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function e(s) { return encodeURIComponent(s == null ? '' : s); }
+
+/* Naver: /p/directions/{lng},{lat},{nombre},{sid},PLACE_POI/{destino}/-/{modo} */
+function poi(s) {
+  if (!s) return null;
+  return s.px + ',' + s.py + ',' + e(s.name) + ',' + (s.sid || '') + ',' + (s.sid ? 'PLACE_POI' : '');
+}
+function routeUrl(from, to, mode) {
+  var a = poi(from), b = poi(to);
+  if (!a || !b) return null;
+  return 'https://map.naver.com/p/directions/' + a + '/' + b + '/-/' + (mode || 'transit');
+}
+function placeUrl(s) {
+  if (s.sid) return 'https://map.naver.com/p/entry/place/' + s.sid;
+  if (s.search) return 'https://map.naver.com/p/search/' + e(s.search);
+  return null;
+}
+
+(function render() {
+  var out = '', prev = null, num = 0, k = 0;
+
+  STOPS.forEach(function (s) {
+    if (s.zone) {
+      out += '<div class="zone"><h2>' + esc(s.zone) + '</h2>' +
+             (s.zoneNote ? '<p>' + esc(s.zoneNote) + '</p>' : '') + '</div>';
+      return;
+    }
+
+    var isMove = s.kind === 'move';
+    if (!isMove) num++;
+
+    var actions = '';
+    var pu = placeUrl(s);
+    if (pu) actions += '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + pu + '">Ver en Naver Map</a>';
+    /* from: 출발점 덮어쓰기 — 여러 날 일정에서 그날 첫 장소는 어제 마지막이 아니라 호텔에서 출발한다 */
+    var ru = s.noRoute ? null : routeUrl(s.from || prev, s, s.mode);
+    if (ru) {
+      var label = s.mode === 'walk' ? 'Cómo llegar a pie' : 'Cómo llegar';
+      actions += '<a class="btn btn-secondary" target="_blank" rel="noopener" href="' + ru + '">' + label + '</a>';
+    }
+
+    var addr = '';
+    if (s.kaddr) {
+      k++;
+      addr = '<div class="kaddr">' +
+               '<div class="k">Muéstralo al taxista</div>' +
+               '<div class="v" id="k' + k + '">' + esc(s.kaddr) + '</div>' +
+               '<button class="copy" onclick="copyK(\'k' + k + '\', this)">Copiar</button>' +
+             '</div>';
+    }
+
+    var inner = '<div class="when">' + esc(s.time) + '</div>' +
+                '<h3>' + esc(s.title) + '</h3>' +
+                (s.why ? '<div><span class="why">' + esc(s.why) + '</span></div>' : '') +
+                '<div class="desc">' + (s.desc || '') + '</div>' +
+                addr +
+                (actions ? '<div class="actions">' + actions + '</div>' : '');
+
+    if (isMove) {
+      out += '<div class="move"><div>' + inner + '</div></div>';
+    } else {
+      out += '<div class="stop' + (s.key ? ' key' : '') + '">' +
+               '<div class="stop-top">' +
+                 '<div class="num">' + num + '</div>' +
+                 '<div style="flex:1;min-width:0">' + inner + '</div>' +
+               '</div>' +
+             '</div>';
+    }
+
+    prev = s;
+  });
+
+  document.getElementById('body').innerHTML = out;
+})();
+
+function copyK(id, btn) {
+  var t = document.getElementById(id).textContent;
+  var done = function () {
+    var old = btn.textContent;
+    btn.textContent = 'Copiado';
+    setTimeout(function () { btn.textContent = old; }, 1500);
+  };
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, fallback);
+  } else { fallback(); }
+}
+</script>
+
+</body>
+</html>
