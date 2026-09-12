@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<!--
+  Itinerario personalizado — Claudia Patricia Herrera (familia, 5 pax)
+  Martes 28 de julio de 2026 · Seongsu + Itaewon
+  Basado en el mapa guardado de Naver: https://naver.me/GkIeDejF
+  Los enlaces se generan desde el array STOPS (abajo) — para editar, cambia solo ese array.
+
+  Diseño: Airbnb DESIGN.md (getdesign.md/airbnb)
+    Rausch #ff385c · ink #222 · hairline #ddd · lienzo blanco
+    radios 8 / 14 / full · un solo nivel de sombra · base de espaciado 4px
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sábado 12 sep · Gera y Seli</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* colors */
+      --primary: #ff385c;
+      --primary-active: #e00b41;
+      --ink: #222222;
+      --body: #3f3f3f;
+      --muted: #6a6a6a;
+      --muted-soft: #929292;
+      --hairline: #dddddd;
+      --hairline-soft: #ebebeb;
+      --border-strong: #c1c1c1;
+      --canvas: #ffffff;
+      --surface-soft: #f7f7f7;
+      --surface-strong: #f2f2f2;
+      --on-primary: #ffffff;
+
+      /* radii */
+      --r-xs: 4px; --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 32px; --r-full: 9999px;
+
+      /* spacing (base 4px) */
+      --s-xxs: 2px; --s-xs: 4px; --s-sm: 8px; --s-md: 12px;
+      --s-base: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px; --s-section: 64px;
+
+      /* single shadow tier */
+      --shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
+
+      --font: Inter, 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont,
+              system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--canvas);
+      color: var(--body);
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--s-lg) var(--s-xxl); }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+    .hero { padding: var(--s-xl) 0 var(--s-lg); }
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; line-height: 1.18;
+      color: var(--on-primary); background: var(--primary);
+      border-radius: var(--r-full); padding: 5px 12px;
+      margin-bottom: var(--s-base);
+    }
+    h1 {
+      font-size: 28px; font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.5px; color: var(--ink);
+    }
+    .hero .sub {
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      color: var(--muted); margin-top: var(--s-sm);
+    }
+    .hero .brand {
+      font-size: 13px; font-weight: 400; line-height: 1.23;
+      color: var(--muted-soft); margin-top: var(--s-md);
+    }
+
+    /* ── Facts row ────────────────────────────────────────── */
+    .facts {
+      display: flex; flex-wrap: wrap;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: var(--s-lg);
+    }
+    .fact { flex: 1 1 33%; padding: var(--s-base) 0; }
+    .fact + .fact { border-left: 1px solid var(--hairline-soft); padding-left: var(--s-base); }
+    .fact .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .fact .v {
+      font-size: 16px; font-weight: 600; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs);
+    }
+
+    /* ── Briefing ─────────────────────────────────────────── */
+    .brief {
+      background: var(--surface-soft);
+      border-radius: var(--r-md);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-xl);
+    }
+    .brief h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .brief ul { list-style: none; }
+    .brief li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .brief li + li { margin-top: var(--s-sm); }
+    .brief li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--primary);
+    }
+    .brief b { color: var(--ink); font-weight: 600; }
+
+    /* ── Zone heading ─────────────────────────────────────── */
+    .zone {
+      padding-top: var(--s-xl); margin-bottom: var(--s-base);
+    }
+    .zone h2 {
+      font-size: 22px; font-weight: 500; line-height: 1.18;
+      letter-spacing: -0.44px; color: var(--ink);
+    }
+    .zone p {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--muted); margin-top: var(--s-xs);
+    }
+
+    /* ── Stop card ────────────────────────────────────────── */
+    .stop {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--canvas);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-base);
+      transition: box-shadow .2s ease;
+    }
+    .stop:hover { box-shadow: var(--shadow); }
+
+    .stop-top { display: flex; align-items: flex-start; gap: var(--s-md); }
+    .num {
+      flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--r-full);
+      background: var(--surface-strong); color: var(--ink);
+      font-size: 12px; font-weight: 700; line-height: 32px; text-align: center;
+    }
+    .stop.key .num { background: var(--primary); color: var(--on-primary); }
+
+    .when {
+      font-size: 12px; font-weight: 700; line-height: 1.33;
+      color: var(--primary);
+    }
+    .stop h3 {
+      font-size: 20px; font-weight: 600; line-height: 1.2;
+      letter-spacing: -0.18px; color: var(--ink); margin-top: var(--s-xxs);
+    }
+    .why {
+      display: inline-block; margin-top: var(--s-sm);
+      border: 1px solid var(--hairline); border-radius: var(--r-full);
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 600; line-height: 1.18; color: var(--ink);
+    }
+    .desc {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--body); margin-top: var(--s-md);
+    }
+    .desc b { color: var(--ink); font-weight: 600; }
+    .desc a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .desc a:active { color: var(--primary-active); }
+
+    /* ── Korean address ───────────────────────────────────── */
+    .kaddr {
+      margin-top: var(--s-base);
+      background: var(--surface-soft);
+      border-radius: var(--r-sm);
+      padding: var(--s-md) var(--s-base);
+    }
+    .kaddr .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .kaddr .v {
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs); word-break: keep-all;
+    }
+    .copy {
+      margin-top: var(--s-sm);
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--border-strong); border-radius: var(--r-full);
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      padding: 6px 14px; cursor: pointer;
+    }
+    .copy:active { background: var(--surface-strong); }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .actions { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-top: var(--s-base); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.29;
+      border-radius: var(--r-full); padding: 10px 20px; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: var(--on-primary); }
+    .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--border-strong); }
+    .btn-secondary:active { background: var(--surface-strong); }
+
+    /* ── Transfer row ─────────────────────────────────────── */
+    .move {
+      display: flex; align-items: flex-start; gap: var(--s-md);
+      padding: var(--s-base) var(--s-lg);
+      margin-bottom: var(--s-base);
+      border-left: 2px dashed var(--hairline);
+    }
+    .move .when { color: var(--muted-soft); }
+    .move h3 { font-size: 16px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
+    .move .desc { font-size: 14px; color: var(--muted); margin-top: var(--s-xs); }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    .foot { border-top: 1px solid var(--hairline); margin-top: var(--s-xl); padding-top: var(--s-lg); }
+    .foot h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .foot ul { list-style: none; }
+    .foot li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .foot li + li { margin-top: var(--s-sm); }
+    .foot li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--hairline);
+    }
+    .foot b { color: var(--ink); font-weight: 600; }
+
+    .cta {
+      display: block; text-align: center; text-decoration: none;
+      background: var(--primary); color: var(--on-primary);
+      border-radius: var(--r-sm); padding: 14px 24px; min-height: 48px;
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      margin-top: var(--s-lg);
+    }
+    .cta:active { background: var(--primary-active); }
+    .cta.ghost {
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--ink); margin-top: var(--s-md);
+    }
+    .cta.ghost:active { background: var(--surface-strong); }
+
+    /* ── Print ────────────────────────────────────────────── */
+    @media print {
+      .cta.ghost, .copy { display: none; }
+      .stop { break-inside: avoid; box-shadow: none; }
+      .num, .eyebrow, .btn-primary, .cta { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .btn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: 10px; word-break: break-all; }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 var(--s-base) var(--s-xl); }
+      h1 { font-size: 24px; }
+      .zone h2 { font-size: 20px; }
+      .stop { padding: var(--s-base); }
+      .fact { flex: 1 1 100%; }
+      .fact + .fact { border-left: 0; border-top: 1px solid var(--hairline-soft); padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Sábado 12 de septiembre · Seúl</span>
+    <h1>Hongdae y el río Han</h1>
+    <p class="sub">Salimos del hotel a las 14:00.</p>
+    <p class="brand">Gera y Seli · Corea en Español · Gyudong</p>
+  </header>
+
+  <div class="facts"><div class="fact"><div class="k">Encuentro</div><div class="v">14:00 · lobby del hotel</div></div><div class="fact"><div class="k">Show de drones</div><div class="v">20:30 · Ttukseom</div></div><div class="fact"><div class="k">Efectivo</div><div class="v">café de perros 15,000 · bici ~10,000</div></div></div>
+    <div id="body"></div>
+
+  <footer class="foot">
+    
+    <a class="cta ghost" href="#" onclick="window.print();return false;">Guardar como PDF</a>
+  </footer>
+
+</div>
+
+<script>
+/* ── Datos del día. Para editar el itinerario, cambia solo este array. ────────
+   px/py y sid vienen del mapa guardado de Naver (no inventar sid).
+   kind: 'stop' (parada) | 'move' (traslado)
+   mode: 'walk' | 'transit'  → modo del enlace "Cómo llegar" desde la parada anterior
+   noRoute: true → esta parada no genera enlace de ruta (ya lo lleva el traslado previo)
+   from: {px,py,name,sid} → punto de partida del enlace "Cómo llegar" (p. ej. el hotel al empezar el día)
+*/
+var STOPS = [
+  { zone: "Sábado 12", zoneNote: "14:00 · salimos del hotel" },
+  {
+    kind: "stop",
+    time: "14:30",
+    title: "Hongdae (홍대 걷고싶은거리)",
+    kaddr: "서울 마포구 서교동 (홍대 걷고싶은거리)",
+    sid: "18785281",
+    name: "홍대걷고싶은거리",
+    px: 126.923192,
+    py: 37.555058,
+    mode: "transit",
+    from: {"px": 126.948289, "py": 37.540838, "name": "서울가든호텔", "sid": "11659089"},
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "15:00",
+    title: "Comida · Myeongdong Wang Donkatsu (명동왕돈까스 동교직영점)",
+    desc: "<a href='https://www.instagram.com/p/DPdznkCEsqD/?img_index=1' target='_blank' rel='noopener'>Tu mapa foodie de ATEEZ ▶</a>",
+    kaddr: "서울 마포구 동교로25길 15",
+    sid: "18358941",
+    name: "명동왕돈까스 동교직영점",
+    px: 126.921553,
+    py: 37.557725,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "16:00",
+    title: "Café de samoyedos · 겨울이 머무는 집",
+    desc: "<a href='https://www.instagram.com/reel/Cqw5wwLv5OO/' target='_blank' rel='noopener'>Tu reel ▶</a> · 15,000 KRW",
+    kaddr: "서울 마포구 와우산로17길 19-5 1층",
+    sid: "1205588089",
+    name: "겨울이 머무는 집",
+    px: 126.921811,
+    py: 37.549968,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    time: "16:45",
+    title: "Tribe Café · soufflé (트라이브 홍대점)",
+    kaddr: "서울 마포구 어울마당로 100-12 지1층",
+    sid: "1818598459",
+    name: "트라이브 홍대점",
+    px: 126.922539,
+    py: 37.553572,
+    mode: "walk",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "17:45",
+    title: "Bici por el río Han · atardecer (뚝섬한강공원 자전거대여소)",
+    desc: "<a href='https://www.instagram.com/reel/DaIJSFGJK-U/' target='_blank' rel='noopener'>Tu reel ▶</a> · salida 1 de la estación Jayang (línea 7) · ~10,000 KRW",
+    kaddr: "서울 광진구 자양동 (자양역 1번 출구 앞)",
+    sid: "2141999737",
+    name: "자양(뚝섬한강공원)역1번출구앞자전거대여소",
+    px: 127.067192,
+    py: 37.531861,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "20:30 – 20:45",
+    title: "Show de drones (뚝섬한강공원)",
+    desc: "Programa desde las 19:00 · gratis · se cancela con lluvia o viento fuerte",
+    kaddr: "서울 광진구 자양동 704-1 (뚝섬한강공원)",
+    sid: "13416890",
+    name: "뚝섬한강공원",
+    px: 127.070677,
+    py: 37.529452,
+    mode: "walk",
+    from: {"px": 127.067192, "py": 37.531861, "name": "자양(뚝섬한강공원)역1번출구앞자전거대여소", "sid": "2141999737"},
+  },
+];
+
+/* ── Render ──────────────────────────────────────────────────────────────── */
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function e(s) { return encodeURIComponent(s == null ? '' : s); }
+
+/* Naver: /p/directions/{lng},{lat},{nombre},{sid},PLACE_POI/{destino}/-/{modo} */
+function poi(s) {
+  if (!s) return null;
+  return s.px + ',' + s.py + ',' + e(s.name) + ',' + (s.sid || '') + ',' + (s.sid ? 'PLACE_POI' : '');
+}
+function routeUrl(from, to, mode) {
+  var a = poi(from), b = poi(to);
+  if (!a || !b) return null;
+  return 'https://map.naver.com/p/directions/' + a + '/' + b + '/-/' + (mode || 'transit');
+}
+function placeUrl(s) {
+  if (s.sid) return 'https://map.naver.com/p/entry/place/' + s.sid;
+  if (s.search) return 'https://map.naver.com/p/search/' + e(s.search);
+  return null;
+}
+
+(function render() {
+  var out = '', prev = null, num = 0, k = 0;
+
+  STOPS.forEach(function (s) {
+    if (s.zone) {
+      out += '<div class="zone"><h2>' + esc(s.zone) + '</h2>' +
+             (s.zoneNote ? '<p>' + esc(s.zoneNote) + '</p>' : '') + '</div>';
+      return;
+    }
+
+    var isMove = s.kind === 'move';
+    if (!isMove) num++;
+
+    var actions = '';
+    var pu = placeUrl(s);
+    if (pu) actions += '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + pu + '">Ver en Naver Map</a>';
+    /* from: 출발점 덮어쓰기 — 여러 날 일정에서 그날 첫 장소는 어제 마지막이 아니라 호텔에서 출발한다 */
+    var ru = s.noRoute ? null : routeUrl(s.from || prev, s, s.mode);
+    if (ru) {
+      var label = s.mode === 'walk' ? 'Cómo llegar a pie' : 'Cómo llegar';
+      actions += '<a class="btn btn-secondary" target="_blank" rel="noopener" href="' + ru + '">' + label + '</a>';
+    }
+
+    var addr = '';
+    if (s.kaddr) {
+      k++;
+      addr = '<div class="kaddr">' +
+               '<div class="k">Muéstralo al taxista</div>' +
+               '<div class="v" id="k' + k + '">' + esc(s.kaddr) + '</div>' +
+               '<button class="copy" onclick="copyK(\'k' + k + '\', this)">Copiar</button>' +
+             '</div>';
+    }
+
+    var inner = '<div class="when">' + esc(s.time) + '</div>' +
+                '<h3>' + esc(s.title) + '</h3>' +
+                (s.why ? '<div><span class="why">' + esc(s.why) + '</span></div>' : '') +
+                '<div class="desc">' + (s.desc || '') + '</div>' +
+                addr +
+                (actions ? '<div class="actions">' + actions + '</div>' : '');
+
+    if (isMove) {
+      out += '<div class="move"><div>' + inner + '</div></div>';
+    } else {
+      out += '<div class="stop' + (s.key ? ' key' : '') + '">' +
+               '<div class="stop-top">' +
+                 '<div class="num">' + num + '</div>' +
+                 '<div style="flex:1;min-width:0">' + inner + '</div>' +
+               '</div>' +
+             '</div>';
+    }
+
+    prev = s;
+  });
+
+  document.getElementById('body').innerHTML = out;
+})();
+
+function copyK(id, btn) {
+  var t = document.getElementById(id).textContent;
+  var done = function () {
+    var old = btn.textContent;
+    btn.textContent = 'Copiado';
+    setTimeout(function () { btn.textContent = old; }, 1500);
+  };
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, fallback);
+  } else { fallback(); }
+}
+</script>
+
+</body>
+</html>
