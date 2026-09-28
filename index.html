@@ -894,7 +894,7 @@ function salesHTML(){
 }
 
 /* ---------- actions ---------- */
-function setView(v){view=v;document.getElementById('vk').classList.toggle('on',v==='kanban');document.getElementById('vl').classList.toggle('on',v==='list');document.getElementById('vc').classList.toggle('on',v==='calendar');document.getElementById('vs').classList.toggle('on',v==='sales');render();if(v==='sales'&&!salesRows)loadSales();}
+function setView(v){view=v;document.getElementById('vk').classList.toggle('on',v==='kanban');document.getElementById('vl').classList.toggle('on',v==='list');document.getElementById('vc').classList.toggle('on',v==='calendar');document.getElementById('vs').classList.toggle('on',v==='sales');render();if(v==='sales'&&(!salesRows||!salesAt||Date.now()-new Date(salesAt).getTime()>30*60*1000))loadSales();}
 document.getElementById('search').oninput=e=>{search=e.target.value.trim();render();};
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
