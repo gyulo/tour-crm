@@ -57,6 +57,7 @@ const TKEY="seoulTourCRM_token";
 const qs=new URLSearchParams(location.search);
 const CARD_ID=qs.get("card");
 let card=null, blocks=[], extras=[], board={}, names={}, memos={}, fees={}, boardMemo="", nDays=10, selId=null, saveTimer=null, swapSel=null;
+let loadedAt=""; // 이 화면이 불러온 저장본 시각 — 다른 화면·클로드가 그 뒤에 저장했으면 덮어쓰지 않는다 (2026-09-28 옛 탭이 배치를 세 번 되돌린 사건)
 
 const CAT_HUE={"☕":"#c98f4e","🍗":"#d96c4f","🎤":"#9a6ddb","🏞":"#4f9e6b","🚗":"#5b8fd4","🛍":"#d45f9e","🖤":"#555","📝":"#555","⭐":"#d4a017","❓":"#999"};
 function tok(){let t="";try{t=localStorage.getItem(TKEY)||"";}catch(e){}
@@ -255,7 +256,7 @@ async function load(){
   if(!card){setStatus("카드 못 찾음: "+CARD_ID);return;}
   document.getElementById("who").textContent=card.name||CARD_ID;
   document.title="루타 보드 — "+(card.name||CARD_ID);
-  const rb=card.rutaBoard||{};board=rb.days||{};names=rb.names||{};memos=rb.memos||{};fees=rb.fees||{};boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
+  const rb=card.rutaBoard||{};loadedAt=rb.savedAt||"";board=rb.days||{};names=rb.names||{};memos=rb.memos||{};fees=rb.fees||{};boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
   extras=Array.isArray(rb.extras)?rb.extras:[];
   blocks=parseBlocks(card.wishLinks).concat(extras);
   nDays=rb.nDays|| (function(){ // hireStart~flightOut 일수 추정
@@ -268,16 +269,19 @@ async function load(){
   render();}
 
 async function saveBoard(manual){
-  const t=tok();if(!t||!card)return;
+  saveTimer=null;const t=tok();if(!t||!card)return;
   setStatus("저장 중…");
   try{ // 최신 카드 위에 rutaBoard 만 얹어서 통째 저장 (다른 칸 되감기 방지)
     const rows=await (await fetch(API+"?key="+encodeURIComponent(t))).json();
     const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
     const fresh=list.find(c=>String(c.id)===String(CARD_ID))||card;
+    const srv=(fresh.rutaBoard||{}).savedAt||"";
+    if(srv&&loadedAt&&srv!==loadedAt){ // 그 사이 다른 곳에서 저장됨 → 덮어쓰지 말고 최신으로 다시 불러오기
+      await load();setStatus("⚠ 다른 곳에서 바뀐 게 있어 최신으로 불러왔어요 — 방금 옮긴 건 한 번 더 해주세요");return;}
     fresh.rutaBoard={v:1,nDays,days:board,names,memos,extras,fees,memo:boardMemo,savedAt:new Date().toISOString()};
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify({token:t,client:fresh})});
-    card=fresh;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
+    card=fresh;if(r.ok)loadedAt=fresh.rutaBoard.savedAt;setStatus(r.ok?("저장됨 ✓ "+new Date().toTimeString().slice(0,5)):"저장 오류");
   }catch(e){setStatus("저장 실패(오프라인?)");}}
 
 function copyDone(){ // 「/viaje-ruta4 이름」 복사 — 클로드가 PDF 합치기→일정표 칸 등록→전송 승인까지
@@ -302,5 +306,7 @@ function copyText(){
 
 try{const lm=new Date(document.lastModified); // 지금 열린 파일이 어느 판인지 — 캐시로 옛 버전 잡고 있으면 이 시간이 옛날로 뜸
   document.getElementById("vv").textContent="판 "+(lm.getMonth()+1)+"/"+lm.getDate()+" "+lm.toTimeString().slice(0,5);}catch(e){}
+// 탭으로 돌아오면(저장 대기 없을 때) 최신 저장본으로 다시 그림 — 폰·PC 여러 화면이 서로 되감지 않게
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&!saveTimer&&card)load();});
 load();
 </script></body></html>
