@@ -276,7 +276,7 @@ async function saveBoard(manual){
     const list=Array.isArray(rows)?rows:(rows.clients||rows.items||[]);
     const fresh=list.find(c=>String(c.id)===String(CARD_ID))||card;
     const srv=(fresh.rutaBoard||{}).savedAt||"";
-    if(srv&&loadedAt&&srv!==loadedAt){ // 그 사이 다른 곳에서 저장됨 → 덮어쓰지 말고 최신으로 다시 불러오기
+    if(srv&&srv!==loadedAt){ // loadedAt 빈 값(빈 보드로 연 화면)도 포함 — 9/29 Laura: 빈 화면이 서버 보드를 덮을 뻔 // 그 사이 다른 곳에서 저장됨 → 덮어쓰지 말고 최신으로 다시 불러오기
       await load();setStatus("⚠ 다른 곳에서 바뀐 게 있어 최신으로 불러왔어요 — 방금 옮긴 건 한 번 더 해주세요");return;}
     fresh.rutaBoard={v:1,nDays,days:board,names,memos,extras,fees,memo:boardMemo,savedAt:new Date().toISOString()};
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
