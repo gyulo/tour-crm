@@ -899,7 +899,7 @@ document.getElementById('search').oninput=e=>{search=e.target.value.trim();rende
 function move(id,dir){const c=clients.find(x=>x.id===id);const i=STAGES.findIndex(s=>s.id===c.stage);const n=STAGES[i+dir];if(!n)return;c.stage=n.id;if(STAGES.findIndex(s=>s.id===n.id)>=DEPOSIT_FROM)c.depositPaid=true;saveLocal();render();pushClient(c);toast(`${c.name} → ${n.label}`);}
 
 /* ---------- drawer ---------- */
-function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",itinUrl:"",itinGuideUrl:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"sns",depositPaid:false,tourFee:"",feeAmt:"",feeCur:"KRW",notes:"",created:new Date().toISOString().split('T')[0]};}
+function blank(){return {id:Date.now(),ticket:"",ig:"",name:"",phone:"",email:"",itinUrl:"",itinGuideUrl:"",linkCaptions:{},origin:"",city:"",channel:"",pax:"",group:"",season:"",days:"",tourDate:"",cities:[],stay:"",stayDetail:"",stayAddr:"",flightIn:"",flightOut:"",interests:[],drama:"",dramas:[],kpop:"",food:"",local:"",hanbok:"",diet:[],concern:[],hours:"",hireStart:"",hireEnd:"",tourDays:[],maybeDays:[],scheduleNote:"",wishLinks:"",payMethod:"",budget:"",stage:"lead",depositPaid:false,tourFee:"",feeAmt:"",feeCur:"KRW",notes:"",created:new Date().toISOString().split('T')[0]};}
 let draft=null,waSummary="";
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function extractUrls(t){return (String(t==null?'':t).match(/https?:\/\/[^\s]+/g)||[]);}
@@ -1269,7 +1269,7 @@ function syncDraftFromForm(){
   d.hanbok=readSingle('d_hanbok');d.diet=readChips('d_diet');d.concern=readChips('d_concern');
   d.hours=readSingle('d_hours');d.hireStart=g('d_hireStart');d.hireEnd=g('d_hireEnd');d.tourDays=tdRaw();d.maybeDays=mdRaw();
   d.scheduleNote=document.getElementById('d_scheduleNote').value.trim();d.wishLinks=g('d_wishLinks');d.payMethod=readSingle('d_payMethod');
-  d.stage=document.querySelector('#d_stage .ch.on').dataset.v;
+  d.stage=(document.querySelector('#d_stage .ch.on')||{dataset:{v:d.stage||'lead'}}).dataset.v;
   d.depositPaid=document.getElementById('d_deposit').classList.contains('on');
   d.tourFee=g('d_tourFee');d.feeAmt=g('d_feeAmt');d.feeCur=g('d_feeCur')||'KRW';d.notes=document.getElementById('d_notes').value.trim();
 }
@@ -1285,7 +1285,7 @@ function saveClient(){
     group:readSingle('d_group'),cities:readChips('d_cities'),stay:readSingle('d_stay'),stayDetail:gv('d_stayDetail'),stayAddr:gv('d_stayAddr'),flightIn:gv('d_flightIn'),flightOut:gv('d_flightOut'),interests:readChips('d_interests'),
     drama:gv('d_drama'),dramas:readChips('d_dramas'),kpop:gv('d_kpop'),food:gv('d_food'),local:(document.querySelector('#d_local button.on')||{}).dataset?.v||"",hanbok:readSingle('d_hanbok'),
     diet:readChips('d_diet'),concern:readChips('d_concern'),hours:readSingle('d_hours'),hireStart:gv('d_hireStart'),hireEnd:gv('d_hireEnd'),tourDays:readTourDays(),maybeDays:readMaybeDays(),scheduleNote:document.getElementById('d_scheduleNote').value.trim(),wishLinks:document.getElementById('d_wishLinks').value.trim(),payMethod:readSingle('d_payMethod'),
-    stage:document.querySelector('#d_stage .ch.on').dataset.v,sub:(document.querySelector('#d_sub .ch.on')||{dataset:{}}).dataset.v||'',depositPaid:document.getElementById('d_deposit').classList.contains('on'),
+    stage:(document.querySelector('#d_stage .ch.on')||{dataset:{v:(base.stage||'lead')}}).dataset.v,sub:(document.querySelector('#d_sub .ch.on')||{dataset:{}}).dataset.v||'',depositPaid:document.getElementById('d_deposit').classList.contains('on'),
     tourFee:gv('d_tourFee'),feeAmt:gv('d_feeAmt'),feeCur:gv('d_feeCur')||'KRW',notes:document.getElementById('d_notes').value.trim(),created:draft.created,source:draft.source||"manual",linkCaptions:draft.linkCaptions||{}});
   if(openId){const i=clients.findIndex(c=>c.id===openId);clients[i]=obj;}
   else{clients.push(obj);}
