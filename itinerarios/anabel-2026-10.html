@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<!--
+  Itinerario personalizado — Claudia Patricia Herrera (familia, 5 pax)
+  Martes 28 de julio de 2026 · Seongsu + Itaewon
+  Basado en el mapa guardado de Naver: https://naver.me/GkIeDejF
+  Los enlaces se generan desde el array STOPS (abajo) — para editar, cambia solo ese array.
+
+  Diseño: Airbnb DESIGN.md (getdesign.md/airbnb)
+    Rausch #ff385c · ink #222 · hairline #ddd · lienzo blanco
+    radios 8 / 14 / full · un solo nivel de sombra · base de espaciado 4px
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anabel & Juan Luis · Corea 2–13 oct</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* colors */
+      --primary: #ff385c;
+      --primary-active: #e00b41;
+      --ink: #222222;
+      --body: #3f3f3f;
+      --muted: #6a6a6a;
+      --muted-soft: #929292;
+      --hairline: #dddddd;
+      --hairline-soft: #ebebeb;
+      --border-strong: #c1c1c1;
+      --canvas: #ffffff;
+      --surface-soft: #f7f7f7;
+      --surface-strong: #f2f2f2;
+      --on-primary: #ffffff;
+
+      /* radii */
+      --r-xs: 4px; --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 32px; --r-full: 9999px;
+
+      /* spacing (base 4px) */
+      --s-xxs: 2px; --s-xs: 4px; --s-sm: 8px; --s-md: 12px;
+      --s-base: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px; --s-section: 64px;
+
+      /* single shadow tier */
+      --shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
+
+      --font: Inter, 'Airbnb Cereal VF', Circular, -apple-system, BlinkMacSystemFont,
+              system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--canvas);
+      color: var(--body);
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--s-lg) var(--s-xxl); }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+    .hero { padding: var(--s-xl) 0 var(--s-lg); }
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; line-height: 1.18;
+      color: var(--on-primary); background: var(--primary);
+      border-radius: var(--r-full); padding: 5px 12px;
+      margin-bottom: var(--s-base);
+    }
+    h1 {
+      font-size: 28px; font-weight: 700; line-height: 1.2;
+      letter-spacing: -0.5px; color: var(--ink);
+    }
+    .hero .sub {
+      font-size: 16px; font-weight: 400; line-height: 1.5;
+      color: var(--muted); margin-top: var(--s-sm);
+    }
+    .hero .brand {
+      font-size: 13px; font-weight: 400; line-height: 1.23;
+      color: var(--muted-soft); margin-top: var(--s-md);
+    }
+
+    /* ── Facts row ────────────────────────────────────────── */
+    .facts {
+      display: flex; flex-wrap: wrap;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: var(--s-lg);
+    }
+    .fact { flex: 1 1 33%; padding: var(--s-base) 0; }
+    .fact + .fact { border-left: 1px solid var(--hairline-soft); padding-left: var(--s-base); }
+    .fact .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .fact .v {
+      font-size: 16px; font-weight: 600; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs);
+    }
+
+    /* ── Briefing ─────────────────────────────────────────── */
+    .brief {
+      background: var(--surface-soft);
+      border-radius: var(--r-md);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-xl);
+    }
+    .brief h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .brief ul { list-style: none; }
+    .brief li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .brief li + li { margin-top: var(--s-sm); }
+    .brief li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--primary);
+    }
+    .brief b { color: var(--ink); font-weight: 600; }
+
+    /* ── Zone heading ─────────────────────────────────────── */
+    .zone {
+      padding-top: var(--s-xl); margin-bottom: var(--s-base);
+    }
+    .zone h2 {
+      font-size: 22px; font-weight: 500; line-height: 1.18;
+      letter-spacing: -0.44px; color: var(--ink);
+    }
+    .zone p {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--muted); margin-top: var(--s-xs);
+    }
+
+    /* ── Stop card ────────────────────────────────────────── */
+    .stop {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--canvas);
+      padding: var(--s-lg);
+      margin-bottom: var(--s-base);
+      transition: box-shadow .2s ease;
+    }
+    .stop:hover { box-shadow: var(--shadow); }
+
+    .stop-top { display: flex; align-items: flex-start; gap: var(--s-md); }
+    .num {
+      flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--r-full);
+      background: var(--surface-strong); color: var(--ink);
+      font-size: 12px; font-weight: 700; line-height: 32px; text-align: center;
+    }
+    .stop.key .num { background: var(--primary); color: var(--on-primary); }
+
+    .when {
+      font-size: 12px; font-weight: 700; line-height: 1.33;
+      color: var(--primary);
+    }
+    .stop h3 {
+      font-size: 20px; font-weight: 600; line-height: 1.2;
+      letter-spacing: -0.18px; color: var(--ink); margin-top: var(--s-xxs);
+    }
+    .why {
+      display: inline-block; margin-top: var(--s-sm);
+      border: 1px solid var(--hairline); border-radius: var(--r-full);
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 600; line-height: 1.18; color: var(--ink);
+    }
+    .desc {
+      font-size: 14px; font-weight: 400; line-height: 1.43;
+      color: var(--body); margin-top: var(--s-md);
+    }
+    .desc b { color: var(--ink); font-weight: 600; }
+    .desc a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .desc a:active { color: var(--primary-active); }
+
+    /* ── Korean address ───────────────────────────────────── */
+    .kaddr {
+      margin-top: var(--s-base);
+      background: var(--surface-soft);
+      border-radius: var(--r-sm);
+      padding: var(--s-md) var(--s-base);
+    }
+    .kaddr .k {
+      font-size: 8px; font-weight: 700; line-height: 1.25; letter-spacing: 0.32px;
+      text-transform: uppercase; color: var(--muted-soft);
+    }
+    .kaddr .v {
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      color: var(--ink); margin-top: var(--s-xs); word-break: keep-all;
+    }
+    .copy {
+      margin-top: var(--s-sm);
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--border-strong); border-radius: var(--r-full);
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      padding: 6px 14px; cursor: pointer;
+    }
+    .copy:active { background: var(--surface-strong); }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .actions { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-top: var(--s-base); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.29;
+      border-radius: var(--r-full); padding: 10px 20px; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: var(--on-primary); }
+    .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--border-strong); }
+    .btn-secondary:active { background: var(--surface-strong); }
+
+    /* ── Transfer row ─────────────────────────────────────── */
+    .move {
+      display: flex; align-items: flex-start; gap: var(--s-md);
+      padding: var(--s-base) var(--s-lg);
+      margin-bottom: var(--s-base);
+      border-left: 2px dashed var(--hairline);
+    }
+    .move .when { color: var(--muted-soft); }
+    .move h3 { font-size: 16px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
+    .move .desc { font-size: 14px; color: var(--muted); margin-top: var(--s-xs); }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    .foot { border-top: 1px solid var(--hairline); margin-top: var(--s-xl); padding-top: var(--s-lg); }
+    .foot h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ink); margin-bottom: var(--s-md); }
+    .foot ul { list-style: none; }
+    .foot li {
+      font-size: 14px; line-height: 1.43; color: var(--body);
+      padding-left: var(--s-base); position: relative;
+    }
+    .foot li + li { margin-top: var(--s-sm); }
+    .foot li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 5px; height: 5px; border-radius: var(--r-full); background: var(--hairline);
+    }
+    .foot b { color: var(--ink); font-weight: 600; }
+
+    .cta {
+      display: block; text-align: center; text-decoration: none;
+      background: var(--primary); color: var(--on-primary);
+      border-radius: var(--r-sm); padding: 14px 24px; min-height: 48px;
+      font-size: 16px; font-weight: 500; line-height: 1.25;
+      margin-top: var(--s-lg);
+    }
+    .cta:active { background: var(--primary-active); }
+    .cta.ghost {
+      background: var(--canvas); color: var(--ink);
+      border: 1px solid var(--ink); margin-top: var(--s-md);
+    }
+    .cta.ghost:active { background: var(--surface-strong); }
+
+    /* ── Print ────────────────────────────────────────────── */
+    @media print {
+      .cta.ghost, .copy { display: none; }
+      .stop { break-inside: avoid; box-shadow: none; }
+      .num, .eyebrow, .btn-primary, .cta { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .btn::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: 10px; word-break: break-all; }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 var(--s-base) var(--s-xl); }
+      h1 { font-size: 24px; }
+      .zone h2 { font-size: 20px; }
+      .stop { padding: var(--s-base); }
+      .fact { flex: 1 1 100%; }
+      .fact + .fact { border-left: 0; border-top: 1px solid var(--hairline-soft); padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">2 – 13 de octubre · Seúl · Busan</span>
+    <h1>Vuestros días en Corea</h1>
+    <p class="sub">Día por día, en este orden.</p>
+    <p class="brand">Anabel & Juan Luis · Corea en Español · Gyudong</p>
+  </header>
+
+  <div class="facts"><div class="fact"><div class="k">Seúl</div><div class="v">2 – 7 oct</div></div><div class="fact"><div class="k">Busan</div><div class="v">7 – 11 oct</div></div><div class="fact"><div class="k">Seúl</div><div class="v">12 – 13 oct</div></div></div>
+    <div id="body"></div>
+
+  <footer class="foot">
+    
+    <a class="cta ghost" href="#" onclick="window.print();return false;">Guardar como PDF</a>
+  </footer>
+
+</div>
+
+<script>
+/* ── Datos del día. Para editar el itinerario, cambia solo este array. ────────
+   px/py y sid vienen del mapa guardado de Naver (no inventar sid).
+   kind: 'stop' (parada) | 'move' (traslado)
+   mode: 'walk' | 'transit'  → modo del enlace "Cómo llegar" desde la parada anterior
+   noRoute: true → esta parada no genera enlace de ruta (ya lo lleva el traslado previo)
+   from: {px,py,name,sid} → punto de partida del enlace "Cómo llegar" (p. ej. el hotel al empezar el día)
+*/
+var STOPS = [
+  { zone: "Viernes 2 · Llegada" },
+  {
+    kind: "stop",
+    key: true,
+    time: "08:00",
+    title: "Aeropuerto de Incheon T1 → hotel",
+    desc: "<a href='https://somi-journey-game.s3.ap-northeast-2.amazonaws.com/viaje/index.html' target='_blank' rel='noopener'>Guía en vídeo del aeropuerto ▶</a>",
+    kaddr: "인천광역시 중구 공항로 272 (인천국제공항 제1여객터미널)",
+    search: "인천국제공항 제1여객터미널",
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Palacio Changdeokgung (창덕궁)",
+    desc: "De día se entra sin reserva.",
+    kaddr: "서울 종로구 율곡로 99",
+    sid: "12261493",
+    name: "창덕궁",
+    px: 126.991938,
+    py: 37.582604,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Insadong (인사동)",
+    kaddr: "서울 종로구 인사동",
+    sid: "13542782",
+    name: "인사동문화의거리",
+    px: 126.984936,
+    py: 37.573982,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Myeongdong (명동)",
+    kaddr: "서울 중구 명동2가 (명동거리)",
+    sid: "18694135",
+    name: "명동거리",
+    px: 126.984677,
+    py: 37.562948,
+    mode: "transit",
+  },
+  { zone: "Sábado 3" },
+  {
+    kind: "stop",
+    time: "",
+    title: "Plaza Gwanghwamun (광화문광장)",
+    kaddr: "서울 종로구 세종대로 175",
+    sid: "13349962",
+    name: "광화문광장",
+    px: 126.976891,
+    py: 37.574053,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Palacio Gyeongbokgung (경복궁)",
+    kaddr: "서울 종로구 사직로 161",
+    sid: "11571707",
+    name: "경복궁",
+    px: 126.977016,
+    py: 37.578841,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Bukchon Hanok Village (북촌한옥마을)",
+    kaddr: "서울 종로구 계동길 37",
+    sid: "13034552",
+    name: "북촌 한옥마을",
+    px: 126.985084,
+    py: 37.581354,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Ikseon-dong (익선동)",
+    kaddr: "서울 종로구 익선동 (익선동한옥거리)",
+    sid: "37684387",
+    name: "익선동한옥거리",
+    px: 126.989774,
+    py: 37.573441,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Café Soha Salt Pond (소하염전)",
+    kaddr: "서울 종로구 수표로28길 21-5",
+    sid: "1910405811",
+    name: "소하염전",
+    px: 126.989716,
+    py: 37.573156,
+    mode: "transit",
+  },
+  { zone: "Domingo 4" },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Museo Nacional de Corea (국립중앙박물관)",
+    desc: "Entrada gratis.",
+    kaddr: "서울 용산구 서빙고로 137",
+    sid: "11620570",
+    name: "국립중앙박물관",
+    px: 126.980388,
+    py: 37.524087,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Memorial de la Guerra (전쟁기념관)",
+    desc: "Entrada gratis.",
+    kaddr: "서울 용산구 이태원로 29",
+    sid: "1895177064",
+    name: "전쟁기념관",
+    px: 126.977148,
+    py: 37.536464,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Cheonggyecheon (청계천)",
+    kaddr: "서울 중구 태평로1가 1 (청계광장)",
+    sid: "13543936",
+    name: "청계광장",
+    px: 126.977712,
+    py: 37.569166,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Mercado Gwangjang (광장시장)",
+    kaddr: "서울 종로구 창경궁로 88",
+    sid: "21075936",
+    name: "광장시장",
+    px: 126.999069,
+    py: 37.570166,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "DDP (동대문디자인플라자)",
+    kaddr: "서울 중구 을지로 281",
+    sid: "18063223",
+    name: "동대문디자인플라자",
+    px: 127.009932,
+    py: 37.567546,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Parque Namsan (남산공원)",
+    kaddr: "서울 중구 삼일대로 231",
+    sid: "13087823",
+    name: "남산공원",
+    px: 126.992509,
+    py: 37.551051,
+    mode: "transit",
+  },
+  { zone: "Lunes 5" },
+  {
+    kind: "stop",
+    time: "",
+    title: "ETF Bakery Seongsu (ETF베이커리 성수)",
+    desc: "El antiguo Glow Seongsu.",
+    kaddr: "서울 성동구 성수이로16길 32",
+    sid: "2004674248",
+    name: "ETF베이커리 성수",
+    px: 127.059939,
+    py: 37.540156,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Gentle Monster · Haus Nowhere Dosan (젠틀몬스터)",
+    kaddr: "서울 강남구 압구정로46길 50",
+    sid: "1823082942",
+    name: "젠틀몬스터 하우스 노웨어 도산",
+    px: 127.035698,
+    py: 37.525377,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Seoul Forest (서울숲)",
+    kaddr: "서울 성동구 뚝섬로 273",
+    sid: "11636039",
+    name: "서울숲",
+    px: 127.038566,
+    py: 37.541964,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Starfield COEX · Biblioteca Starfield (별마당도서관)",
+    kaddr: "서울 강남구 영동대로 513 스타필드 코엑스몰 B1",
+    sid: "214665616",
+    name: "별마당 도서관",
+    px: 127.060177,
+    py: 37.510058,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Templo Bongeunsa (봉은사)",
+    kaddr: "서울 강남구 봉은사로 531",
+    sid: "11664007",
+    name: "봉은사",
+    px: 127.057655,
+    py: 37.51492,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Puente Banpo · Fuente Arcoíris (달빛무지개분수)",
+    desc: "Octubre: 12:00 · 19:30 · 20:00 · 20:30 · 21:00 — 20 min cada pase.",
+    kaddr: "서울 서초구 신반포로11길 40 (반포한강공원)",
+    sid: "13543876",
+    name: "반포대교달빛무지개분수",
+    px: 126.998433,
+    py: 37.512659,
+    mode: "transit",
+  },
+  { zone: "Martes 6 · Suwon" },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Starfield Suwon · Biblioteca Starfield (별마당도서관 수원)",
+    desc: "La biblioteca grande.",
+    kaddr: "경기 수원시 장안구 수성로 175",
+    sid: "1363762877",
+    name: "별마당도서관 스타필드수원점",
+    px: 126.991621,
+    py: 37.287382,
+    noRoute: true,
+  },
+  { zone: "Miércoles 7 · Seúl → Busan" },
+  {
+    kind: "stop",
+    key: true,
+    time: "10:00",
+    title: "KTX Seúl → Busan",
+    desc: "Una maleta se puede quedar en Seúl.",
+    kaddr: "서울 용산구 한강대로 405 (서울역)",
+    sid: "11630456",
+    name: "서울역",
+    px: 126.970702,
+    py: 37.554073,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Spaland Centum City (센텀 스파랜드)",
+    desc: "Spa / jjimjilbang.",
+    kaddr: "부산 해운대구 센텀남대로 35 신세계백화점 센텀시티점",
+    sid: "13359851",
+    name: "센텀 스파랜드",
+    px: 129.129144,
+    py: 35.168362,
+    mode: "transit",
+    from: {"px": 129.041601, "py": 35.115187, "name": "부산역", "sid": "13479631"},
+  },
+  { zone: "Jueves 8" },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Arte Museum Busan (아르떼뮤지엄)",
+    kaddr: "부산 영도구 해양로247번길 29",
+    sid: "1425685396",
+    name: "아르떼뮤지엄 부산",
+    px: 129.07585,
+    py: 35.086537,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Teleférico Songdo · Busan Air Cruise (송도해상케이블카)",
+    kaddr: "부산 서구 송도해변로 171",
+    sid: "594242077",
+    name: "송도해상케이블카",
+    px: 129.023399,
+    py: 35.076643,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Puente colgante Yonggung (송도용궁구름다리)",
+    kaddr: "부산 서구 암남동 620-53",
+    sid: "1202664243",
+    name: "송도용궁구름다리",
+    px: 129.021991,
+    py: 35.06192,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Café Magnate (마그네이트) · café de los padres de Jimin",
+    kaddr: "부산 남구 진남로 135",
+    search: "마그네이트 카페 부산 진남로",
+    noRoute: true,
+  },
+  { zone: "Viernes 9" },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Templo Haedong Yonggungsa (해동용궁사)",
+    kaddr: "부산 기장군 기장읍 용궁길 86",
+    sid: "11737443",
+    name: "해동용궁사",
+    px: 129.223227,
+    py: 35.188555,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Mirador Cheongsapo Daritdol (청사포다릿돌전망대)",
+    kaddr: "부산 해운대구 중동 산3-9",
+    sid: "1352519939",
+    name: "청사포다릿돌전망대",
+    px: 129.196248,
+    py: 35.164206,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Haeundae Blue Line Park (해운대블루라인파크)",
+    desc: "Sky Capsule: mejor reservar.",
+    kaddr: "부산 해운대구 달맞이길62번길 13",
+    sid: "1007574852",
+    name: "해운대블루라인파크 미포정거장",
+    px: 129.172856,
+    py: 35.158138,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Busan X the Sky (부산엑스더스카이)",
+    kaddr: "부산 해운대구 달맞이길 30",
+    sid: "1328539259",
+    name: "부산엑스더스카이",
+    px: 129.169769,
+    py: 35.15995,
+    mode: "transit",
+  },
+  { zone: "Sábado 10" },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Gamcheon Culture Village (감천문화마을)",
+    desc: "Cafés con vistas · cerveza de fruta.",
+    kaddr: "부산 사하구 감내2로 203",
+    sid: "21884707",
+    name: "감천문화마을",
+    px: 129.010439,
+    py: 35.098641,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Playa Gwangalli (광안리해수욕장)",
+    desc: "Sábado por la noche: drone show. Mucha gente.",
+    kaddr: "부산 수영구 광안해변로 219",
+    sid: "11491655",
+    name: "광안리해수욕장",
+    px: 129.120141,
+    py: 35.154121,
+    mode: "transit",
+  },
+  { zone: "Domingo 11" },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Isla Dongbaek · Nurimaru APEC House (누리마루)",
+    kaddr: "부산 해운대구 동백로 116",
+    sid: "13129139",
+    name: "누리마루APEC하우스",
+    px: 129.151342,
+    py: 35.152366,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Paseo costero de Dongbaek (동백공원해안산책로)",
+    kaddr: "부산 해운대구 우동",
+    sid: "17005194",
+    name: "동백공원해안산책로",
+    px: 129.153084,
+    py: 35.154,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Marine City (마린시티)",
+    desc: "Mejor de noche.",
+    kaddr: "부산 해운대구 우동 1411",
+    sid: "1068767893",
+    name: "마린시티",
+    px: 129.145534,
+    py: 35.157783,
+    mode: "transit",
+  },
+  { zone: "Lunes 12 · Seúl" },
+  {
+    kind: "stop",
+    time: "",
+    title: "Parque de los Colores · Río Han (여의도 서울색공원)",
+    desc: "Río Han, de noche.",
+    kaddr: "서울 영등포구 여의도동 84",
+    sid: "35386965",
+    name: "여의도한강공원서울색공원",
+    px: 126.930712,
+    py: 37.530438,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Itaewon (이태원)",
+    kaddr: "서울 용산구 이태원동",
+    sid: "31193088",
+    name: "이태원세계음식거리",
+    px: 126.993387,
+    py: 37.534991,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "N Seoul Tower (남산서울타워)",
+    kaddr: "서울 용산구 남산공원길 105",
+    sid: "11662870",
+    name: "N서울타워",
+    px: 126.988247,
+    py: 37.551217,
+    mode: "transit",
+  },
+  { zone: "Martes 13" },
+  {
+    kind: "stop",
+    time: "",
+    title: "Hongdae (홍대)",
+    kaddr: "서울 마포구 서교동 (홍대 걷고싶은거리)",
+    sid: "18785281",
+    name: "홍대걷고싶은거리",
+    px: 126.923192,
+    py: 37.555058,
+    noRoute: true,
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "AK Plaza Hongdae (AK플라자 홍대)",
+    desc: "¡No os lo perdáis! · Cartas Pokémon.",
+    kaddr: "서울 마포구 양화로 188",
+    sid: "1982416889",
+    name: "AK PLAZA 홍대",
+    px: 126.926095,
+    py: 37.558187,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Café Pokpo · cascada Hongje (카페폭포)",
+    kaddr: "서울 서대문구 연희로 262-24",
+    sid: "1472283292",
+    name: "카페폭포",
+    px: 126.937076,
+    py: 37.581476,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    key: true,
+    time: "",
+    title: "Seoul Sky · Lotte World Tower (서울스카이)",
+    kaddr: "서울 송파구 올림픽로 300",
+    sid: "303218356",
+    name: "서울스카이",
+    px: 127.102563,
+    py: 37.51257,
+    mode: "transit",
+  },
+  {
+    kind: "stop",
+    time: "",
+    title: "Templo Jogyesa (조계사)",
+    kaddr: "서울 종로구 우정국로 55",
+    sid: "12127463",
+    name: "조계사",
+    px: 126.981855,
+    py: 37.573781,
+    mode: "transit",
+  },
+];
+
+/* ── Render ──────────────────────────────────────────────────────────────── */
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function e(s) { return encodeURIComponent(s == null ? '' : s); }
+
+/* Naver: /p/directions/{lng},{lat},{nombre},{sid},PLACE_POI/{destino}/-/{modo} */
+function poi(s) {
+  if (!s) return null;
+  return s.px + ',' + s.py + ',' + e(s.name) + ',' + (s.sid || '') + ',' + (s.sid ? 'PLACE_POI' : '');
+}
+function routeUrl(from, to, mode) {
+  var a = poi(from), b = poi(to);
+  if (!a || !b) return null;
+  return 'https://map.naver.com/p/directions/' + a + '/' + b + '/-/' + (mode || 'transit');
+}
+function placeUrl(s) {
+  if (s.sid) return 'https://map.naver.com/p/entry/place/' + s.sid;
+  if (s.search) return 'https://map.naver.com/p/search/' + e(s.search);
+  return null;
+}
+
+(function render() {
+  var out = '', prev = null, num = 0, k = 0;
+
+  STOPS.forEach(function (s) {
+    if (s.zone) {
+      out += '<div class="zone"><h2>' + esc(s.zone) + '</h2>' +
+             (s.zoneNote ? '<p>' + esc(s.zoneNote) + '</p>' : '') + '</div>';
+      return;
+    }
+
+    var isMove = s.kind === 'move';
+    if (!isMove) num++;
+
+    var actions = '';
+    var pu = placeUrl(s);
+    if (pu) actions += '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + pu + '">Ver en Naver Map</a>';
+    /* from: 출발점 덮어쓰기 — 여러 날 일정에서 그날 첫 장소는 어제 마지막이 아니라 호텔에서 출발한다 */
+    var ru = s.noRoute ? null : routeUrl(s.from || prev, s, s.mode);
+    if (ru) {
+      var label = s.mode === 'walk' ? 'Cómo llegar a pie' : 'Cómo llegar';
+      actions += '<a class="btn btn-secondary" target="_blank" rel="noopener" href="' + ru + '">' + label + '</a>';
+    }
+
+    var addr = '';
+    if (s.kaddr) {
+      k++;
+      addr = '<div class="kaddr">' +
+               '<div class="k">Muéstralo al taxista</div>' +
+               '<div class="v" id="k' + k + '">' + esc(s.kaddr) + '</div>' +
+               '<button class="copy" onclick="copyK(\'k' + k + '\', this)">Copiar</button>' +
+             '</div>';
+    }
+
+    var inner = '<div class="when">' + esc(s.time) + '</div>' +
+                '<h3>' + esc(s.title) + '</h3>' +
+                (s.why ? '<div><span class="why">' + esc(s.why) + '</span></div>' : '') +
+                '<div class="desc">' + (s.desc || '') + '</div>' +
+                addr +
+                (actions ? '<div class="actions">' + actions + '</div>' : '');
+
+    if (isMove) {
+      out += '<div class="move"><div>' + inner + '</div></div>';
+    } else {
+      out += '<div class="stop' + (s.key ? ' key' : '') + '">' +
+               '<div class="stop-top">' +
+                 '<div class="num">' + num + '</div>' +
+                 '<div style="flex:1;min-width:0">' + inner + '</div>' +
+               '</div>' +
+             '</div>';
+    }
+
+    prev = s;
+  });
+
+  document.getElementById('body').innerHTML = out;
+})();
+
+function copyK(id, btn) {
+  var t = document.getElementById(id).textContent;
+  var done = function () {
+    var old = btn.textContent;
+    btn.textContent = 'Copiado';
+    setTimeout(function () { btn.textContent = old; }, 1500);
+  };
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, fallback);
+  } else { fallback(); }
+}
+</script>
+
+</body>
+</html>
