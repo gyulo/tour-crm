@@ -278,7 +278,7 @@
     <p class="brand">Anabel & Juan Luis · Corea en Español · Gyudong</p>
   </header>
 
-  <div class="facts"><div class="fact"><div class="k">Seúl</div><div class="v">2 – 7 oct</div></div><div class="fact"><div class="k">Busan</div><div class="v">7 – 11 oct</div></div><div class="fact"><div class="k">Seúl</div><div class="v">12 – 13 oct</div></div></div>
+  <div class="facts"><div class="fact"><div class="k">Seúl</div><div class="v">2 – 7 oct</div></div><div class="fact"><div class="k">Busan</div><div class="v">7 – 11 oct · Central Hotel</div></div><div class="fact"><div class="k">Seúl</div><div class="v">12 – 13 oct</div></div></div>
     <div id="body"></div>
 
   <footer class="foot">
@@ -574,6 +574,20 @@ var STOPS = [
   },
   {
     kind: "stop",
+    key: true,
+    time: "",
+    title: "Hotel en Busan · Central Hotel (센트럴호텔)",
+    desc: "Primero al hotel, dejáis las maletas.",
+    kaddr: "부산 연제구 중앙대로 1122",
+    sid: "2043192509",
+    name: "센트럴호텔",
+    px: 129.08155,
+    py: 35.187751,
+    mode: "transit",
+    from: {"px": 129.041601, "py": 35.115187, "name": "부산역", "sid": "13479631"},
+  },
+  {
+    kind: "stop",
     time: "",
     title: "Spaland Centum City (센텀 스파랜드)",
     desc: "Spa / jjimjilbang.",
@@ -583,7 +597,6 @@ var STOPS = [
     px: 129.129144,
     py: 35.168362,
     mode: "transit",
-    from: {"px": 129.041601, "py": 35.115187, "name": "부산역", "sid": "13479631"},
   },
   { zone: "Jueves 8" },
   {
@@ -596,7 +609,8 @@ var STOPS = [
     name: "아르떼뮤지엄 부산",
     px: 129.07585,
     py: 35.086537,
-    noRoute: true,
+    mode: "transit",
+    from: {"px": 129.08155, "py": 35.187751, "name": "센트럴호텔", "sid": "2043192509"},
   },
   {
     kind: "stop",
@@ -640,7 +654,8 @@ var STOPS = [
     name: "해동용궁사",
     px: 129.223227,
     py: 35.188555,
-    noRoute: true,
+    mode: "transit",
+    from: {"px": 129.08155, "py": 35.187751, "name": "센트럴호텔", "sid": "2043192509"},
   },
   {
     kind: "stop",
@@ -689,7 +704,8 @@ var STOPS = [
     name: "감천문화마을",
     px: 129.010439,
     py: 35.098641,
-    noRoute: true,
+    mode: "transit",
+    from: {"px": 129.08155, "py": 35.187751, "name": "센트럴호텔", "sid": "2043192509"},
   },
   {
     kind: "stop",
@@ -715,7 +731,8 @@ var STOPS = [
     name: "누리마루APEC하우스",
     px: 129.151342,
     py: 35.152366,
-    noRoute: true,
+    mode: "transit",
+    from: {"px": 129.08155, "py": 35.187751, "name": "센트럴호텔", "sid": "2043192509"},
   },
   {
     kind: "stop",
