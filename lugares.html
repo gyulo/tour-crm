@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>장소 정보함</title>
+<style>
+:root{--bg:#faf8f5;--card:#fff;--ink:#1d1b19;--mute:#77716a;--line:#e7e2db;--acc:#e8355a;--acc2:#fde7ec;--ok:#1d8a5b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161514;--card:#201f1d;--ink:#f1eee9;--mute:#9b958d;--line:#33302c;--acc:#ff5c7c;--acc2:#3a1d24;--ok:#4cc38a}}
+:root[data-theme="dark"]{--bg:#161514;--card:#201f1d;--ink:#f1eee9;--mute:#9b958d;--line:#33302c;--acc:#ff5c7c;--acc2:#3a1d24;--ok:#4cc38a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+.bar{display:flex;gap:8px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:2}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+textarea{min-height:64px;resize:vertical}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--acc);color:#fff;white-space:nowrap}
+button.ghost{background:transparent;color:var(--mute);border:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.chip{padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-size:13px;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.zone{margin:18px 0 6px;font-size:13px;font-weight:700;color:var(--acc);letter-spacing:.02em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.card h3{margin:0 0 4px;font-size:16px}
+.tip{margin:4px 0;white-space:pre-wrap}
+.es{color:var(--mute);font-style:italic;white-space:pre-wrap;margin:4px 0}
+.meta{font-size:12px;color:var(--mute);display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;align-items:center}
+.meta a{color:var(--acc)}
+.form{display:none}
+.form.open{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid .full{grid-column:1/-1}
+label{font-size:12px;color:var(--mute);display:block;margin-bottom:2px}
+.st{font-size:12px;color:var(--mute);text-align:right;min-height:16px}
+.empty{color:var(--mute);text-align:center;padding:30px 0}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📍 장소 정보함</h1>
+  <p class="sub">지역을 치면 그 동네 추천·팁이 같이 떠요. 일정표 만들 때 여기서 꺼내 씁니다.</p>
+
+  <div class="bar">
+    <input id="q" placeholder="명동, 홍대, 경복궁, 보쌈…" autocomplete="off">
+    <button id="addBtn">+ 추가</button>
+  </div>
+  <div class="chips" id="zones"></div>
+
+  <div class="card form" id="form">
+    <div class="grid">
+      <div><label>지역</label><input id="f_zone" placeholder="명동" list="zoneList"></div>
+      <div><label>장소 이름</label><input id="f_name" placeholder="설빙 명동점"></div>
+      <div class="full"><label>팁 (한국어 · 회장님 말 그대로)</label><textarea id="f_tip"></textarea></div>
+      <div class="full"><label>손님용 스페인어 (비워 두면 클로드가 채움)</label><textarea id="f_es"></textarea></div>
+      <div><label>한국어 주소</label><input id="f_kaddr" placeholder="서울 중구 명동3길 27"></div>
+      <div><label>네이버 sid</label><input id="f_sid" placeholder="1621273819"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="saveBtn">저장</button>
+      <button class="ghost" id="cancelBtn">취소</button>
+      <button class="ghost" id="delBtn" style="margin-left:auto;display:none">삭제</button>
+    </div>
+  </div>
+  <datalist id="zoneList"></datalist>
+
+  <div class="st" id="st"></div>
+  <div id="list"></div>
+</div>
+
+<script>
+var API = "https://2boqkaotufrfukcsmkh2zaz6yy0jrwbi.lambda-url.ap-northeast-2.on.aws/";
+var KEY = (new URLSearchParams(location.search).get("k")) || "lugares:gauvtgjusbjpcu";
+var CACHE = "lugares-v1:" + KEY;
+var S = {updatedAt: 0, items: [], del: {}};
+var editing = null, zoneSel = "";
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function st(t){ $("st").textContent = t; }
+try { var c = JSON.parse(localStorage.getItem(CACHE) || "null"); if (c && c.items) S = c; } catch(e){}
+
+function merge(a, b){
+  var del = Object.assign({}, a.del || {}, b.del || {}), m = {};
+  (a.items || []).concat(b.items || []).forEach(function(x){ if (!m[x.id] || (x.u || 0) > (m[x.id].u || 0)) m[x.id] = x; });
+  var items = Object.keys(m).map(function(k){ return m[k]; }).filter(function(x){ return !(del[x.id] && del[x.id] >= (x.u || 0)); });
+  return {updatedAt: Math.max(a.updatedAt || 0, b.updatedAt || 0), items: items, del: del};
+}
+function pull(){
+  return fetch(API + "?key=" + encodeURIComponent(KEY)).then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.items) S = merge(S, d);
+    try { localStorage.setItem(CACHE, JSON.stringify(S)); } catch(e){}
+    render(); st("서버와 맞춤 · " + new Date().toLocaleTimeString());
+  }).catch(function(){ st("⚠ 서버 연결 안 됨 — 이 기기에만 보관 중"); });
+}
+function push(){
+  st("저장 중…");
+  return fetch(API + "?key=" + encodeURIComponent(KEY)).then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.items) S = merge(S, d);
+    S.updatedAt = Date.now();
+    try { localStorage.setItem(CACHE, JSON.stringify(S)); } catch(e){}
+    return fetch(API, {method: "POST", headers: {"Content-Type": "text/plain"}, body: JSON.stringify({key: KEY, state: S})});
+  }).then(function(){ st("저장됨 ✓ " + new Date().toLocaleTimeString()); render(); })
+    .catch(function(){ st("⚠ 저장 실패 — 이 기기에만 남아 있음"); render(); });
+}
+
+function render(){
+  var q = $("q").value.trim().toLowerCase();
+  var zones = {};
+  S.items.forEach(function(x){ zones[x.zone || "기타"] = (zones[x.zone || "기타"] || 0) + 1; });
+  var zk = Object.keys(zones).sort(function(a, b){ return a.localeCompare(b, "ko"); });
+  $("zones").innerHTML = zk.map(function(z){
+    return '<span class="chip' + (zoneSel === z ? " on" : "") + '" data-z="' + esc(z) + '">' + esc(z) + " " + zones[z] + "</span>";
+  }).join("");
+  $("zoneList").innerHTML = zk.map(function(z){ return '<option value="' + esc(z) + '">'; }).join("");
+  var rows = S.items.filter(function(x){
+    if (zoneSel && (x.zone || "기타") !== zoneSel) return false;
+    if (!q) return true;
+    return [x.zone, x.name, x.tip, x.es, x.kaddr].join(" ").toLowerCase().indexOf(q) >= 0;
+  });
+  // 지역 이름이 검색어와 맞는 것을 먼저
+  rows.sort(function(a, b){
+    var az = q && (a.zone || "").toLowerCase().indexOf(q) >= 0 ? 0 : 1, bz = q && (b.zone || "").toLowerCase().indexOf(q) >= 0 ? 0 : 1;
+    return az - bz || (a.zone || "").localeCompare(b.zone || "", "ko") || (a.name || "").localeCompare(b.name || "", "ko");
+  });
+  if (!rows.length){ $("list").innerHTML = '<div class="empty">' + (q ? "「" + esc(q) + "」 정보가 아직 없어요. + 추가로 넣어 주세요." : "아직 비어 있어요.") + "</div>"; return; }
+  var out = "", last = null;
+  rows.forEach(function(x){
+    var z = x.zone || "기타";
+    if (z !== last){ out += '<div class="zone">' + esc(z) + "</div>"; last = z; }
+    var link = x.sid ? '<a target="_blank" rel="noopener" href="https://map.naver.com/p/entry/place/' + esc(x.sid) + '">네이버맵</a>'
+             : (x.name ? '<a target="_blank" rel="noopener" href="https://map.naver.com/p/search/' + encodeURIComponent(x.name) + '">네이버 검색</a>' : "");
+    out += '<div class="card"><h3>' + esc(x.name || "(이름 없음)") + "</h3>" +
+      (x.tip ? '<div class="tip">' + esc(x.tip) + "</div>" : "") +
+      (x.es ? '<div class="es">' + esc(x.es) + "</div>" : "") +
+      '<div class="meta">' + (x.kaddr ? "<span>" + esc(x.kaddr) + "</span>" : "") + link +
+      '<a href="#" data-edit="' + esc(x.id) + '">수정</a>' + (x.src ? "<span>· " + esc(x.src) + "</span>" : "") + "</div></div>";
+  });
+  $("list").innerHTML = out;
+}
+
+function openForm(x){
+  editing = x ? x.id : null;
+  $("f_zone").value = x ? x.zone || "" : (zoneSel || $("q").value.trim());
+  $("f_name").value = x ? x.name || "" : "";
+  $("f_tip").value = x ? x.tip || "" : "";
+  $("f_es").value = x ? x.es || "" : "";
+  $("f_kaddr").value = x ? x.kaddr || "" : "";
+  $("f_sid").value = x ? x.sid || "" : "";
+  $("delBtn").style.display = x ? "" : "none";
+  $("form").classList.add("open"); $("f_name").focus();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+function closeForm(){ $("form").classList.remove("open"); editing = null; }
+
+$("addBtn").onclick = function(){ openForm(null); };
+$("cancelBtn").onclick = closeForm;
+$("saveBtn").onclick = function(){
+  var x = {
+    id: editing || ("p" + Date.now().toString(36)),
+    zone: $("f_zone").value.trim(), name: $("f_name").value.trim(), tip: $("f_tip").value.trim(),
+    es: $("f_es").value.trim(), kaddr: $("f_kaddr").value.trim(), sid: $("f_sid").value.trim(), u: Date.now()
+  };
+  if (!x.name && !x.tip){ alert("이름이나 팁 중 하나는 적어 주세요"); return; }
+  var old = S.items.filter(function(y){ return y.id === x.id; })[0];
+  if (old && old.src) x.src = old.src;
+  S.items = S.items.filter(function(y){ return y.id !== x.id; }).concat([x]);
+  closeForm(); render(); push();
+};
+$("delBtn").onclick = function(){
+  if (!editing || !confirm("이 장소를 지울까요?")) return;
+  S.del[editing] = Date.now();
+  S.items = S.items.filter(function(y){ return y.id !== editing; });
+  closeForm(); render(); push();
+};
+$("q").oninput = render;
+$("zones").onclick = function(e){ var z = e.target.getAttribute("data-z"); if (z == null) return; zoneSel = zoneSel === z ? "" : z; render(); };
+$("list").onclick = function(e){
+  var id = e.target.getAttribute("data-edit"); if (!id) return; e.preventDefault();
+  openForm(S.items.filter(function(y){ return y.id === id; })[0]);
+};
+render(); pull();
+setInterval(function(){ if (!$("form").classList.contains("open")) pull(); }, 30000);
+window.addEventListener("focus", function(){ if (!$("form").classList.contains("open")) pull(); });
+</script>
+</body>
+</html>
