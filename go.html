@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abriendo Naver Map…</title>
+<!-- 2026-10-07 아이폰에서 map.naver.com 링크가 앱으로 안 넘어가는 문제(회장님 제보) → 일정표 버튼은 여기를 거친다.
+     폰이면 네이버지도 앱(nmap://)을 먼저 열고, 앱이 안 열리면 1.6초 뒤 웹 지도로 넘긴다. PC는 바로 웹.
+     ?t=place&lat&lng&name&web=…  |  ?t=route&slat&slng&sname&lat&lng&name&mode=transit|walk&web=…  -->
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--sub:#6e6e73;--pri:#03c75a}
+@media (prefers-color-scheme:dark){:root{--bg:#111;--fg:#f2f2f2;--sub:#9a9a9f}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,system-ui,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;text-align:center}
+.b{display:block;margin:12px auto;padding:14px 18px;border-radius:12px;text-decoration:none;font-weight:700;max-width:320px}
+.app{background:var(--pri);color:#fff}.web{border:1px solid var(--sub);color:var(--fg)}
+p{color:var(--sub);margin:4px 0 16px}
+</style></head><body><div>
+<h2 id="n">Naver Map</h2><p>Abriendo la app…</p>
+<a class="b app" id="app" href="#">Abrir en la app Naver Map</a>
+<a class="b web" id="web" href="#">Abrir en el navegador</a>
+</div><script>
+var q=new URLSearchParams(location.search),g=function(k){return q.get(k)||''};
+var web=g('web')||'https://map.naver.com/',name=g('name'),app='nmap://',me='https://gyulo.github.io/tour-crm/';
+if(name)document.getElementById('n').textContent=name;
+if(g('t')==='route'&&g('lat')&&g('slat')){
+  var mode=g('mode')==='walk'?'walk':'public';
+  app+='route/'+mode+'?slat='+g('slat')+'&slng='+g('slng')+'&sname='+encodeURIComponent(g('sname'))+'&dlat='+g('lat')+'&dlng='+g('lng')+'&dname='+encodeURIComponent(name);
+}else if(g('lat')){
+  app+='place?lat='+g('lat')+'&lng='+g('lng')+'&name='+encodeURIComponent(name);
+}else app='';
+if(app)app+='&appname='+encodeURIComponent(me);
+document.getElementById('web').href=web;
+var mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+if(!app||!mobile){document.getElementById('app').style.display='none';location.replace(web);}
+else{
+  document.getElementById('app').href=app;
+  var t=setTimeout(function(){location.replace(web)},1600);
+  document.addEventListener('visibilitychange',function(){if(document.hidden)clearTimeout(t)});
+  location.href=app;
+}
+</script></body></html>
