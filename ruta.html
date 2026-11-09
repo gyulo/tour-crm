@@ -265,7 +265,7 @@ async function load(){
   if(!card){setStatus("카드 못 찾음: "+CARD_ID);return;}
   document.getElementById("who").textContent=card.name||CARD_ID;
   document.title="루타 보드 — "+(card.name||CARD_ID);
-  const rb=card.rutaBoard||{};loadedAt=rb.savedAt||"";board=rb.days||{};names=rb.names||{};memos=rb.memos||{};pics=rb.pics||{};fees=rb.fees||{};rsv=Array.isArray(rb.rsv)?rb.rsv:[];boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
+  const rb=card.rutaBoard||{};loadedAt=String(rb.savedAt||"");board=rb.days||{};names=rb.names||{};memos=rb.memos||{};pics=rb.pics||{};fees=rb.fees||{};rsv=Array.isArray(rb.rsv)?rb.rsv:[];boardMemo=rb.memo||"";document.getElementById("bmemo").value=boardMemo;
   extras=Array.isArray(rb.extras)?rb.extras:[];
   blocks=parseBlocks(card.wishLinks).concat(extras);
   nDays=rb.nDays|| (function(){ // hireStart~flightOut 일수 추정
@@ -274,7 +274,7 @@ async function load(){
         if(a&&b&&b>a)return Math.min(30,Math.round((b-a)/864e5)+1);}catch(e){}
     return 10;})();
   document.getElementById("ndays").value=nDays;
-  setStatus("블록 "+blocks.length+"개 · "+(rb.savedAt?("저장본 "+rb.savedAt.slice(5,16)):"새 보드"));
+  setStatus("블록 "+blocks.length+"개 · "+(rb.savedAt?("저장본 "+String(rb.savedAt).slice(5,16)):"새 보드"));
   render();}
 
 async function saveBoard(manual){
