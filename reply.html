@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>답장 대기</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1d1b18;--sub:#6f6a62;--line:#e4dfd4;--me:#dcf8c6;--you:#fff;--chat:#ece5dd;--go:#1f9d55;--go2:#17804a;--warn:#b7791f;--bad:#c53030;--chip:#f0ebe0}
+@media (prefers-color-scheme:dark){:root{--bg:#141311;--card:#1f1d1a;--ink:#f1ede6;--sub:#a29c92;--line:#35322c;--me:#1f4a33;--you:#2a2824;--chat:#191714;--chip:#2a2824}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
+h1{font-size:19px;margin:0 0 6px}
+.tabs{display:flex;gap:6px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#sync{font-size:12px;color:var(--sub);margin-top:4px}
+main{max-width:640px;margin:0 auto;padding:12px 16px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.nm{font-weight:700;font-size:16px}
+.money{font-size:13px;font-weight:600;margin:2px 0 8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--chip);white-space:nowrap}
+.pill.approved,.pill.sending{background:#fde9b8;color:#7a4d00}.pill.sent{background:#cdeed9;color:#145c34}.pill.failed{background:#fbd5d5;color:#8a1f1f}
+details{margin:6px 0}
+summary{cursor:pointer;font-size:13px;color:var(--sub)}
+.chat{background:var(--chat);border-radius:10px;padding:8px;margin-top:6px;max-height:340px;overflow:auto}
+.b{max-width:85%;padding:5px 9px;border-radius:8px;margin:3px 0;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.b.me{background:var(--me);margin-left:auto}.b.you{background:var(--you)}
+.b small{display:block;font-size:10px;color:var(--sub)}
+.box{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:14px}
+.box h4{margin:0 0 4px;font-size:12px;color:var(--sub);font-weight:700}
+.sum{background:#e8f0fe;color:#1a2b4a}.why{background:var(--chip);font-size:13px}
+@media (prefers-color-scheme:dark){.sum{background:#1f2a3d;color:#dbe6ff}}
+.vt{display:block;margin-top:4px;padding-top:4px;border-top:1px dashed rgba(0,0,0,.15);font-style:italic}
+.sec{font-size:12px;color:var(--sub);font-weight:700;margin:10px 0 0}
+.lines{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.ln{display:flex;gap:6px;align-items:center}
+.ln input{flex:1;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:18px;background:var(--me);color:var(--ink)}
+.ln button{border:0;background:none;color:var(--sub);font-size:18px;cursor:pointer;padding:0 4px}
+.add{align-self:flex-start;border:1px dashed var(--line);background:none;color:var(--sub);border-radius:18px;padding:5px 12px;cursor:pointer;font-size:13px}
+.score{font-size:12px;color:var(--sub);margin-top:6px}
+.acts{display:flex;gap:8px;margin-top:12px}
+.go{flex:1;border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:700;background:var(--go);color:#fff;cursor:pointer;box-shadow:0 3px 0 var(--go2)}
+.go:active{transform:translateY(2px);box-shadow:0 1px 0 var(--go2)}
+.skip{border:1px solid var(--line);background:none;color:var(--sub);border-radius:12px;padding:12px 14px;cursor:pointer}
+.sentlines{font-size:14px;margin-top:6px}.sentlines div{padding:2px 0}
+.err{color:var(--bad);font-size:13px;margin-top:6px}
+.empty{text-align:center;color:var(--sub);padding:40px 0}
+</style></head><body>
+<header><h1>💬 답장 대기</h1>
+<div class="tabs"><button data-t="todo" class="on">보낼 것</button><button data-t="done">보낸 것</button><button data-t="skip">건너뜀</button></div>
+<div id="sync">불러오는 중…</div></header>
+<main id="list"></main>
+<script>
+const URL0 = 'https://2boqkaotufrfukcsmkh2zaz6yy0jrwbi.lambda-url.ap-northeast-2.on.aws/';
+const KEY = new URLSearchParams(location.search).get('k') || 'reply:gauvtgjusbjpcu';
+let S = {updatedAt:0, items:[]}, tab = 'todo', editing = false;
+const $ = s => document.querySelector(s);
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function pull(){
+  try{
+    const r = await fetch(URL0 + '?key=' + encodeURIComponent(KEY), {cache:'no-store'});
+    const s = await r.json();
+    if (s) S = s;
+    $('#sync').textContent = '방금 불러옴 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+    if (!editing) render();
+  }catch(e){ $('#sync').textContent = '불러오기 실패 — 인터넷 확인'; }
+}
+async function save(item){
+  item.u = Date.now();
+  try{
+    const r = await fetch(URL0 + '?key=' + encodeURIComponent(KEY), {cache:'no-store'});
+    const cur = (await r.json()) || {items:[]};
+    const by = Object.fromEntries((cur.items||[]).map(x => [x.id, x]));
+    const old = by[item.id];
+    if (old && ['sending','sent'].includes(old.status)) { S = cur; render(); alert('이미 보내는 중이거나 보냈어요.'); return; }
+    by[item.id] = item;
+    cur.items = Object.values(by).sort((a,b) => (a.order||0)-(b.order||0));
+    cur.updatedAt = Date.now();
+    await fetch(URL0, {method:'POST', headers:{'content-type':'text/plain'}, body: JSON.stringify({key:KEY, state:cur})});
+    S = cur; render();
+  }catch(e){ alert('저장 실패 — 다시 눌러 주세요'); }
+}
+function score(lines){
+  const L = lines.map(x=>x.trim()).filter(Boolean); if(!L.length) return '';
+  const ln = L.map(x=>x.length).sort((a,b)=>a-b), med = ln[Math.floor(ln.length/2)];
+  const short = Math.round(100*ln.filter(x=>x<=10).length/ln.length);
+  const acc = /[áéíóúÁÉÍÓÚ]/.test(L.join('')), inv = /[¿¡]/.test(L.join(''));
+  const f = ok => ok ? '✅' : '⚠️';
+  return `말투: 중앙값 ${med}자 ${f(med>=8&&med<=20)} · 10자 이하 ${short}% ${f(short>=30)} · 악센트 ${f(!acc)} · ¿¡ ${f(!inv)}`;
+}
+function card(it){
+  const st = it.status;
+  const label = {draft:'초안', approved:'보내기 대기 (1분 안에 나감)', sending:'보내는 중', sent:'보냄', failed:'실패', skip:'건너뜀'}[st] || st;
+  const hist = (it.hist||[]).map(m => `<div class="b ${m.me?'me':'you'}"><small>${esc(m.w)} ${m.me?'나':'손님'}</small>${esc(m.t)}${m.voice?`<span class="vt">✍️ ${esc(m.voice)}</span>`:''}</div>`).join('');
+  let body = '';
+  if (st === 'draft'){
+    body = `<div class="sec">② 보낼 문자</div><div class="lines">${it.lines.map((l,i)=>`<div class="ln"><input value="${esc(l)}" data-i="${i}"><button data-del="${i}" title="이 줄 빼기">✕</button></div>`).join('')}
+      <button class="add">＋ 줄 추가</button></div>
+      <div class="score">${score(it.lines)}</div>
+      ${it.why ? `<div class="box why"><h4>③ 이렇게 보내는 이유</h4>${it.why}</div>` : ''}
+      <div class="acts"><button class="go">보내기</button><button class="skip">건너뛰기</button></div>`;
+  } else {
+    body = `<div class="sentlines">${it.lines.map(l=>`<div>• ${esc(l)}</div>`).join('')}</div>` +
+      (it.err ? `<div class="err">${esc(it.err)}</div>` : '') +
+      (st==='approved' ? `<div class="acts"><button class="skip undo">취소 (아직 안 나갔으면)</button></div>` : '') +
+      (st==='skip' ? `<div class="acts"><button class="skip undo">다시 초안으로</button></div>` : '');
+  }
+  return `<div class="card" data-id="${esc(it.id)}">
+    <div class="top"><div><div class="nm">${esc(it.name)}</div></div><span class="pill ${st}">${label}</span></div>
+    <div class="money">${esc(it.money||'')}</div>
+    <details><summary>대화 원문 ${(it.hist||[]).length}개</summary><div class="chat">${hist}</div></details>
+    ${it.summary ? `<div class="box sum"><h4>① 손님이 하는 말</h4>${esc(it.summary)}</div>` : ''}
+    ${body}</div>`;
+}
+function render(){
+  const want = {todo:['draft','approved','sending','failed'], done:['sent'], skip:['skip']}[tab];
+  let items = (S.items||[]).filter(x => want.includes(x.status));
+  if (tab !== 'todo') items = items.slice().sort((a,b)=>(b.u||0)-(a.u||0));
+  $('#list').innerHTML = items.length ? items.map(card).join('') : `<div class="empty">${tab==='todo'?'지금 보낼 답장이 없어요':'없어요'}</div>`;
+  const n = (S.items||[]).filter(x=>x.status==='draft').length;
+  document.title = n ? `(${n}) 답장 대기` : '답장 대기';
+  document.querySelector('[data-t=todo]').textContent = '보낼 것' + (n?` ${n}`:'');
+}
+const find = el => { const c = el.closest('.card'); return [c, (S.items||[]).find(x=>x.id===c.dataset.id)]; };
+const readLines = c => [...c.querySelectorAll('.ln input')].map(i=>i.value);
+document.addEventListener('focusin', e => { if (e.target.matches('.ln input')) editing = true; });
+document.addEventListener('focusout', e => { if (e.target.matches('.ln input')) { editing = false;
+  const [c,it] = find(e.target); if (it) { it.lines = readLines(c); c.querySelector('.score').textContent = score(it.lines); } } });
+document.addEventListener('input', e => { if (e.target.matches('.ln input')) { const [c,it]=find(e.target); c.querySelector('.score').textContent = score(readLines(c)); } });
+document.addEventListener('click', async e => {
+  const t = e.target;
+  if (t.dataset.t){ tab = t.dataset.t; document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on', b===t)); render(); return; }
+  if (!t.closest('.card')) return;
+  const [c,it] = find(t); if (!it) return;
+  if (t.dataset.del !== undefined){ it.lines = readLines(c); it.lines.splice(+t.dataset.del,1); render(); return; }
+  if (t.classList.contains('add')){ it.lines = readLines(c); it.lines.push(''); render();
+    const ins = document.querySelectorAll(`.card[data-id="${CSS.escape(it.id)}"] .ln input`); ins[ins.length-1]?.focus(); return; }
+  if (t.classList.contains('go')){
+    const L = readLines(c).map(x=>x.trim()).filter(Boolean);
+    if (!L.length) return alert('보낼 줄이 없어요');
+    it.lines = L; it.status = 'approved'; t.disabled = true; t.textContent = '올리는 중…';
+    await save(it); return; }
+  if (t.classList.contains('undo')){ it.status = 'draft'; await save(it); return; }
+  if (t.classList.contains('skip')){ it.lines = readLines(c); it.status = 'skip'; await save(it); return; }
+});
+pull(); setInterval(pull, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
+</script></body></html>
