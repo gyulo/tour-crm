@@ -122,6 +122,7 @@ function card(it){
   if (st === 'draft'){
     body = `<div class="sec">② 보낼 문자</div><div class="lines">${it.lines.map((l,i)=>`<div class="ln"><input value="${esc(l)}" data-i="${i}"><button data-del="${i}" title="이 줄 빼기">✕</button></div>`).join('')}
       <button class="add">＋ 줄 추가</button></div>
+      ${(it.media||[]).length ? `<div class="memonote">📎 글줄 다음에 그림 ${it.media.length}장 같이 나가요 — ${esc(it.mediaNote||'')}</div>` : ''}
       <div class="score">${score(it.lines)}</div>
       ${it.why ? `<div class="box why"><h4>③ 이렇게 보내는 이유</h4>${it.why}</div>` : ''}
       <div class="acts"><button class="go">보내기</button><button class="skip">건너뛰기</button></div>
