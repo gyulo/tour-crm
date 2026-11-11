@@ -21,6 +21,13 @@ h1{font-size:19px;margin:0 0 6px}
 #bar .fill::after{content:"";position:absolute;left:8px;right:8px;top:4px;height:5px;border-radius:99px;background:rgba(255,255,255,.35)}
 #bar .num{font-weight:800;font-size:15px;color:#58a700;min-width:52px;text-align:right}
 #bar .txt{font-size:12px;margin-top:6px;color:var(--sub)}
+.memo{margin-top:10px}
+.memo textarea{width:100%;min-height:54px;font:inherit;font-size:14px;padding:8px 10px;border:1px dashed #c9a227;border-radius:10px;background:#fffbea;color:#3d3200;resize:vertical}
+@media (prefers-color-scheme:dark){.memo textarea{background:#2b2612;color:#f3e7b5}}
+.memo button{margin-top:6px;border:0;border-radius:10px;padding:9px 12px;background:#e0b341;color:#3d2a00;font-weight:700;cursor:pointer;width:100%}
+.memonote{font-size:13px;background:#fff3c4;color:#5a4500;border-radius:8px;padding:7px 10px;margin:8px 0}
+@media (prefers-color-scheme:dark){.memonote{background:#3a3214;color:#f3e7b5}}
+.redo{font-size:13px;color:var(--sub);margin:-4px 0 10px;text-align:center}
 #toast{white-space:nowrap;position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;z-index:20;
  background:#58cc02;color:#fff;font-weight:800;font-size:24px;padding:22px 30px;border-radius:20px;box-shadow:0 6px 0 #58a700;text-align:center;transition:all .35s cubic-bezier(.3,1.6,.5,1)}
 #toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -117,7 +124,8 @@ function card(it){
       <button class="add">＋ 줄 추가</button></div>
       <div class="score">${score(it.lines)}</div>
       ${it.why ? `<div class="box why"><h4>③ 이렇게 보내는 이유</h4>${it.why}</div>` : ''}
-      <div class="acts"><button class="go">보내기</button><button class="skip">건너뛰기</button></div>`;
+      <div class="acts"><button class="go">보내기</button><button class="skip">건너뛰기</button></div>
+      <div class="memo"><textarea placeholder="바로 못 보내겠으면 여기 메모 → 클로드가 다시 써 둬요 (예: 가격 250 넣고 날짜 물어봐)"></textarea><button class="memogo">메모 남기고 다음 ▶</button></div>`;
   } else {
     body = `<div class="sentlines">${it.lines.map(l=>`<div>• ${esc(l)}</div>`).join('')}</div>` +
       (it.err ? `<div class="err">${esc(it.err)}</div>` : '') +
@@ -128,6 +136,8 @@ function card(it){
     <div class="top"><div><div class="nm">${esc(it.name)}</div></div><span class="pill ${st}">${label}</span></div>
     <div class="money">${esc(it.money||'')}</div>
     <details><summary>대화 원문 ${(it.hist||[]).length}개</summary><div class="chat">${hist}</div></details>
+    ${it.memo && st==='draft' ? `<div class="memonote">✏️ 회장님 메모 「${esc(it.memo)}」 → 다시 썼어요</div>` : ''}
+    ${st==='memo' ? `<div class="memonote">✏️ 「${esc(it.memo)}」 — 클로드가 다시 쓰는 중</div>` : ''}
     ${it.summary ? `<div class="box sum"><h4>① 손님이 하는 말</h4>${esc(it.summary)}</div>` : ''}
     ${body}</div>`;
 }
@@ -157,10 +167,12 @@ function render(){
   document.title = n ? `(${n}) 답장 대기` : '답장 대기';
   document.querySelector('[data-t=todo]').textContent = '보낼 것' + (n?` ${n}`:'');
   if (tab === 'todo'){
-    const pend = (S.items||[]).filter(x => ['draft','failed'].includes(x.status));
-    if (!pend.length){ $('#list').innerHTML = `<div class="empty">다 했어요 ㅎㅎ<br>보내기 누른 건 1분 안에 나가요</div>`; return; }
+    const pend = (S.items||[]).filter(x => ['draft','failed'].includes(x.status)).sort((a,b)=>(a.redoneAt||0)-(b.redoneAt||0));
+    const nm = (S.items||[]).filter(x=>x.status==='memo').length;
+    const redo = nm ? `<div class="redo">✏️ 클로드가 다시 쓰는 중 ${nm}장 — 끝나면 여기 뒤에 붙어요</div>` : '';
+    if (!pend.length){ $('#list').innerHTML = redo + `<div class="empty">다 했어요 ㅎㅎ<br>보내기 누른 건 1분 안에 나가요</div>`; return; }
     if (cur >= pend.length) cur = pend.length-1; if (cur < 0) cur = 0;
-    $('#list').innerHTML = `<div class="nav"><button data-nav="-1" ${cur?'':'disabled'}>◀ 이전</button><span>${cur+1} / ${pend.length} 남음</span><button data-nav="1" ${cur<pend.length-1?'':'disabled'}>다음 ▶</button></div>` + card(pend[cur]);
+    $('#list').innerHTML = `<div class="nav"><button data-nav="-1" ${cur?'':'disabled'}>◀ 이전</button><span>${cur+1} / ${pend.length} 남음</span><button data-nav="1" ${cur<pend.length-1?'':'disabled'}>다음 ▶</button></div>` + redo + card(pend[cur]);
     return;
   }
   const want = {done:['sent','approved','sending'], skip:['skip']}[tab];
@@ -170,7 +182,8 @@ function render(){
 const find = el => { const c = el.closest('.card'); return [c, (S.items||[]).find(x=>x.id===c.dataset.id)]; };
 async function saveLines(it, lines, redraw=true){ it.lines = lines; dirty[it.id] = lines; if (redraw) render(); await save(it, redraw); }
 const readLines = c => [...c.querySelectorAll('.ln input')].map(i=>i.value);
-document.addEventListener('focusin', e => { if (e.target.matches('.ln input')) editing = true; });
+document.addEventListener('focusin', e => { if (e.target.matches('.ln input, .memo textarea')) editing = true; });
+document.addEventListener('focusout', e => { if (e.target.matches('.memo textarea')) editing = false; });
 document.addEventListener('focusout', e => { if (e.target.matches('.ln input')) { editing = false;
   const [c,it] = find(e.target); if (it) { const L = readLines(c); if (JSON.stringify(L) !== JSON.stringify(it.lines)) saveLines(it, L.filter(x=>x.trim()), false); } } });
 document.addEventListener('input', e => { if (e.target.matches('.ln input')) { const [c,it]=find(e.target); c.querySelector('.score').textContent = score(readLines(c)); } });
@@ -188,6 +201,11 @@ document.addEventListener('click', async e => {
     if (!L.length) return alert('보낼 줄이 없어요');
     it.lines = L; it.status = 'approved'; t.disabled = true; t.textContent = '올리는 중…';
     await save(it); return; }
+  if (t.classList.contains('memogo')){
+    const m = c.querySelector('.memo textarea').value.trim();
+    if (!m) return alert('메모를 적어 주세요');
+    it.lines = readLines(c).filter(x=>x.trim()); it.memo = m; it.memoAt = Date.now(); it.status = 'memo';
+    t.disabled = true; t.textContent = '넘기는 중…'; await save(it); return; }
   if (t.classList.contains('undo')){ it.status = 'draft'; await save(it); return; }
   if (t.classList.contains('skip')){ it.lines = readLines(c); it.status = 'skip'; await save(it); return; }
 });
