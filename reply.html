@@ -14,6 +14,10 @@ h1{font-size:19px;margin:0 0 6px}
 .tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer}
 .tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 #sync{font-size:12px;color:var(--sub);margin-top:4px}
+.kinds{display:flex;gap:0;margin:0 0 10px;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.kinds button{flex:1;border:0;background:var(--card);color:var(--sub);font-size:15px;font-weight:700;padding:9px 0;cursor:pointer}
+.kinds button.on{background:#1cb0f6;color:#fff}
+.kinds button b{display:inline-block;min-width:20px;margin-left:4px;padding:0 6px;border-radius:99px;background:rgba(0,0,0,.12);font-size:12px}
 #bar{margin:14px 0 6px}
 #bar .row{display:flex;align-items:center;gap:10px}
 #bar .track{flex:1;height:18px;border-radius:99px;background:var(--line);overflow:hidden;position:relative}
@@ -70,6 +74,7 @@ summary{cursor:pointer;font-size:13px;color:var(--sub)}
 .empty{text-align:center;color:var(--sub);padding:40px 0}
 </style></head><body>
 <header><h1>💬 답장 대기</h1>
+<div class="kinds"><button data-k="viaje">✈️ 여행</button><button data-k="nabi">🐣 학생</button></div>
 <div class="tabs"><button data-t="todo" class="on">보낼 것</button><button data-t="done">보낸 것</button><button data-t="skip">건너뜀</button></div>
 <div id="bar"></div><div id="sync">불러오는 중…</div></header>
 <main id="list"></main><div id="toast"></div>
@@ -77,6 +82,10 @@ summary{cursor:pointer;font-size:13px;color:var(--sub)}
 const URL0 = 'https://2boqkaotufrfukcsmkh2zaz6yy0jrwbi.lambda-url.ap-northeast-2.on.aws/';
 const KEY = new URLSearchParams(location.search).get('k') || 'reply:gauvtgjusbjpcu';
 let S = {updatedAt:0, items:[]}, tab = 'todo', editing = false, cur = 0;
+// 여행 손님 / 학생 나눠서 (2026-11-12 회장님 「학생, 여행 이렇게 나눠서」) — kind 없으면 세션으로: default=나비 학생
+const kindOf = x => x.kind || (x.session === 'default' ? 'nabi' : 'viaje');
+let KIND = 'viaje'; try{ KIND = localStorage.getItem('rp_kind') || 'viaje'; }catch(e){}
+const mine = () => (S.items||[]).filter(x => kindOf(x) === KIND);
 const dirty = {};   // 고친 줄 — 서버 저장이 끝날 때까지 다시 불러와도 덮어쓰지 않는다
 const $ = s => document.querySelector(s);
 const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -139,11 +148,11 @@ function card(it){
     <details><summary>대화 원문 ${(it.hist||[]).length}개</summary><div class="chat">${hist}</div></details>
     ${it.memo && st==='draft' ? `<div class="memonote">✏️ 회장님 메모 「${esc(it.memo)}」 → 다시 썼어요</div>` : ''}
     ${st==='memo' ? `<div class="memonote">✏️ 「${esc(it.memo)}」 — 클로드가 다시 쓰는 중</div>` : ''}
-    ${it.summary ? `<div class="box sum"><h4>① 손님이 하는 말</h4>${esc(it.summary)}</div>` : ''}
+    ${it.summary ? `<div class="box sum"><h4>① ${kindOf(it)==='nabi'?'학생':'손님'}이 하는 말</h4>${esc(it.summary)}</div>` : ''}
     ${body}</div>`;
 }
 const todayKey = () => new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
-function todays(){ const k = todayKey(); return (S.items||[]).filter(x => new Date((x.created||x.u||0)+9*3600e3).toISOString().slice(0,10) === k); }
+function todays(){ const k = todayKey(); return mine().filter(x => new Date((x.created||x.u||0)+9*3600e3).toISOString().slice(0,10) === k); }
 let lastPct = null;
 function toast(big, small){ const t = $('#toast'); t.innerHTML = big + (small?`<small>${small}</small>`:''); t.classList.add('on'); setTimeout(()=>t.classList.remove('on'), 2200); }
 function bar(){
@@ -156,20 +165,23 @@ function bar(){
     <div class="txt">오늘 · 보냄 ${sent} · 나가는 중 ${wait} · 건너뜀 ${skip} · 남음 ${n-done}</div>`;
   // 중간중간 축하 — 처음 불러올 땐 안 띄우고, 내가 눌러서 넘어갈 때만
   if (lastPct !== null && pct > lastPct){
-    const k = 'rp_toast_'+todayKey(); let seen = {}; try{ seen = JSON.parse(localStorage.getItem(k)||'{}'); }catch(e){}
+    const k = 'rp_toast_'+KIND+'_'+todayKey(); let seen = {}; try{ seen = JSON.parse(localStorage.getItem(k)||'{}'); }catch(e){}
     const marks = [[100,'다 했어요!','오늘 답장 끝'],[75,'거의 다 왔어요','조금만 더'],[50,'반 도착했어요!','절반 끝'],[25,'좋아요, 시작!','4분의 1 끝']];
     for (const [m,big,small] of marks){ if (lastPct < m && pct >= m && !seen[m]){ seen[m]=1; try{ localStorage.setItem(k, JSON.stringify(seen)); }catch(e){} toast(big, small); break; } }
   }
   lastPct = pct;
 }
 function render(){
+  const cnt = k => (S.items||[]).filter(x => kindOf(x)===k && ['draft','failed'].includes(x.status)).length;
+  document.querySelectorAll('.kinds button').forEach(b => { const c = cnt(b.dataset.k);
+    b.classList.toggle('on', b.dataset.k===KIND); b.innerHTML = (b.dataset.k==='viaje'?'✈️ 여행':'🐣 학생') + (c?`<b>${c}</b>`:''); });
   bar();
-  const n = (S.items||[]).filter(x=>x.status==='draft').length;
-  document.title = n ? `(${n}) 답장 대기` : '답장 대기';
+  const all = cnt('viaje') + cnt('nabi'), n = cnt(KIND);
+  document.title = all ? `(${all}) 답장 대기` : '답장 대기';
   document.querySelector('[data-t=todo]').textContent = '보낼 것' + (n?` ${n}`:'');
   if (tab === 'todo'){
-    const pend = (S.items||[]).filter(x => ['draft','failed'].includes(x.status)).sort((a,b)=>(a.redoneAt||0)-(b.redoneAt||0));
-    const nm = (S.items||[]).filter(x=>x.status==='memo').length;
+    const pend = mine().filter(x => ['draft','failed'].includes(x.status)).sort((a,b)=>(a.redoneAt||0)-(b.redoneAt||0));
+    const nm = mine().filter(x=>x.status==='memo').length;
     const redo = nm ? `<div class="redo">✏️ 클로드가 다시 쓰는 중 ${nm}장 — 끝나면 여기 뒤에 붙어요</div>` : '';
     if (!pend.length){ $('#list').innerHTML = redo + `<div class="empty">다 했어요 ㅎㅎ<br>보내기 누른 건 1분 안에 나가요</div>`; return; }
     if (cur >= pend.length) cur = pend.length-1; if (cur < 0) cur = 0;
@@ -177,7 +189,7 @@ function render(){
     return;
   }
   const want = {done:['sent','approved','sending'], skip:['skip']}[tab];
-  const items = (S.items||[]).filter(x => want.includes(x.status)).sort((a,b)=>(b.u||0)-(a.u||0));
+  const items = mine().filter(x => want.includes(x.status)).sort((a,b)=>(b.u||0)-(a.u||0));
   $('#list').innerHTML = items.length ? items.map(card).join('') : '<div class="empty">없어요</div>';
 }
 const find = el => { const c = el.closest('.card'); return [c, (S.items||[]).find(x=>x.id===c.dataset.id)]; };
@@ -190,6 +202,7 @@ document.addEventListener('focusout', e => { if (e.target.matches('.ln input')) 
 document.addEventListener('input', e => { if (e.target.matches('.ln input')) { const [c,it]=find(e.target); c.querySelector('.score').textContent = score(readLines(c)); } });
 document.addEventListener('click', async e => {
   const t = e.target;
+  if (t.closest('.kinds button')){ KIND = t.closest('.kinds button').dataset.k; try{ localStorage.setItem('rp_kind', KIND); }catch(e){} cur = 0; lastPct = null; render(); return; }
   if (t.dataset.t){ tab = t.dataset.t; document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on', b===t)); render(); return; }
   if (t.dataset.nav){ cur += +t.dataset.nav; render(); window.scrollTo(0,0); return; }
   if (!t.closest('.card')) return;
