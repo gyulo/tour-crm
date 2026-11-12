@@ -141,7 +141,7 @@ function card(it){
       (st==='skip' ? `<div class="acts"><button class="skip undo">다시 초안으로</button></div>` : '');
   }
   return `<div class="card" data-id="${esc(it.id)}">
-    <div class="top"><div><div class="nm">${kindOf(it)==='nabi'?'🐣 ':'✈️ '}${it.channel==='ig'?'📸 ':''}${esc(it.name)}</div></div><span class="pill ${st}">${label}</span></div>
+    <div class="top"><div><div class="nm">${it.hot?'💰 ':''}${kindOf(it)==='nabi'?'🐣 ':'✈️ '}${it.channel==='ig'?'📸 ':''}${esc(it.name)}</div></div><span class="pill ${st}">${label}</span></div>
     <div class="money">${esc(it.money||'')}</div>
     <details><summary>대화 원문 ${(it.hist||[]).length}개</summary><div class="chat">${hist}</div></details>
     ${it.memo && st==='draft' ? `<div class="memonote">✏️ 회장님 메모 「${esc(it.memo)}」 → 다시 썼어요</div>` : ''}
@@ -175,7 +175,7 @@ function render(){
   document.title = n ? `(${n}) 답장 대기` : '답장 대기';
   document.querySelector('[data-t=todo]').textContent = '보낼 것' + (n?` ${n}`:'');
   if (tab === 'todo'){
-    const pend = mine().filter(x => ['draft','failed'].includes(x.status)).sort((a,b)=>((kindOf(a)==='nabi'?0:1)-(kindOf(b)==='nabi'?0:1)) || (a.redoneAt||0)-(b.redoneAt||0));
+    const pend = mine().filter(x => ['draft','failed'].includes(x.status)).sort((a,b)=>((b.hot?1:0)-(a.hot?1:0)) || ((kindOf(a)==='nabi'?0:1)-(kindOf(b)==='nabi'?0:1)) || (a.redoneAt||0)-(b.redoneAt||0));
     const nm = mine().filter(x=>x.status==='memo').length;
     const redo = nm ? `<div class="redo">✏️ 클로드가 다시 쓰는 중 ${nm}장 — 끝나면 여기 뒤에 붙어요</div>` : '';
     if (!pend.length){ $('#list').innerHTML = redo + `<div class="empty">다 했어요 ㅎㅎ<br>보내기 누른 건 1분 안에 나가요</div>`; return; }
