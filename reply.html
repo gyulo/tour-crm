@@ -55,8 +55,8 @@ summary{cursor:pointer;font-size:13px;color:var(--sub)}
 .b small{display:block;font-size:10px;color:var(--sub)}
 .box{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:14px}
 .box h4{margin:0 0 4px;font-size:12px;color:var(--sub);font-weight:700}
-.sum{background:#e8f0fe;color:#1a2b4a}.why{background:var(--chip);font-size:13px}
-@media (prefers-color-scheme:dark){.sum{background:#1f2a3d;color:#dbe6ff}}
+.sum{background:#e8f0fe;color:#1a2b4a}.ko{background:#fff6e0;color:#3a2a00;white-space:pre-wrap}.why{background:var(--chip);font-size:13px}
+@media (prefers-color-scheme:dark){.sum{background:#1f2a3d;color:#dbe6ff}.ko{background:#3a3020;color:#ffeccc}}
 .vt{display:block;margin-top:4px;padding-top:4px;border-top:1px dashed rgba(0,0,0,.15);font-style:italic}
 .sec{font-size:12px;color:var(--sub);font-weight:700;margin:10px 0 0}
 .lines{display:flex;flex-direction:column;gap:6px;margin-top:8px}
@@ -179,7 +179,8 @@ function card(it){
     <details><summary>대화 원문 ${(it.hist||[]).length}개</summary><div class="chat">${hist}</div></details>
     ${it.memo && st==='draft' ? `<div class="memonote">✏️ 회장님 메모 「${esc(it.memo)}」 → 다시 썼어요</div>` : ''}
     ${st==='memo' ? `<div class="memonote">✏️ 「${esc(it.memo)}」 — 클로드가 다시 쓰는 중</div>` : ''}
-    ${it.summary ? `<div class="box sum"><h4>① ${kindOf(it)==='nabi'?'학생':'손님'}이 하는 말</h4>${esc(it.summary)}</div>` : ''}
+    ${it.ko ? `<div class="box ko"><h4>🇰🇷 번역 (최근 말)</h4>${esc(it.ko)}</div>` : ''}
+    ${it.summary ? `<div class="box sum"><h4>① ${kindOf(it)==='nabi'?'학생':'손님'}이 하는 말 (요약)</h4>${esc(it.summary)}</div>` : ''}
     ${body}</div>`;
 }
 const todayKey = () => new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
