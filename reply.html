@@ -92,27 +92,60 @@ async function pull(){
   try{
     const r = await fetch(URL0 + '?key=' + encodeURIComponent(KEY), {cache:'no-store'});
     const s = await r.json();
-    if (s) { S = s; for (const it of S.items||[]) if (dirty[it.id] && it.status==='draft') it.lines = dirty[it.id]; }
+    if (s) { S = s; for (const it of S.items||[]) if (dirty[it.id] && ['draft','failed'].includes(it.status)) it.lines = dirty[it.id]; }
     $('#sync').textContent = '방금 불러옴 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
     if (!editing) render();
+    recheck();
   }catch(e){ $('#sync').textContent = '불러오기 실패 — 인터넷 확인'; }
 }
-async function save(item, redraw=true){
-  item.u = Date.now();
-  try{
+// 저장 = 서버 최신본에 내 카드만 끼워 넣고, 돌아온 서버본에 정말 들어갔는지 확인 (2026-11-13 「적으면 저장이 안 될 때가 있다」)
+// 서버는 updatedAt 큰 쪽이 판 전체를 이긴다 → 폰 시계가 PC보다 늦거나, 크론이 같은 순간 덮어쓰면 조용히 사라졌다.
+const pend = {};    // 내가 저장한 카드 — 서버에 반영된 게 보일 때까지 pull 마다 확인하고, 사라졌으면 다시 저장
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function putItem(item){
+  for (let k = 0; k < 4; k++){
     const r = await fetch(URL0 + '?key=' + encodeURIComponent(KEY), {cache:'no-store'});
     const cur = (await r.json()) || {items:[]};
     const by = Object.fromEntries((cur.items||[]).map(x => [x.id, x]));
     const old = by[item.id];
-    if (old && ['sending','sent'].includes(old.status)) { S = cur; render(); alert('이미 보내는 중이거나 보냈어요.'); return; }
+    if (old && ['sending','sent'].includes(old.status) && old.u >= (item.u0||0)) return {cur, gone:true};
     by[item.id] = item;
     cur.items = Object.values(by).sort((a,b) => (a.order||0)-(b.order||0));
-    cur.updatedAt = Date.now();
-    await fetch(URL0, {method:'POST', headers:{'content-type':'text/plain'}, body: JSON.stringify({key:KEY, state:cur})});
-    delete dirty[item.id];
-    S = cur; if (redraw && !editing) render();
-  }catch(e){ alert('저장 실패 — 다시 눌러 주세요'); }
+    cur.updatedAt = Math.max(Date.now(), (cur.updatedAt||0) + 1);
+    const w = await fetch(URL0, {method:'POST', headers:{'content-type':'text/plain'}, body: JSON.stringify({key:KEY, state:cur})});
+    const back = await w.json().catch(()=>null);
+    const st = back && back.state;
+    const got = st && (st.items||[]).find(x => x.id === item.id);
+    if (got && got.u === item.u) return {cur: st, ok:true};
+    await sleep(600 * (k + 1));
+  }
+  return {fail:true};
 }
+async function save(item, redraw=true){
+  item.u0 = item.u0 || item.u || 0; item.u = Date.now();
+  try{
+    const res = await putItem(item);
+    if (res.gone){ S = res.cur; render(); alert('이미 보내는 중이거나 보냈어요.'); return; }
+    if (res.fail){ pend[item.id] = JSON.parse(JSON.stringify(item)); toast('⚠️ 저장 아직 안 됨','15초 뒤 다시 해요'); return; }
+    pend[item.id] = JSON.parse(JSON.stringify(item));
+    delete dirty[item.id]; delete memoDraft[item.id]; keepDrafts();
+    S = res.cur; if (redraw && !editing) render();
+  }catch(e){ pend[item.id] = JSON.parse(JSON.stringify(item)); toast('⚠️ 인터넷 끊김','저장 다시 해요'); }
+}
+// pull 때마다: 내가 저장한 카드가 서버에 그대로 있나? 크론이 덮어써서 사라졌으면 다시 저장
+async function recheck(){
+  for (const id of Object.keys(pend)){
+    const mine = pend[id], srv = (S.items||[]).find(x => x.id === id);
+    if (srv && (srv.u||0) >= mine.u) { if (Date.now() - mine.u > 60000) delete pend[id]; continue; }
+    if (srv && ['sending','sent'].includes(srv.status)) { delete pend[id]; continue; }
+    mine.u0 = srv ? srv.u : 0;
+    const res = await putItem(mine).catch(()=>({fail:true}));
+    if (res.ok){ S = res.cur; pend[id].u = mine.u; if (!editing) render(); }
+  }
+}
+// 메모칸에 적던 글 — 다시 그려도(15초 갱신·앱 전환) 안 지워지게 기억
+const memoDraft = (()=>{ try{ return JSON.parse(localStorage.getItem('rp_memo')||'{}'); }catch(e){ return {}; } })();
+function keepDrafts(){ try{ localStorage.setItem('rp_memo', JSON.stringify(memoDraft)); }catch(e){} }
 function score(lines){
   const L = lines.map(x=>x.trim()).filter(Boolean); if(!L.length) return '';
   const ln = L.map(x=>x.length).sort((a,b)=>a-b), med = ln[Math.floor(ln.length/2)];
@@ -133,7 +166,7 @@ function card(it){
       <div class="score">${score(it.lines)}</div>
       ${it.why ? `<div class="box why"><h4>③ 이렇게 보내는 이유</h4>${it.why}</div>` : ''}
       <div class="acts"><button class="go">보내기</button><button class="skip">건너뛰기</button></div>
-      <div class="memo"><textarea placeholder="바로 못 보내겠으면 여기 메모 → 클로드가 다시 써 둬요 (예: 가격 250 넣고 날짜 물어봐)"></textarea><button class="memogo">메모 남기고 다음 ▶</button></div>`;
+      <div class="memo"><textarea data-id="${esc(it.id)}" placeholder="바로 못 보내겠으면 여기 메모 → 클로드가 다시 써 둬요 (예: 가격 250 넣고 날짜 물어봐)">${esc(memoDraft[it.id]||'')}</textarea><button class="memogo">메모 남기고 다음 ▶</button></div>`;
   } else {
     body = `<div class="sentlines">${it.lines.map(l=>`<div>• ${esc(l)}</div>`).join('')}</div>` +
       (it.err ? `<div class="err">${esc(it.err)}</div>` : '') +
@@ -194,7 +227,9 @@ document.addEventListener('focusin', e => { if (e.target.matches('.ln input, .me
 document.addEventListener('focusout', e => { if (e.target.matches('.memo textarea')) editing = false; });
 document.addEventListener('focusout', e => { if (e.target.matches('.ln input')) { editing = false;
   const [c,it] = find(e.target); if (it) { const L = readLines(c); if (JSON.stringify(L) !== JSON.stringify(it.lines)) saveLines(it, L.filter(x=>x.trim()), false); } } });
-document.addEventListener('input', e => { if (e.target.matches('.ln input')) { const [c,it]=find(e.target); c.querySelector('.score').textContent = score(readLines(c)); } });
+document.addEventListener('input', e => {
+  if (e.target.matches('.memo textarea')) { memoDraft[e.target.dataset.id] = e.target.value; keepDrafts(); }
+  if (e.target.matches('.ln input')) { const [c,it]=find(e.target); dirty[it.id] = readLines(c); c.querySelector('.score').textContent = score(readLines(c)); } });
 document.addEventListener('click', async e => {
   const t = e.target;
   if (t.dataset.t){ tab = t.dataset.t; document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on', b===t)); render(); return; }
