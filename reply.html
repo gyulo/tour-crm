@@ -141,7 +141,7 @@ function card(it){
       (st==='skip' ? `<div class="acts"><button class="skip undo">다시 초안으로</button></div>` : '');
   }
   return `<div class="card" data-id="${esc(it.id)}">
-    <div class="top"><div><div class="nm">${kindOf(it)==='nabi'?'🐣 ':'✈️ '}${esc(it.name)}</div></div><span class="pill ${st}">${label}</span></div>
+    <div class="top"><div><div class="nm">${kindOf(it)==='nabi'?'🐣 ':'✈️ '}${it.channel==='ig'?'📸 ':''}${esc(it.name)}</div></div><span class="pill ${st}">${label}</span></div>
     <div class="money">${esc(it.money||'')}</div>
     <details><summary>대화 원문 ${(it.hist||[]).length}개</summary><div class="chat">${hist}</div></details>
     ${it.memo && st==='draft' ? `<div class="memonote">✏️ 회장님 메모 「${esc(it.memo)}」 → 다시 썼어요</div>` : ''}
