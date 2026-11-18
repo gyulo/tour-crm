@@ -184,7 +184,9 @@ function card(it){
     ${body}</div>`;
 }
 const todayKey = () => new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
-function todays(){ const k = todayKey(); return mine().filter(x => new Date((x.created||x.u||0)+9*3600e3).toISOString().slice(0,10) === k); }
+// 11/18 회장님 「보낼 때마다 칸이 앞으로 안 나가」: 오늘 만든 카드만 세서, 어제 카드를 오늘 보내면 바가 안 움직였음 → 남은 카드 + 오늘 손댄 카드
+const dayOf = ms => new Date((ms||0)+9*3600e3).toISOString().slice(0,10);
+function todays(){ const k = todayKey(); return mine().filter(x => ['draft','failed','memo'].includes(x.status) || dayOf(x.u) === k || dayOf(x.created) === k); }
 let lastPct = null;
 function toast(big, small){ const t = $('#toast'); t.innerHTML = big + (small?`<small>${small}</small>`:''); t.classList.add('on'); setTimeout(()=>t.classList.remove('on'), 2200); }
 function bar(){
